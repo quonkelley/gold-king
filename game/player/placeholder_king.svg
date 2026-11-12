@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="96" viewBox="0 0 64 96">
+  <!-- Temporary P001 placeholder. Faces right by default; the nose and arm make left/right flips readable. Not art direction. -->
+  <g stroke="#1a1208" stroke-width="3" stroke-linejoin="round">
+    <!-- cape (trailing side) -->
+    <path d="M18 40 L8 86 L30 86 Z" fill="#7a1f2b"/>
+    <!-- feet -->
+    <rect x="20" y="84" width="10" height="9" rx="2" fill="#3b2a1a"/>
+    <rect x="34" y="84" width="12" height="9" rx="2" fill="#3b2a1a"/>
+    <!-- body -->
+    <rect x="18" y="38" width="30" height="48" rx="10" fill="#c9a23a"/>
+    <!-- forward arm -->
+    <path d="M44 50 L58 58 L54 63 L42 57 Z" fill="#c9a23a"/>
+    <!-- head -->
+    <circle cx="34" cy="28" r="13" fill="#f0c9a0"/>
+    <!-- nose (facing direction) -->
+    <path d="M46 26 L54 30 L46 33 Z" fill="#f0c9a0"/>
+    <!-- crown -->
+    <path d="M22 18 L24 4 L30 12 L35 2 L40 12 L46 4 L47 18 Z" fill="#ffd23f"/>
+  </g>
+  <!-- eye -->
+  <circle cx="41" cy="26" r="2.5" fill="#1a1208"/>
+</svg>

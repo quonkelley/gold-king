@@ -478,7 +478,35 @@ Potential measurements if useful:
 
 ### 11. Test Setup
 
-To be completed when implementation begins.
+Implemented on branch `feat/p001-movement-camera`. All values below are prototype starting defaults for tuning, not design decisions.
+
+**Scene:** `game/prototypes/p001_movement_camera.tscn` (project main scene for P001 only). A roughly 30 × 30 m gray box built from CSG boxes with collision:
+- Open southern area with three low blocks (0.6–1.0 m) and two tall pillars (4 m) for partial occlusion.
+- A 4 m-deep dividing wall (2.5 m tall) with a 1.5 m-wide narrow passage into a northern area containing one tall pillar.
+- 2.5 m boundary walls on three sides; the camera-side (south) boundary is 0.6 m so it does not hide the player.
+- Flat colors only (floor, walls, blocks). One directional light with shadows; flat background color and ambient light. No fog, grading, or other atmosphere.
+
+**Player:** `game/player/player.tscn` — `CharacterBody3D` (floating motion mode, no gravity) with a capsule collider (radius 0.45 m, height 1.5 m) and a `Sprite3D` placeholder.
+- Sprite: temporary hand-made SVG (`placeholder_king.svg`, imported at 4× scale), Y-axis billboard, alpha-cut, unshaded, about 1.6 m tall with its bottom at the player's feet. Placeholder quality is not under test.
+- Facing: left/right sprite flip only. Changes only when horizontal input exceeds 0.2; idle and pure vertical movement keep the last facing.
+
+**Controls:** Godot input actions `move_left`, `move_right`, `move_up`, `move_down`. Keyboard: WASD (physical keys) and arrow keys. Gamepad: left analog stick. Action dead zone 0.2. Partial stick tilt gives proportionally slower movement.
+
+**Starting tuning values** (all editable in the inspector):
+
+| Variable | Starting value |
+|---|---|
+| Move speed | 5.0 m/s |
+| Acceleration / deceleration | 80 / 120 m/s² (near-instant) |
+| Camera projection | Perspective, FOV 45° |
+| Camera pitch | 52° below horizontal |
+| Camera distance | 12 m |
+| Camera follow | Rigid, no smoothing, no rotation input |
+| Sprite pixel size | 0.0042 m/px |
+| Renderer | Mobile (unchanged) |
+| Physics interpolation | Off (project default) |
+
+**Running:** open the project in Godot 4.7.2 and press F5, or run `/Applications/Godot.app/Contents/MacOS/Godot --path .` from the repository root. Add `--debug-collisions` to view collision shapes.
 
 ### 12. Observations
 

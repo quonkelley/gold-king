@@ -1,0 +1,117 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://game/player/player.tscn" id="1_player"]
+[ext_resource type="Script" path="res://game/prototypes/p001_follow_camera.gd" id="2_camera"]
+
+[sub_resource type="Environment" id="Environment_graybox"]
+background_mode = 1
+background_color = Color(0.55, 0.6, 0.65, 1)
+ambient_light_source = 2
+ambient_light_color = Color(1, 1, 1, 1)
+ambient_light_energy = 0.5
+
+[sub_resource type="StandardMaterial3D" id="Mat_floor"]
+albedo_color = Color(0.45, 0.47, 0.42, 1)
+
+[sub_resource type="StandardMaterial3D" id="Mat_wall"]
+albedo_color = Color(0.68, 0.64, 0.58, 1)
+
+[sub_resource type="StandardMaterial3D" id="Mat_block"]
+albedo_color = Color(0.45, 0.52, 0.64, 1)
+
+[node name="P001MovementCamera" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_graybox")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, -0.409576, 0.286788, 0, 0.573576, 0.819152, -0.5, -0.709406, 0.496732, 0, 10, 0)
+shadow_enabled = true
+
+[node name="Geometry" type="Node3D" parent="."]
+
+[node name="Floor" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+use_collision = true
+size = Vector3(32, 1, 32)
+material = SubResource("Mat_floor")
+
+[node name="WallNorth" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.25, -15.5)
+use_collision = true
+size = Vector3(32, 2.5, 1)
+material = SubResource("Mat_wall")
+
+[node name="WallSouthLow" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 15.5)
+use_collision = true
+size = Vector3(32, 0.6, 1)
+material = SubResource("Mat_wall")
+
+[node name="WallEast" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.5, 1.25, 0)
+use_collision = true
+size = Vector3(1, 2.5, 32)
+material = SubResource("Mat_wall")
+
+[node name="WallWest" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.5, 1.25, 0)
+use_collision = true
+size = Vector3(1, 2.5, 32)
+material = SubResource("Mat_wall")
+
+[node name="DividerWest" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 1.25, -5)
+use_collision = true
+size = Vector3(20, 2.5, 4)
+material = SubResource("Mat_wall")
+
+[node name="DividerEast" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.75, 1.25, -5)
+use_collision = true
+size = Vector3(8.5, 2.5, 4)
+material = SubResource("Mat_wall")
+
+[node name="LowBlockA" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0.4, 5)
+use_collision = true
+size = Vector3(2, 0.8, 2)
+material = SubResource("Mat_block")
+
+[node name="LowBlockB" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0.3, 9)
+use_collision = true
+size = Vector3(3, 0.6, 1.5)
+material = SubResource("Mat_block")
+
+[node name="LowBlockC" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0.5, 11)
+use_collision = true
+size = Vector3(1.5, 1, 1.5)
+material = SubResource("Mat_block")
+
+[node name="PillarA" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 2, 3)
+use_collision = true
+size = Vector3(1.2, 4, 1.2)
+material = SubResource("Mat_wall")
+
+[node name="PillarB" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 2, 4)
+use_collision = true
+size = Vector3(1.2, 4, 1.2)
+material = SubResource("Mat_wall")
+
+[node name="PillarNorth" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 2, -11)
+use_collision = true
+size = Vector3(1.5, 4, 1.5)
+material = SubResource("Mat_wall")
+
+[node name="Player" parent="." instance=ExtResource("1_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 8)
+
+[node name="Camera" type="Camera3D" parent="." node_paths=PackedStringArray("target")]
+fov = 45.0
+script = ExtResource("2_camera")
+target = NodePath("../Player")
