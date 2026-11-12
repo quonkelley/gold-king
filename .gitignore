@@ -1,0 +1,35 @@
+/android/
+
+# Godot generated/cache
+.godot/
+
+# Imported/generated translations
+*.translation
+
+# Export/build output
+build/
+dist/
+exports/
+
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE/editor-local files
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~
+
+# Logs
+*.log
+
+# Secrets / local environment
+.env
+.env.*
+!.env.example
