@@ -241,7 +241,19 @@ If tests do not yet exist, do not create a giant test framework just to satisfy 
 
 Godot should be callable from the repository environment when practical.
 
-Project-specific validation commands will be added here once the Godot project and test framework are initialized.
+**Target version:** Godot 4.7.2 stable.
+
+**Verified executable (Quon's macOS environment):**
+
+```bash
+/Applications/Godot.app/Contents/MacOS/Godot --version
+```
+
+Godot is not on `PATH` in that environment. Use the full path.
+
+Check the reported version before implementation work. If it does not report 4.7.2, report the mismatch rather than changing the documented target. As of 2026-11-12 the local install reports `4.7.1.stable.official.a13da4feb`, so an upgrade is required before P001 implementation.
+
+Project-specific headless validation and test commands will be added here once P001 and the testing workflow exist. No headless project checks or tests exist yet.
 
 Until then, do not invent commands or claim validation was performed when it was not.
 

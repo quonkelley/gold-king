@@ -247,7 +247,7 @@ Once the Godot project exists:
 3. Import/open the repository's `project.godot`.
 4. Run the current prototype scene from the Godot editor.
 
-Exact run, test, and command-line validation instructions will be added once the first Godot project and test tooling are initialized.
+The verified Godot command-line invocation is documented in [`AGENTS.md`](AGENTS.md) under **CLI validation**. Run and test instructions will be added once P001 and the testing workflow exist.
 
 Do not invent undocumented setup commands.
 

@@ -20,6 +20,9 @@ desktop.ini
 .vscode/
 .idea/
 
+# Claude Code local settings (shared .claude/settings.json stays tracked)
+.claude/settings.local.json
+
 # Temporary files
 *.tmp
 *.bak

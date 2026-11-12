@@ -398,6 +398,11 @@ Build only:
 - Collision.
 - Controlled top-down/elevated camera.
 - Basic facing/visual orientation sufficient for testing movement.
+- Basic keyboard and gamepad movement, so the player/camera relationship can be checked with both expected input methods.
+
+**Input (human decision, 2026-11-12):** P001 supports both keyboard and gamepad, kept deliberately minimal. Use abstract Godot input actions (`move_left`, `move_right`, `move_up`, `move_down`) rather than device checks. Initial bindings: WASD, arrow keys if trivial, and the left analog stick. This is a prototype implementation choice. It does not approve a final control scheme.
+
+**Renderer (human decision, 2026-11-12):** The project's current Mobile renderer stays unchanged for P001. Reconsider it only if the prototype shows an actual visual, lighting, performance, or workflow problem. It is not a production renderer decision.
 
 ### 5. Out of Scope
 
@@ -406,6 +411,7 @@ Do **not** add:
 - Combat.
 - Dodge.
 - Gold collection.
+- Gold burden.
 - Treasure.
 - Midas/Gilding powers.
 - Enemies.
@@ -414,6 +420,7 @@ Do **not** add:
 - Final animation.
 - Settlement systems.
 - Procedural generation.
+- Input rebinding, settings UI, controller menus, dead-zone configuration UI, accessibility controls, or a final control scheme.
 
 ### 6. Variables Being Tested
 

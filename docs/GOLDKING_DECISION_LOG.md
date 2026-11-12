@@ -281,6 +281,8 @@ The settlement should provide a lower-pressure contrast to expeditions without b
 
 **Status:** Approved Direction
 
+**Status Note (2026-11-12):** The two-phase structure is approved. The "Grow Stronger and More Burdened" and "Return or Fail" steps depend on the Prototype Assumptions *Gold Power vs. Burden* and *Losing Unsecured Gold and Treasure* below, and are not finalized mechanics.
+
 **Reasoning:**  
 The two loops can continuously feed one another.
 
