@@ -138,7 +138,7 @@ Do not rewrite an interpretation as if it were an observed fact.
 
 | ID | Prototype | Primary Question | Status | Outcome | Date |
 |---|---|---|---|---|---|
-| P001 | Player Movement & Camera | Does the chosen 2.5D presentation produce intuitive, readable movement? | Planned | — | — |
+| P001 | Player Movement & Camera | Does the chosen 2.5D presentation produce intuitive, readable movement? | Complete | Validated (Medium) | 2026-11-12 |
 | P002 | Gold Collection | Is collecting gold immediately satisfying and readable? | Planned | — | — |
 | P003 | Gold Power vs. Burden | Can increasing wealth feel powerful and dangerous at the same time? | Planned | — | — |
 | P004 | Gold Spill & Theft | Does losing loose gold during combat create enjoyable urgency rather than annoyance? | Planned | — | — |
@@ -355,15 +355,17 @@ If no further prototype is necessary, write:
 
 ## P001 — Player Movement & Controlled Camera
 
-**Status:** Planned  
-**Date Started:** —  
-**Date Concluded:** —  
-**Build / Commit:** —  
-**Testers:** Quon / Jason initially  
+**Status:** Complete  
+**Date Started:** 2026-11-12  
+**Date Concluded:** 2026-11-12  
+**Build / Commit:** `e91900a` (branch `feat/p001-movement-camera`)  
+**Testers:** Quon  
 **Related Decision(s):**
 - 2.5D top-down presentation
 - 3D environments + 2D characters
 - Controlled gameplay camera
+
+**Related Feature Spec:** `docs/features/player_movement_camera.md`
 
 ### 1. Primary Design Question
 
@@ -510,42 +512,73 @@ Implemented on branch `feat/p001-movement-camera`. All values below are prototyp
 
 ### 12. Observations
 
-Pending.
+Single playtest session by Quon on the `e91900a` build (starting tuning values in §11; no tuning changes were reported).
+
+- Tester moved diagonally, in figure-eights, and with rapid direction reversals.
+- Tester moved through the open area and through the narrow passage.
+- Tester moved behind environment objects (partial occlusion).
+- Tester changed left/right facing; the character's shadow followed the facing change correctly.
+- Collision with environment objects behaved as expected; no collision problems were observed.
+- No movement or camera problems were observed.
+- The character has no animation. This was expected and is outside P001 scope.
+
+Not recorded: which input device(s) were used during the session, and whether orthographic projection was compared. No measurements were collected.
 
 ### 13. Player Comments
 
-Pending.
+Reported by Quon:
+
+- Movement feels good at the current prototype stage.
+- Diagonal movement, figure-eight movement, and rapid reversals feel fine.
+- Movement through open and narrow areas is smooth.
+- Camera distance feels good; no need for manual camera rotation was identified.
+- Character size looks appropriate for now.
+- Going behind objects looks good; occlusion did not create a problem.
+- The hybrid 2D-character / 3D-world presentation currently feels good.
+- No significant issues were found.
 
 ### 14. What Worked
 
-Pending.
+- Ground-plane movement, including diagonals and quick reversals.
+- Collision against the gray-box geometry, including the narrow passage.
+- Controlled camera at the starting distance, without a need for rotation.
+- Character readability, scale, and behavior when partially occluded.
+- Shadow behavior when facing flips.
 
 ### 15. What Did Not Work
 
-Pending.
+- No problems were reported.
+- No character animation exists; this is out of scope for P001 and not a failure.
 
 ### 16. Interpretation
 
-Pending.
+- The 2D-character / 3D-world presentation with a controlled elevated camera appears intuitive and readable enough to build on. *(Developer interpretation.)*
+- Uncertainty: this is one tester, who is also a developer, in one session, in a small gray-box scene without combat, enemies, or gold. Input devices used were not recorded, so keyboard vs. controller feel is not separately evidenced. Problems may still appear once more systems or larger spaces are added.
 
 ### 17. Unexpected Findings
 
-Pending.
+None reported.
 
 ### 18. Outcome
 
-**Outcome:** Pending  
-**Confidence:** Pending
+**Outcome:** Validated  
+**Confidence:** Medium
 
-**Conclusion:** Pending.
+**Conclusion:** The current 2D-character / 3D-world presentation, controlled elevated camera, movement, collision, and basic occlusion are sufficiently intuitive and readable to continue development. No significant problems were identified in the initial human playtest. P001 supports proceeding to P002 without additional tuning.
+
+This validates the **direction**, not a final implementation. It does not approve final movement, final camera settings, final character scale, perspective projection as permanent, any animation solution, or a production player controller.
+
+The P001 configuration in §11 becomes the baseline for P002 unless later evidence gives a reason to change it.
 
 ### 19. Decision Impact
 
-Pending.
+- Supports existing Approved Direction: **2.5D Top-Down Presentation** (3D environments + 2D characters).
+- Supports existing Approved Direction: **Controlled Gameplay Camera**.
+- Neither decision needs revisiting at this time. No new design decision created.
 
 ### 20. Next Test
 
-If P001 validates the presentation sufficiently, proceed to **P002 — Gold Collection**.
+**P002 — Gold Collection:** test whether collecting gold is immediately readable and satisfying.
 
 ---
 
