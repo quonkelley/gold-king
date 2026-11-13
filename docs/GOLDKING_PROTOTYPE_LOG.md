@@ -139,7 +139,7 @@ Do not rewrite an interpretation as if it were an observed fact.
 | ID | Prototype | Primary Question | Status | Outcome | Date |
 |---|---|---|---|---|---|
 | P001 | Player Movement & Camera | Does the chosen 2.5D presentation produce intuitive, readable movement? | Complete | Validated (Medium) | 2026-11-12 |
-| P002 | Gold Collection | Is collecting gold immediately satisfying and readable? | Testing | Pending playtest | 2026-11-12 (started) |
+| P002 | Gold Collection | Is collecting gold immediately satisfying and readable? | Concluded (pending review) | Iterate (feedback polish deferred; baseline accepted) | 2026-11-13 |
 | P003 | Gold Power vs. Burden | Can increasing wealth feel powerful and dangerous at the same time? | Planned | — | — |
 | P004 | Gold Spill & Theft | Does losing loose gold during combat create enjoyable urgency rather than annoyance? | Planned | — | — |
 | P005 | Mini Expedition / Extraction | Does choosing between returning safely and pushing deeper create meaningful greed tension? | Planned | — | — |
@@ -586,11 +586,11 @@ The P001 configuration in §11 becomes the baseline for P002 unless later eviden
 
 ## P002 — Gold Collection
 
-**Status:** Testing (playtest 1 recorded; iteration 1 implemented, awaiting playtest 2)  
+**Status:** Testing concluded; outcome recorded (§18). Awaiting human review before merge.  
 **Date Started:** 2026-11-12  
-**Date Concluded:** —  
+**Date Concluded:** 2026-11-13  
 **Build / Commit:** `d2d201c` (original setup, playtest 1); `94e86aa` (iteration 1). Branch `feat/p002-gold-collection`.  
-**Testers:** Quon (playtest 1). Planned: Jason, independently.  
+**Testers:** Quon (playtests 1 and 2). Jason has not yet tested.  
 **Related Decision(s):**
 - Gold as a central, desirable resource (Approved Direction)
 - Visible communication of carried wealth (Approved Direction)
@@ -673,7 +673,7 @@ Derived from spec §3 and §8:
 | Pickups missed on the first full route (which ones) | Playtest 1: not recorded |
 | Coaching needed (yes/no; what) | Playtest 1: not recorded |
 | Pouch noticed separately from the HUD (yes/no) | Playtest 1: not recorded. Pouch preference: undecided. |
-| Satisfaction rating 1–5 (per tester) | Playtest 1 (Quon): 3/5 overall |
+| Satisfaction rating 1–5 (per tester) | Playtest 1 (Quon): 3/5 overall. Playtest 2 (Quon): floating 3/5, grounded 2/5. |
 
 ### 11. Test Setup
 
@@ -789,6 +789,18 @@ Not recorded:
 - Which input device was used.
 - Whether the pouch-off comparison was tried.
 
+#### Playtest 2 — Quon, reported 2026-11-13, build `94e86aa` (iteration 1: improved feedback; floating and grounded presentations)
+
+Quon played both presentation modes with the iteration 1 feedback and compared them.
+
+Not recorded:
+- Which mode was played first.
+- Which pickups, if any, were missed.
+- Which input device was used.
+- Whether the pouch was on or off.
+
+Visible wealth accumulation and pouch preference were not rated in this playtest.
+
 ### 13. Player Comments
 
 #### Playtest 1 — Quon (player report)
@@ -806,6 +818,22 @@ Not recorded:
 - Floating collectibles work mechanically, but whether they suit GoldKing is uncertain.
 - Grounded gold might feel more physically integrated into the world.
 
+#### Playtest 2 — Quon (player report)
+
+| Dimension | Floating gold | Grounded gold |
+|---|---|---|
+| Recognition | 5 | 2 |
+| Natural collection | 4 | 3 |
+| Audio / visual feedback | 3 | 3 |
+| Overall satisfaction | 3 | 2 |
+
+**Preference:** floating gold.
+
+- The improved audio still isn't particularly pleasing.
+- Floating gold feels more attractive and inviting.
+- Quon prefers floating gold over grounded gold.
+- Further audio refinement can happen later.
+
 ### 14. What Worked
 
 Playtest 1:
@@ -813,11 +841,21 @@ Playtest 1:
 - Collecting by walking into it (5/5).
 - Seeing wealth accumulate (4/5).
 
+Playtest 2:
+- Floating gold stayed highly recognizable (5/5) and was described as more attractive and inviting.
+- Feedback was rated 3/5 in both modes, up from 2/5 in playtest 1.
+
 ### 15. What Did Not Work
 
 Playtest 1:
 - Sound and visual feedback (2/5) was the weakest-rated dimension.
 - Overall satisfaction (3/5) is below the 4/5 target in spec §8.
+
+Playtest 2:
+- Grounded gold was much harder to recognize (2/5), and its overall satisfaction was lower (2/5).
+- The improved audio is still not particularly pleasing.
+- Overall satisfaction stayed at 3/5 with floating gold, still below the 4/5 target.
+- Natural collection for floating gold was rated 4/5, down from 5/5 in playtest 1. The reason was not reported.
 
 ### 16. Interpretation
 
@@ -827,23 +865,77 @@ Playtest 1 *(developer interpretation; one tester, who is also a developer, in o
 - Whether floating presentation contributes is uncertain. It is worth one direct comparison against grounded gold with the same feedback.
 - The pouch was not decisively helpful or harmful.
 
+Playtest 2 *(developer interpretation; the same single tester)*:
+
+- The iteration 1 feedback appears to be an improvement (2 → 3), but not enough to raise overall satisfaction. Better feedback alone may not reach the 4/5 target with placeholder assets.
+- In this gray-box scene, floating gold clearly reads better than gold lying flat on the floor.
+  - Possible reasons for the grounded result: no bob, no shadow, a squashed silhouette from the camera angle, and low contrast against the floor.
+  - These are unconfirmed. A different grounded treatment (for example a standing heap) was not tested.
+- The drop from 5 to 4 for floating natural collection may be noise. It could also be an effect of the longer pop or of comparing modes. This is unconfirmed.
+- Order effects between the two modes are unknown.
+
 ### 17. Unexpected Findings
 
 Playtest 1:
 - Quon suggested breaking objects, digging, and discovering river deposits as possible future ways to obtain gold. These are **future possibilities only**. They are not approved, not P002 features, and not Decision Log entries.
 
+Playtest 2:
+- None reported.
+
 ### 18. Outcome
 
-**Outcome:** Pending. P002 remains Testing after playtest 1. Iteration 1 (improved feedback, plus a floating vs. grounded comparison) is implemented, and playtest 2 has not yet been run.  
-**Confidence:** —
+**Outcome:** Iterate. Recorded as "Needs Iteration — feedback polish deferred; collection baseline accepted for subsequent prototyping."
+
+**Confidence:**
+- **Medium** for recognition and automatic proximity collection.
+- **Low** for overall satisfaction and final presentation.
+
+**Conclusion:** Floating gold is easy to find, and collecting it on contact feels natural. That is a good enough collection baseline to continue prototyping. P002 is **not** fully validated:
+- Satisfaction is moderate.
+- Feedback still needs work.
+- The pouch's contribution is unclear.
+
+**Supported findings:**
+- Floating gold is highly recognizable: 5/5 in both playtests.
+- Automatic proximity collection feels natural: 5/5, then 4/5.
+- Floating gold is preferred over grounded gold in the tested gray-box environment.
+- Gold accumulation was reasonably clear in playtest 1 (4/5).
+- All reported mechanical validation checks passed: 73 of 73 on the original setup, and 83 of 83 in each mode for iteration 1.
+
+**Unresolved:**
+- Overall satisfaction remains moderate (3/5), below the 4/5 target.
+- Audio and visual feedback still need improvement. The current sound and effects are **placeholder quality, not production-ready**.
+- The pouch's contribution remains unclear. Preference was undecided in playtest 1 and not rated in playtest 2.
+- Collection has not yet been tested alongside gold power and burden.
+- Only one tester (Quon, also a developer). Jason has not tested P002.
+
+Feedback polish is **deferred**, not abandoned. It should be revisited when audio and visual work is in scope or when satisfaction blocks a later prototype.
 
 ### 19. Decision Impact
 
-Pending human playtest.
+- **Weakly supports** the existing Approved Directions *gold as a central, desirable resource* and *visible communication of carried wealth*. Gold is noticed and collected readily, but satisfaction is only moderate. No Decision Log change.
+- The P002 Prototype Assumptions are **retained as working choices, not promoted**:
+  - Automatic proximity pickup
+  - Floating presentation
+  - HUD counter
+  - Provisional pouch
+
+  They are not permanent gameplay decisions, character design, or narrative canon.
+- Grounded (flat) gold was **not preferred** in this test. This is evidence about one gray-box treatment, not a general rejection of grounded gold.
+- Breaking objects, digging, and river deposits remain unapproved future possibilities (§17), outside P002 and P003.
 
 ### 20. Next Test
 
-Pending human playtest. The planned next prototype is P003 (Gold Power vs. Burden).
+**P003 — Gold Power vs. Burden.**
+
+**Working baseline carried forward from P002.** These are prototype choices, not decisions:
+- Floating gold presentation (Gold Presentation set to Floating).
+- Automatic proximity collection (0.3 m trigger).
+- The existing HUD counter.
+- The provisional pouch (still optional, contribution unclear).
+- The existing iteration 1 sound and effects, kept as placeholder quality.
+
+P003 scope does **not** include breakable objects, digging, river deposits, or further feedback polish.
 
 ---
 
