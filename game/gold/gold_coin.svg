@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <!-- Temporary P002 placeholder gold pickup. Bold outline for contrast against the gray box. Not art direction. -->
+  <circle cx="12" cy="12" r="10" fill="#ffd23f" stroke="#1a1208" stroke-width="2"/>
+  <circle cx="12" cy="12" r="6.5" fill="none" stroke="#c98a12" stroke-width="1.5"/>
+  <path d="M7 9 Q9 5.5 13 5.5" fill="none" stroke="#fff6c8" stroke-width="1.6" stroke-linecap="round"/>
+</svg>

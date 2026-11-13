@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <!-- Temporary P002 pouch, stage 3 (overflowing). Provisional prototype visual, not character design. -->
+  <g stroke="#1a1208" stroke-width="1.5" stroke-linejoin="round">
+    <path d="M9 16 Q1 31 16 31 Q31 31 23 16 Z" fill="#8a5a2b"/>
+    <circle cx="11.5" cy="13" r="3.2" fill="#ffd23f"/>
+    <circle cx="20.5" cy="13" r="3.2" fill="#ffd23f"/>
+    <circle cx="16" cy="9.5" r="3.4" fill="#ffd23f"/>
+    <circle cx="16" cy="14.5" r="3.2" fill="#ffd23f"/>
+    <circle cx="25" cy="22" r="2.6" fill="#ffd23f"/>
+    <rect x="9" y="15.5" width="14" height="2.5" rx="1" fill="#5e3b1a"/>
+  </g>
+</svg>
