@@ -16,6 +16,7 @@ stream_0/stream = ExtResource("8_chime")
 
 [node name="P002GoldCollection" instance=ExtResource("1_base")]
 script = ExtResource("2_script")
+gold_presentation = 0
 
 [node name="Pouch" type="Sprite3D" parent="Player" node_paths=PackedStringArray("king_visual")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.47, 0.6, -0.05)
