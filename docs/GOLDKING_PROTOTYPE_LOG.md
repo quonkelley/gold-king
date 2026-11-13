@@ -139,7 +139,7 @@ Do not rewrite an interpretation as if it were an observed fact.
 | ID | Prototype | Primary Question | Status | Outcome | Date |
 |---|---|---|---|---|---|
 | P001 | Player Movement & Camera | Does the chosen 2.5D presentation produce intuitive, readable movement? | Complete | Validated (Medium) | 2026-11-12 |
-| P002 | Gold Collection | Is collecting gold immediately satisfying and readable? | Planned | — | — |
+| P002 | Gold Collection | Is collecting gold immediately satisfying and readable? | Testing | Pending playtest | 2026-11-12 (started) |
 | P003 | Gold Power vs. Burden | Can increasing wealth feel powerful and dangerous at the same time? | Planned | — | — |
 | P004 | Gold Spill & Theft | Does losing loose gold during combat create enjoyable urgency rather than annoyance? | Planned | — | — |
 | P005 | Mini Expedition / Extraction | Does choosing between returning safely and pushing deeper create meaningful greed tension? | Planned | — | — |
@@ -579,6 +579,202 @@ The P001 configuration in §11 becomes the baseline for P002 unless later eviden
 ### 20. Next Test
 
 **P002 — Gold Collection:** test whether collecting gold is immediately readable and satisfying.
+
+---
+
+# Planned Prototype 002
+
+## P002 — Gold Collection
+
+**Status:** Testing (implemented; awaiting human playtest)  
+**Date Started:** 2026-11-12  
+**Date Concluded:** —  
+**Build / Commit:** `d2d201c` (branch `feat/p002-gold-collection`)  
+**Testers:** — (planned: Quon and Jason, independently)  
+**Related Decision(s):**
+- Gold as a central, desirable resource (Approved Direction)
+- Visible communication of carried wealth (Approved Direction)
+- 2.5D presentation / controlled camera (Approved Direction; P001 baseline)
+
+**Related Feature Spec:** `docs/features/p002_gold_collection.md`
+
+### 1. Primary Design Question
+
+Is finding, approaching, collecting, and visibly accumulating gold immediately readable and satisfying?
+
+### 2. Hypothesis
+
+Simple hand-placed pickups that collect on contact, with an immediate pop, sparkle, and short sound, plus a HUD count and a visibly filling pouch, will make gold collection readable without instruction and make players want to collect more ("I want that gold").
+
+### 3. Why This Matters
+
+Gold is GoldKing's central resource. Later prototypes (P003 power vs. burden, P004 spill and theft, P005 expedition) assume that obtaining gold is appealing on its own. If it is not, their results will be misleading.
+
+### 4. Prototype Scope
+
+- One placeholder gold pickup type, +1 each, about 20 hand-placed in the P001 gray box.
+- Automatic proximity collection, exactly once per pickup, with no button and no magnet.
+- Collection feedback: pop/shrink, small sparkle, one short sound.
+- HUD gold counter.
+- Provisional pouch attached to the King with three fill stages.
+- Scene reset for repeat tests.
+
+The pickup interaction, the pouch, and the feedback style are **P002 Prototype Assumptions only** (spec §10), not final mechanics or character design.
+
+### 5. Out of Scope
+
+- Gold-based power or burden, and any movement or posture changes (P003).
+- Spilling, theft, or enemies (P004).
+- Extraction, banking, or ownership (P005 or later).
+- Treasure, inventory, economy, Gilding, combat, or procedural generation.
+- Final art, audio, or animation, save data, and production player/inventory architecture.
+
+### 6. Variables Being Tested
+
+The starting values are listed in §11. Candidates for tuning between sessions:
+
+- Pickup trigger radius.
+- Pouch on vs. off, and the pouch stage thresholds.
+- Coin bob on vs. off.
+- Feedback intensity: sound volume and overlap, pop, and sparkle.
+
+Change one at a time where practical.
+
+### 7. Controls / Things Held Constant
+
+- P001 movement, camera, collision, and facing, with tuning unchanged.
+- P001 gray-box environment, unchanged.
+- The same pickup layout and starting position for every run.
+
+### 8. Success Signals
+
+From spec §8. These are reviewable criteria, not canon.
+
+- No critical counting or reachability bugs on the repeatable route.
+- Both primary testers understand pickup without instruction on their first encounter.
+- Both testers can tell that gold is accumulating, not merely disappearing.
+- Satisfaction ratings of about 4/5. This is a useful target, not a rigid gate.
+- Spontaneous desire to collect more.
+
+### 9. Failure Signals
+
+Derived from spec §3 and §8:
+
+- Testers need coaching to understand that walking into gold collects it.
+- Pickups in clusters or partly hidden spots are missed, or are triggered by accident.
+- Collection moments are unclear in a cluster, or the feedback feels noisy or chaotic.
+- Testers do not perceive accumulation beyond the HUD, or the pouch obstructs or distracts from the King.
+- Collecting feels tedious rather than appealing.
+
+### 10. Optional Measurements
+
+| Metric | Result |
+|---|---|
+| Pickups missed on the first full route (which ones) | — |
+| Coaching needed (yes/no; what) | — |
+| Pouch noticed separately from the HUD (yes/no) | — |
+| Satisfaction rating 1–5 (per tester) | — |
+
+### 11. Test Setup
+
+Implemented on branch `feat/p002-gold-collection`. All values below are prototype starting defaults for tuning, not design decisions. The implementation structure is prototype-local and is not a proposed architecture.
+
+**Scene:** `game/prototypes/p002_gold_collection.tscn` is now the project main scene. It is an inherited scene of the unchanged P001 scene: same gray box, light, camera, and player, with the player starting at (0, 0, 8). The P001 scene still runs on its own (`--scene res://game/prototypes/p001_movement_camera.tscn`).
+
+**Pickups:** 20 instances of `game/gold/gold_pickup.tscn`, each worth +1:
+
+| Pattern | Count | Where |
+|---|---|---|
+| Isolated | 1 | Open west area |
+| Trail | 5 | From near the start, angling north-east toward the passage |
+| Narrow passage | 1 | Inside the 1.5 m passage |
+| Compact cluster | 6 | 2 × 3 grid, 0.6 m spacing, open east area |
+| Beside obstacles | 3 | Low block A (east face), pillar A (west face), dividing wall (south face) |
+| Partly obscured | 1 | Directly north of pillar B, which is between it and the camera |
+| North area, off the main path | 3 | Two along the north side, one in the far north-west corner |
+
+**Pickup behavior:**
+- Collection is triggered when the King's body overlaps a 0.3 m sphere at hip height. Combined with the 0.45 m capsule, that means within about 0.75 m center to center.
+- A pickup collects exactly once and then removes itself. There is no magnet.
+- The coin is a placeholder gold disc (SVG, 4× import, about 0.36 m) on the same Y-billboard and alpha-cut setup as the King. It casts a shadow.
+- The coin art bobs 0.06 m at 0.8 cycles per second. The trigger does not move. Set Bob Height to 0 on `gold_pickup.tscn` to disable bobbing for every coin.
+
+**Feedback:**
+- The coin pops to 1.4× over 0.05 s, then shrinks away over 0.1 s.
+- An 8-particle unlit sparkle burst lasts 0.35 s.
+- One shared chime (generated placeholder, 0.14 s) is capped at 3 overlapping voices, with up to about 6% random pitch variation and volume at −6 dB.
+
+**HUD:** top-left label reading "Gold: N". It updates in the same frame as collection and has no count-up animation.
+
+**Pouch (provisional):**
+- A sprite on the King's trailing (cape) side, 0.05 m behind his sprite so he always draws in front. It casts no shadow and has no collision.
+- It mirrors his left/right facing.
+- Stages:
+  - Low below 6 gold
+  - Partly filled from 6 to 13
+  - Overflowing at 14 or more
+- To compare without it, uncheck Visible on `Player/Pouch` in the P002 scene. Collection and the HUD are unaffected.
+
+**Controls:** P001 movement controls, unchanged. **Reset:** R or gamepad Back (`restart_test` action) reloads the scene, restoring all pickups, the total, the pouch, and the start position.
+
+**Running:**
+- In the editor, open the project in Godot 4.7.2 and press F5.
+- From the repository root, run `/Applications/Godot.app/Contents/MacOS/Godot --path .`
+
+**Pre-playtest mechanical check (measured data, not a playtest):** a throwaway headless script, not committed, passed 73 of 73 checks on Godot 4.7.2:
+
+- **Collection counting:**
+  - Each pickup counts exactly once.
+  - Duplicate overlap signals and non-player bodies do not count.
+  - The full route totals 20.
+  - The HUD matched the total on every checked physics frame.
+  - The pouch changed at 6 and 14.
+- **Speed:** all trail and cluster pickups registered at full 5 m/s, with up to 2 pickups in one physics frame.
+- **Reachability:** every pickup was reached by real movement.
+- **Pouch:**
+  - Hiding it does not affect collection.
+  - It mirrors with the King's facing.
+- **P001 regression:** speed, diagonal speed, stopping, wall collision, the narrow passage, the camera offset and pitch, and the King's shadow are unchanged.
+- **Reset:** R and gamepad Back both restore the initial state.
+
+Audio audibility, sparkle appearance, pouch readability, and collection feel were **not** evaluated by automation.
+
+### 12. Observations
+
+Pending human playtest.
+
+### 13. Player Comments
+
+Pending human playtest.
+
+### 14. What Worked
+
+Pending human playtest.
+
+### 15. What Did Not Work
+
+Pending human playtest.
+
+### 16. Interpretation
+
+Pending human playtest.
+
+### 17. Unexpected Findings
+
+Pending human playtest.
+
+### 18. Outcome
+
+**Outcome:** Pending human playtest  
+**Confidence:** —
+
+### 19. Decision Impact
+
+Pending human playtest.
+
+### 20. Next Test
+
+Pending human playtest. The planned next prototype is P003 (Gold Power vs. Burden).
 
 ---
 
