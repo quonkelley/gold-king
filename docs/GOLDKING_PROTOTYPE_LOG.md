@@ -586,11 +586,11 @@ The P001 configuration in §11 becomes the baseline for P002 unless later eviden
 
 ## P002 — Gold Collection
 
-**Status:** Testing (implemented; awaiting human playtest)  
+**Status:** Testing (playtest 1 recorded; iteration 1 approved)  
 **Date Started:** 2026-11-12  
 **Date Concluded:** —  
 **Build / Commit:** `d2d201c` (branch `feat/p002-gold-collection`)  
-**Testers:** — (planned: Quon and Jason, independently)  
+**Testers:** Quon (playtest 1). Planned: Jason, independently.  
 **Related Decision(s):**
 - Gold as a central, desirable resource (Approved Direction)
 - Visible communication of carried wealth (Approved Direction)
@@ -670,10 +670,10 @@ Derived from spec §3 and §8:
 
 | Metric | Result |
 |---|---|
-| Pickups missed on the first full route (which ones) | — |
-| Coaching needed (yes/no; what) | — |
-| Pouch noticed separately from the HUD (yes/no) | — |
-| Satisfaction rating 1–5 (per tester) | — |
+| Pickups missed on the first full route (which ones) | Playtest 1: not recorded |
+| Coaching needed (yes/no; what) | Playtest 1: not recorded |
+| Pouch noticed separately from the HUD (yes/no) | Playtest 1: not recorded. Pouch preference: undecided. |
+| Satisfaction rating 1–5 (per tester) | Playtest 1 (Quon): 3/5 overall |
 
 ### 11. Test Setup
 
@@ -741,31 +741,62 @@ Audio audibility, sparkle appearance, pouch readability, and collection feel wer
 
 ### 12. Observations
 
-Pending human playtest.
+#### Playtest 1 — Quon, 2026-11-12, build `d2d201c` (floating coins, original feedback)
+
+Quon played the §11 setup with its starting values. Changes made during the session were not reported.
+
+Not recorded:
+- Which pickups, if any, were missed.
+- Whether any coaching was needed.
+- Which input device was used.
+- Whether the pouch-off comparison was tried.
 
 ### 13. Player Comments
 
-Pending human playtest.
+#### Playtest 1 — Quon (player report)
+
+| Dimension | Rating (1–5) |
+|---|---|
+| Gold recognition / discovery | 5 |
+| Natural collection | 5 |
+| Sound / visual feedback | 2 |
+| Visible wealth accumulation | 4 |
+| Overall collection satisfaction | 3 |
+| Pouch preference | Undecided |
+
+- Collecting gold feels natural but only moderately satisfying.
+- Floating collectibles work mechanically, but whether they suit GoldKing is uncertain.
+- Grounded gold might feel more physically integrated into the world.
 
 ### 14. What Worked
 
-Pending human playtest.
+Playtest 1:
+- Finding the gold (5/5).
+- Collecting by walking into it (5/5).
+- Seeing wealth accumulate (4/5).
 
 ### 15. What Did Not Work
 
-Pending human playtest.
+Playtest 1:
+- Sound and visual feedback (2/5) was the weakest-rated dimension.
+- Overall satisfaction (3/5) is below the 4/5 target in spec §8.
 
 ### 16. Interpretation
 
-Pending human playtest.
+Playtest 1 *(developer interpretation; one tester, who is also a developer, in one session)*:
+
+- Discovery and the proximity pickup appear to work. The feedback is the most likely limit on satisfaction.
+- Whether floating presentation contributes is uncertain. It is worth one direct comparison against grounded gold with the same feedback.
+- The pouch was not decisively helpful or harmful.
 
 ### 17. Unexpected Findings
 
-Pending human playtest.
+Playtest 1:
+- Quon suggested breaking objects, digging, and discovering river deposits as possible future ways to obtain gold. These are **future possibilities only**. They are not approved, not P002 features, and not Decision Log entries.
 
 ### 18. Outcome
 
-**Outcome:** Pending human playtest  
+**Outcome:** Pending. P002 remains Testing after playtest 1, and iteration 1 was approved: improved feedback, plus a floating vs. grounded comparison.  
 **Confidence:** —
 
 ### 19. Decision Impact
