@@ -140,7 +140,7 @@ Do not rewrite an interpretation as if it were an observed fact.
 |---|---|---|---|---|---|
 | P001 | Player Movement & Camera | Does the chosen 2.5D presentation produce intuitive, readable movement? | Complete | Validated (Medium) | 2026-11-12 |
 | P002 | Gold Collection | Is collecting gold immediately satisfying and readable? | Concluded (current cycle) | Iterate (feedback polish deferred; working baseline accepted for P003) | 2026-11-13 |
-| P003 | Gold Power vs. Burden | Can increasing wealth feel powerful and dangerous at the same time? | Planned | — | — |
+| P003 | Gold Power vs. Burden | Can increasing wealth feel powerful and dangerous at the same time? | Testing | Pending playtest | 2026-11-13 (started) |
 | P004 | Gold Spill & Theft | Does losing loose gold during combat create enjoyable urgency rather than annoyance? | Planned | — | — |
 | P005 | Mini Expedition / Extraction | Does choosing between returning safely and pushing deeper create meaningful greed tension? | Planned | — | — |
 
@@ -936,6 +936,239 @@ Feedback polish is **deferred**, not abandoned. It should be revisited when audi
 - The existing iteration 1 sound and effects, kept as placeholder quality.
 
 P003 scope does **not** include breakable objects, digging, river deposits, or further feedback polish.
+
+---
+
+# Planned Prototype 003
+
+## P003 — Gold Power vs. Burden
+
+**Status:** Testing (implemented; awaiting human playtest)  
+**Date Started:** 2026-11-13  
+**Date Concluded:** —  
+**Build / Commit:** `0070266` (branch `feat/p003-gold-power-burden`)  
+**Testers:** — (planned: Quon and Jason, independently)  
+**Related Decision(s):**
+- Gold as a central, desirable resource (Approved Direction)
+- Gold Power vs. Burden (Prototype Assumption; exact mechanic unvalidated)
+- P001 movement and camera baseline; P002 working collection baseline
+
+**Related Feature Spec:** `docs/features/p003_gold_power_burden.md`
+
+### 1. Primary Design Question
+
+Can becoming richer feel increasingly powerful and increasingly dangerous at the same time, without making the player want to avoid gold?
+
+### 2. Hypothesis
+
+From spec §3:
+- A temporary strike that needs fewer hits as gold rises will make wealth feel like power.
+- A mild loss of top speed, felt against a timed gate, will make wealth feel like a cost.
+- In one short route where both matter, the trade-off will feel interesting rather than punishing, and players will still want more gold.
+
+### 3. Why This Matters
+
+"More gold = more power and more burden" is the central gold fantasy (a Prototype Assumption). If the burden only reads as friction, or the power only reads as a number, the core loop needs a different burden form before P004 and P005 build on it.
+
+### 4. Prototype Scope
+
+- Three provisional wealth states driven by the existing P002 gold total.
+- One temporary strike against stationary test targets.
+- A top-speed penalty only.
+- One combined course: start → blocking target → timed blocking gate → finish.
+- A practice target, and a movement-only course option.
+- Trial presets and reset.
+- P002 collection, HUD, pouch, and floating gold reused unchanged.
+
+### 5. Out of Scope
+
+- Enemy AI or full combat.
+- Player health, damage, death, or failure.
+- Stamina, dodge, or more than one burden mechanic.
+- Gold spill or theft (P004).
+- Expedition, extraction, or banking (P005).
+- Midas/Gilding.
+- Inventory or economy.
+- Progression or saving.
+- Breakable-loot rewards, digging, or river deposits.
+- Audio/VFX polish, and stronger effects for Heavy.
+
+### 6. Variables Being Tested
+
+- Wealth state:
+  - Light (0–5 gold)
+  - Loaded (6–13)
+  - Heavy (14+)
+- Per state, top speed (5.0 / 4.6 / 4.2 m/s) and strike impact (2 / 3 / 6 against toughness 6).
+
+### 7. Controls / Things Held Constant
+
+- Acceleration (80), deceleration (120), diagonal capping, facing, collision, and camera are unchanged in every state.
+- Strike cooldown (0.3 s), reach (1.0 m), and feedback are identical in every state.
+- Course geometry and gate schedule are identical for every trial. The gate phase resets at each trial start.
+- No pickups in the course lane, so gold is constant during a trial.
+
+### 8. Success Signals
+
+From spec §8. Reviewable, not canon.
+
+- Power and burden are both perceptible in play.
+- Gold stays attractive at higher states, and players can say when the extra wealth is worth it.
+- Basic movement stays reliable.
+- Some real preference or tension emerges in the combined course. Not everyone always picks Heavy, and not everyone always rejects it.
+- Players can describe "imposing" vs. "sluggish".
+
+### 9. Failure Signals
+
+From spec §8:
+- Players avoid gold once the burden appears.
+- A slow King feels bad to control.
+- Power is only visible as a number.
+- The course shows inconvenience but no meaningful pressure.
+
+If these appear, reconsider the burden form before adding more systems.
+
+### 10. Optional Measurements
+
+| Metric | Result |
+|---|---|
+| Combined-course time per state (several runs, with order recorded) | — |
+| Target-broken split per state | — |
+| Gate wait per state | — |
+| Ratings 1–5: perceived power, burden fairness, movement feel, desire to collect more, trade-off enjoyment | — |
+| State preference and reason | — |
+
+### 11. Test Setup
+
+Implemented on branch `feat/p003-gold-power-burden`. **All values are Prototype Assumptions and starting points for tuning, not final balance.** The implementation is prototype-local and not a proposed combat or controller architecture.
+
+**Scene:** `game/prototypes/p003_gold_power_burden.tscn` (now the project main scene). It is an inherited scene of the unchanged P002 scene, which itself inherits P001.
+- The same gray box, camera, player, 20 floating pickups, HUD, and pouch are present.
+- The controller script extends the P002 controller and uses its gold total. There is no second counter.
+- No P001 or P002 files were modified. P002 and P001 still run on their own with `--scene`.
+
+**Wealth states:**
+
+| State | Gold | Top speed | Strike impact | Hits to break (toughness 6) |
+|---|---|---|---|---|
+| Light | 0–5 | 5.0 m/s | 2 | 3 |
+| Loaded | 6–13 | 4.6 m/s | 3 | 2 |
+| Heavy | 14+ | 4.2 m/s | 6 | 1 |
+
+- The state is applied whenever the gold total changes: natural pickup, a preset key, or a reset. The HUD, pouch, speed, impact, and trial label update in the same frame.
+- Thresholds match the pouch stages (6 / 14).
+- Only top speed changes. The P003 controller sets the player's existing `move_speed` at runtime and does not touch the P001 player files.
+
+**Strike:**
+- J, Space, or gamepad X/Square, with a 0.3 s cooldown.
+- **Radial** 1.0 m reach around the King's hip. It does not aim with facing, which keeps it forgiving.
+- Shows a flat reach ring on the floor and plays a placeholder hit sound when it lands.
+- Affects P003 test targets only.
+- Targets show remaining toughness as `[######]` pips, flash on hit, and burst into debris when broken.
+- The same feedback appears in every state.
+
+**Course (north area, separate from the P001 narrow passage):**
+- A 0.6 m-high lane wall forms a 2.25 m-wide dead-end lane along the north wall. It is low so the camera can see the King inside the lane.
+- The route runs east to west: start line (x 2) → course target filling the lane (x 0) → timed gate (x −3.5) → finish line (x −12).
+- **Timed gate:**
+  - A stationary barrier whose collision and look switch on a fixed schedule: closed for 1.0 s, then open for 1.0 s, repeating. It shows a yellow floor strip for the last 0.3 s before closing.
+  - Its clock starts at zero when the trial starts, so every trial sees the same phase.
+  - **Collision-safe close:** if the King is inside the gate when it is due to close, it stays open until he is clear, then closes for the rest of that window. The schedule is not shifted, so later cycles stay on time. The delay only happens when he is standing in the gateway, so normal runs are unaffected.
+- No damage, health, pushing, gold loss, or failure.
+- The tall P001 pillar near x −6 sits between the gate and the finish.
+
+**Practice target (power only):** in the open west area at about (−12, 6). It respawns about 1 s after breaking, and the trial HUD shows how many hits the last break took.
+
+**Movement-only comparison:** untick `Course Target Enabled` on the P003 root. The course target is then absent, so trials time traversal and gate waiting only.
+
+**Measurements (shown in the trial HUD, and printed as one line per trial in the Output panel; nothing is saved):**
+- Wealth state, gold, and speed.
+- Total time, counted in physics ticks at 60 per second.
+- Time when the target broke.
+- Strike attempts and hits on the course target.
+- Time spent waiting in front of the closed gate.
+- **Caution:** the start → target-broken split includes the approach as well as striking, so it is **not** a pure measure of attack power.
+
+**Controls:**
+- P001 movement controls, unchanged.
+- **1 / 2 / 3** (or D-pad left / up / right): set gold to 0 / 10 / 20, which puts the King in Light / Loaded / Heavy. Each also moves the King to the course start and resets the target, gate phase, timer, and counters.
+- **R**: full scene reload. Gold returns to `Start Gold` (0) and the King to the P001 start.
+- Walking up to the lane entrance also arms a new trial.
+- The Light/Loaded/Heavy line in the trial HUD can be hidden with `Show Wealth State`.
+
+**Running:** open the project in Godot 4.7.2 and press F5, or run `/Applications/Godot.app/Contents/MacOS/Godot --path .`
+
+**Pre-playtest mechanical check (measured data, not a playtest):** Godot 4.7.2, all checks headless.
+
+A throwaway P003 script, not committed, passed **84 of 84** checks:
+
+| Area | What was checked |
+|---|---|
+| Thresholds | 5→6 and 13→14, both set directly and through natural pickups. Speed, impact, HUD, pouch, and trial label stay in sync. |
+| Movement | Top speed 5.0 / 4.6 / 4.2 m/s, with diagonals no faster. Acceleration and deceleration steps (80/60, 120/60 per frame) are unchanged in every state. Wall collision, the P001 passage at Heavy, facing, and camera offset are unchanged. |
+| Strike | Breaks the practice target in exactly 3 / 2 / 1 strikes. The cooldown allows one strike per 0.3 s. Strikes out of reach don't hit, and striking doesn't change gold. |
+| Course | The intact target blocks the lane, and the lane can't be bypassed. The gate schedule is correct, a closed gate blocks, and an open gate passes. The gate never closes onto the King and he can't get stuck in it. |
+| Trials | All three states complete the course. Each state took exactly 3 / 2 / 1 hits. The timer matches the frames observed. Gold stays constant during trials. Three identical scripted runs per state gave identical results. The movement-only option works. |
+| Resets | Preset keys and R reset everything as described. |
+| P002 inside P003 | Collection and HUD work, and all 20 pickups are reachable with the lane wall and practice target added. |
+
+Scripted-run results, for reference only. They come from a scripted input pattern, not a human player, so they are not evidence of feel:
+
+| State | Time | Target broken at | Gate wait |
+|---|---|---|---|
+| Light | 3.45 s | 0.85 s | 0 s |
+| Loaded | 3.33 s | 0.52 s | 0 s |
+| Heavy | 3.33 s | 0.22 s | 0.05 s |
+| Movement-only (Light) | 2.82 s | — | — |
+
+The original P002 suite, unchanged and run against the unchanged P002 scene in both presentation modes, passed 82 of 83. The one failure is its "main scene is P002" check, which is expected because the main scene is now P003. P001, P002, and P003 scenes and all new scripts load and parse with no errors or warnings.
+
+**Not evaluated by automation:** whether the King feels stronger, whether the slowdown is fair or annoying, whether the gate creates tension, whether testers still want gold, strike and hit feel, and audio and visuals.
+
+**Known limitations and risks:**
+- The gate schedule interacts strongly with the course layout. With these starting values the scripted Loaded and Heavy runs tie. Gate timing (`Closed Time`, `Open Time`, `Phase Offset`) and positions are tuning variables, not results.
+- A single run time is not conclusive. Human reaction and gate-cycle luck add variance, so record several runs per state and the order they were played in.
+- The radial strike ignores facing, so the King can hit a target behind him. This was accepted as a forgiving test instrument.
+- The 1 / 2 / 3 keys are test shortcuts, not a gameplay feature. Natural collection can only reach Heavy by collecting coins outside the lane first.
+- The input bindings overlap Godot's built-in UI actions (D-pad with `ui_left`/`ui_up`/`ui_right`, Space with `ui_accept`). This is harmless because the prototype has no focused UI.
+- The strike hit sound and all visuals are generated placeholders.
+
+### 12. Observations
+
+Pending human playtest.
+
+### 13. Player Comments
+
+Pending human playtest.
+
+### 14. What Worked
+
+Pending human playtest.
+
+### 15. What Did Not Work
+
+Pending human playtest.
+
+### 16. Interpretation
+
+Pending human playtest.
+
+### 17. Unexpected Findings
+
+Pending human playtest.
+
+### 18. Outcome
+
+**Outcome:** Pending human playtest  
+**Confidence:** —
+
+### 19. Decision Impact
+
+Pending human playtest.
+
+### 20. Next Test
+
+Pending human playtest.
 
 ---
 
