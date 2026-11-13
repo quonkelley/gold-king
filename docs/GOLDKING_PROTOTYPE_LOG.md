@@ -365,7 +365,7 @@ If no further prototype is necessary, write:
 - 3D environments + 2D characters
 - Controlled gameplay camera
 
-**Related Feature Spec:** `docs/features/player_movement_camera.md`
+**Related Feature Spec:** `docs/features/p001_player_movement_camera.md`
 
 ### 1. Primary Design Question
 
