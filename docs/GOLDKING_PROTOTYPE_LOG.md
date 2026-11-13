@@ -139,7 +139,7 @@ Do not rewrite an interpretation as if it were an observed fact.
 | ID | Prototype | Primary Question | Status | Outcome | Date |
 |---|---|---|---|---|---|
 | P001 | Player Movement & Camera | Does the chosen 2.5D presentation produce intuitive, readable movement? | Complete | Validated (Medium) | 2026-11-12 |
-| P002 | Gold Collection | Is collecting gold immediately satisfying and readable? | Planned | — | — |
+| P002 | Gold Collection | Is collecting gold immediately satisfying and readable? | Concluded (pending review) | Iterate (feedback polish deferred; baseline accepted) | 2026-11-13 |
 | P003 | Gold Power vs. Burden | Can increasing wealth feel powerful and dangerous at the same time? | Planned | — | — |
 | P004 | Gold Spill & Theft | Does losing loose gold during combat create enjoyable urgency rather than annoyance? | Planned | — | — |
 | P005 | Mini Expedition / Extraction | Does choosing between returning safely and pushing deeper create meaningful greed tension? | Planned | — | — |
@@ -365,7 +365,7 @@ If no further prototype is necessary, write:
 - 3D environments + 2D characters
 - Controlled gameplay camera
 
-**Related Feature Spec:** `docs/features/player_movement_camera.md`
+**Related Feature Spec:** `docs/features/p001_player_movement_camera.md`
 
 ### 1. Primary Design Question
 
@@ -579,6 +579,363 @@ The P001 configuration in §11 becomes the baseline for P002 unless later eviden
 ### 20. Next Test
 
 **P002 — Gold Collection:** test whether collecting gold is immediately readable and satisfying.
+
+---
+
+# Planned Prototype 002
+
+## P002 — Gold Collection
+
+**Status:** Testing concluded; outcome recorded (§18). Awaiting human review before merge.  
+**Date Started:** 2026-11-12  
+**Date Concluded:** 2026-11-13  
+**Build / Commit:** `d2d201c` (original setup, playtest 1); `94e86aa` (iteration 1). Branch `feat/p002-gold-collection`.  
+**Testers:** Quon (playtests 1 and 2). Jason has not yet tested.  
+**Related Decision(s):**
+- Gold as a central, desirable resource (Approved Direction)
+- Visible communication of carried wealth (Approved Direction)
+- 2.5D presentation / controlled camera (Approved Direction; P001 baseline)
+
+**Related Feature Spec:** `docs/features/p002_gold_collection.md`
+
+### 1. Primary Design Question
+
+Is finding, approaching, collecting, and visibly accumulating gold immediately readable and satisfying?
+
+### 2. Hypothesis
+
+Simple hand-placed pickups that collect on contact, with an immediate pop, sparkle, and short sound, plus a HUD count and a visibly filling pouch, will make gold collection readable without instruction and make players want to collect more ("I want that gold").
+
+### 3. Why This Matters
+
+Gold is GoldKing's central resource. Later prototypes (P003 power vs. burden, P004 spill and theft, P005 expedition) assume that obtaining gold is appealing on its own. If it is not, their results will be misleading.
+
+### 4. Prototype Scope
+
+- One placeholder gold pickup type, +1 each, about 20 hand-placed in the P001 gray box.
+- Automatic proximity collection, exactly once per pickup, with no button and no magnet.
+- Collection feedback: pop/shrink, small sparkle, one short sound.
+- HUD gold counter.
+- Provisional pouch attached to the King with three fill stages.
+- Scene reset for repeat tests.
+
+The pickup interaction, the pouch, and the feedback style are **P002 Prototype Assumptions only** (spec §10), not final mechanics or character design.
+
+### 5. Out of Scope
+
+- Gold-based power or burden, and any movement or posture changes (P003).
+- Spilling, theft, or enemies (P004).
+- Extraction, banking, or ownership (P005 or later).
+- Treasure, inventory, economy, Gilding, combat, or procedural generation.
+- Final art, audio, or animation, save data, and production player/inventory architecture.
+
+### 6. Variables Being Tested
+
+The starting values are listed in §11. Candidates for tuning between sessions:
+
+- Pickup trigger radius.
+- Pouch on vs. off, and the pouch stage thresholds.
+- Coin bob on vs. off.
+- Feedback intensity: sound volume and overlap, pop, and sparkle.
+
+Change one at a time where practical.
+
+### 7. Controls / Things Held Constant
+
+- P001 movement, camera, collision, and facing, with tuning unchanged.
+- P001 gray-box environment, unchanged.
+- The same pickup layout and starting position for every run.
+
+### 8. Success Signals
+
+From spec §8. These are reviewable criteria, not canon.
+
+- No critical counting or reachability bugs on the repeatable route.
+- Both primary testers understand pickup without instruction on their first encounter.
+- Both testers can tell that gold is accumulating, not merely disappearing.
+- Satisfaction ratings of about 4/5. This is a useful target, not a rigid gate.
+- Spontaneous desire to collect more.
+
+### 9. Failure Signals
+
+Derived from spec §3 and §8:
+
+- Testers need coaching to understand that walking into gold collects it.
+- Pickups in clusters or partly hidden spots are missed, or are triggered by accident.
+- Collection moments are unclear in a cluster, or the feedback feels noisy or chaotic.
+- Testers do not perceive accumulation beyond the HUD, or the pouch obstructs or distracts from the King.
+- Collecting feels tedious rather than appealing.
+
+### 10. Optional Measurements
+
+| Metric | Result |
+|---|---|
+| Pickups missed on the first full route (which ones) | Playtest 1: not recorded |
+| Coaching needed (yes/no; what) | Playtest 1: not recorded |
+| Pouch noticed separately from the HUD (yes/no) | Playtest 1: not recorded. Pouch preference: undecided. |
+| Satisfaction rating 1–5 (per tester) | Playtest 1 (Quon): 3/5 overall. Playtest 2 (Quon): floating 3/5, grounded 2/5. |
+
+### 11. Test Setup
+
+Implemented on branch `feat/p002-gold-collection`. All values below are prototype starting defaults for tuning, not design decisions. The implementation structure is prototype-local and is not a proposed architecture.
+
+**Scene:** `game/prototypes/p002_gold_collection.tscn` is now the project main scene. It is an inherited scene of the unchanged P001 scene: same gray box, light, camera, and player, with the player starting at (0, 0, 8). The P001 scene still runs on its own (`--scene res://game/prototypes/p001_movement_camera.tscn`).
+
+**Pickups:** 20 instances of `game/gold/gold_pickup.tscn`, each worth +1:
+
+| Pattern | Count | Where |
+|---|---|---|
+| Isolated | 1 | Open west area |
+| Trail | 5 | From near the start, angling north-east toward the passage |
+| Narrow passage | 1 | Inside the 1.5 m passage |
+| Compact cluster | 6 | 2 × 3 grid, 0.6 m spacing, open east area |
+| Beside obstacles | 3 | Low block A (east face), pillar A (west face), dividing wall (south face) |
+| Partly obscured | 1 | Directly north of pillar B, which is between it and the camera |
+| North area, off the main path | 3 | Two along the north side, one in the far north-west corner |
+
+**Pickup behavior:**
+- Collection is triggered when the King's body overlaps a 0.3 m sphere at hip height. Combined with the 0.45 m capsule, that means within about 0.75 m center to center.
+- A pickup collects exactly once and then removes itself. There is no magnet.
+- The coin is a placeholder gold disc (SVG, 4× import, about 0.36 m) on the same Y-billboard and alpha-cut setup as the King. It casts a shadow.
+- The coin art bobs 0.06 m at 0.8 cycles per second. The trigger does not move. Set Bob Height to 0 on `gold_pickup.tscn` to disable bobbing for every coin.
+
+**Feedback:**
+- The coin pops to 1.4× over 0.05 s, then shrinks away over 0.1 s.
+- An 8-particle unlit sparkle burst lasts 0.35 s.
+- One shared chime (generated placeholder, 0.14 s) is capped at 3 overlapping voices, with up to about 6% random pitch variation and volume at −6 dB.
+
+**HUD:** top-left label reading "Gold: N". It updates in the same frame as collection and has no count-up animation.
+
+**Pouch (provisional):**
+- A sprite on the King's trailing (cape) side, 0.05 m behind his sprite so he always draws in front. It casts no shadow and has no collision.
+- It mirrors his left/right facing.
+- Stages:
+  - Low below 6 gold
+  - Partly filled from 6 to 13
+  - Overflowing at 14 or more
+- To compare without it, uncheck Visible on `Player/Pouch` in the P002 scene. Collection and the HUD are unaffected.
+
+**Controls:** P001 movement controls, unchanged. **Reset:** R or gamepad Back (`restart_test` action) reloads the scene, restoring all pickups, the total, the pouch, and the start position.
+
+**Running:**
+- In the editor, open the project in Godot 4.7.2 and press F5.
+- From the repository root, run `/Applications/Godot.app/Contents/MacOS/Godot --path .`
+
+**Pre-playtest mechanical check (measured data, not a playtest):** a throwaway headless script, not committed, passed 73 of 73 checks on Godot 4.7.2:
+
+- **Collection counting:**
+  - Each pickup counts exactly once.
+  - Duplicate overlap signals and non-player bodies do not count.
+  - The full route totals 20.
+  - The HUD matched the total on every checked physics frame.
+  - The pouch changed at 6 and 14.
+- **Speed:** all trail and cluster pickups registered at full 5 m/s, with up to 2 pickups in one physics frame.
+- **Reachability:** every pickup was reached by real movement.
+- **Pouch:**
+  - Hiding it does not affect collection.
+  - It mirrors with the King's facing.
+- **P001 regression:** speed, diagonal speed, stopping, wall collision, the narrow passage, the camera offset and pitch, and the King's shadow are unchanged.
+- **Reset:** R and gamepad Back both restore the initial state.
+
+Audio audibility, sparkle appearance, pouch readability, and collection feel were **not** evaluated by automation.
+
+#### Iteration 1 Setup (2026-11-12, build `94e86aa`)
+
+This iteration was approved after playtest 1, where sound/visual feedback rated 2/5 and overall satisfaction 3/5 (§13). The setup above is otherwise unchanged:
+- Same 20 pickup positions, values, and 0.3 m trigger.
+- Same HUD counting and pouch (implementation untouched).
+- Same reset.
+- P001 movement, camera, collision, and tuning unchanged.
+
+All values are prototype starting points, not design decisions.
+
+**Feedback changes** (apply to both presentations):
+
+| Element | Playtest 1 | Iteration 1 |
+|---|---|---|
+| Pickup sound | Soft two-note sine chime, 0.14 s | Metallic two-strike "ch-ing": inharmonic partials plus a short contact click, 0.38 s ring. Generated placeholder. Same −6 dB, about ±6% pitch variation, max 3 voices. |
+| Rapid pickups | Every pickup triggers a sound | Pickups less than 45 ms apart share one sound, so clusters read as separate clinks rather than a stacked smear. Every pickup still counts. |
+| Coin pop | Grow to 1.4×, then shrink, in 0.15 s | Overshoot to 1.5× with a bright color flash, lift 0.35 m, then shrink, in 0.18 s |
+| Glint | None | Four-point star flash at the coin, about 0.18 s, drawn on top of other geometry so it isn't hidden by the popping coin |
+| Sparkle | 8 solid particles, 0.35 s | 12 particles that fade white → gold → transparent, 0.45 s |
+| HUD | Number changes instantly | Number still changes instantly, plus a subtle pulse (1.15× scale, settling over 0.12 s). Set Hud Pulse Scale to 1 to disable. |
+
+**Presentation comparison** (only the coin art differs between modes):
+- **A — Floating:** the playtest 1 look. Upright Y-billboard coin at 0.35 m, bobbing 0.06 m, casting a shadow.
+- **B — Grounded:** the same coin texture and size lying flat on the floor, 0.02 m up. No bob and no shadow. From the camera it looks like a slightly squashed disc.
+- To switch, select the root node of `game/prototypes/p002_gold_collection.tscn` and change **Gold Presentation** to Floating or Grounded. It applies to all 20 pickups. Reset (R) keeps the selected mode.
+
+**Pre-playtest mechanical check (iteration 1, measured data, not a playtest):** the original throwaway suite was reused and extended with presentation and feedback checks. It passed 83 of 83 checks in **each** presentation mode on Godot 4.7.2:
+- Counting, duplicate-signal and non-player guards.
+- Full-speed trail and cluster collection.
+- The HUD matched the total on every checked physics frame.
+- Pouch stages, hiding, and facing.
+- Reachability of all 20 pickups by real movement.
+- R and gamepad Back reset.
+- P001 movement and camera regression.
+- Mode-specific coin pose, bob or no bob, a stationary trigger, glint and HUD pulse on collection, and the 45 ms sound merge.
+
+Sound quality, effect readability, grounded-coin visibility in play, and satisfaction were **not** evaluated by automation.
+
+### 12. Observations
+
+#### Playtest 1 — Quon, 2026-11-12, build `d2d201c` (floating coins, original feedback)
+
+Quon played the §11 setup with its starting values. Changes made during the session were not reported.
+
+Not recorded:
+- Which pickups, if any, were missed.
+- Whether any coaching was needed.
+- Which input device was used.
+- Whether the pouch-off comparison was tried.
+
+#### Playtest 2 — Quon, reported 2026-11-13, build `94e86aa` (iteration 1: improved feedback; floating and grounded presentations)
+
+Quon played both presentation modes with the iteration 1 feedback and compared them.
+
+Not recorded:
+- Which mode was played first.
+- Which pickups, if any, were missed.
+- Which input device was used.
+- Whether the pouch was on or off.
+
+Visible wealth accumulation and pouch preference were not rated in this playtest.
+
+### 13. Player Comments
+
+#### Playtest 1 — Quon (player report)
+
+| Dimension | Rating (1–5) |
+|---|---|
+| Gold recognition / discovery | 5 |
+| Natural collection | 5 |
+| Sound / visual feedback | 2 |
+| Visible wealth accumulation | 4 |
+| Overall collection satisfaction | 3 |
+| Pouch preference | Undecided |
+
+- Collecting gold feels natural but only moderately satisfying.
+- Floating collectibles work mechanically, but whether they suit GoldKing is uncertain.
+- Grounded gold might feel more physically integrated into the world.
+
+#### Playtest 2 — Quon (player report)
+
+| Dimension | Floating gold | Grounded gold |
+|---|---|---|
+| Recognition | 5 | 2 |
+| Natural collection | 4 | 3 |
+| Audio / visual feedback | 3 | 3 |
+| Overall satisfaction | 3 | 2 |
+
+**Preference:** floating gold.
+
+- The improved audio still isn't particularly pleasing.
+- Floating gold feels more attractive and inviting.
+- Quon prefers floating gold over grounded gold.
+- Further audio refinement can happen later.
+
+### 14. What Worked
+
+Playtest 1:
+- Finding the gold (5/5).
+- Collecting by walking into it (5/5).
+- Seeing wealth accumulate (4/5).
+
+Playtest 2:
+- Floating gold stayed highly recognizable (5/5) and was described as more attractive and inviting.
+- Feedback was rated 3/5 in both modes, up from 2/5 in playtest 1.
+
+### 15. What Did Not Work
+
+Playtest 1:
+- Sound and visual feedback (2/5) was the weakest-rated dimension.
+- Overall satisfaction (3/5) is below the 4/5 target in spec §8.
+
+Playtest 2:
+- Grounded gold was much harder to recognize (2/5), and its overall satisfaction was lower (2/5).
+- The improved audio is still not particularly pleasing.
+- Overall satisfaction stayed at 3/5 with floating gold, still below the 4/5 target.
+- Natural collection for floating gold was rated 4/5, down from 5/5 in playtest 1. The reason was not reported.
+
+### 16. Interpretation
+
+Playtest 1 *(developer interpretation; one tester, who is also a developer, in one session)*:
+
+- Discovery and the proximity pickup appear to work. The feedback is the most likely limit on satisfaction.
+- Whether floating presentation contributes is uncertain. It is worth one direct comparison against grounded gold with the same feedback.
+- The pouch was not decisively helpful or harmful.
+
+Playtest 2 *(developer interpretation; the same single tester)*:
+
+- The iteration 1 feedback appears to be an improvement (2 → 3), but not enough to raise overall satisfaction. Better feedback alone may not reach the 4/5 target with placeholder assets.
+- In this gray-box scene, floating gold clearly reads better than gold lying flat on the floor.
+  - Possible reasons for the grounded result: no bob, no shadow, a squashed silhouette from the camera angle, and low contrast against the floor.
+  - These are unconfirmed. A different grounded treatment (for example a standing heap) was not tested.
+- The drop from 5 to 4 for floating natural collection may be noise. It could also be an effect of the longer pop or of comparing modes. This is unconfirmed.
+- Order effects between the two modes are unknown.
+
+### 17. Unexpected Findings
+
+Playtest 1:
+- Quon suggested breaking objects, digging, and discovering river deposits as possible future ways to obtain gold. These are **future possibilities only**. They are not approved, not P002 features, and not Decision Log entries.
+
+Playtest 2:
+- None reported.
+
+### 18. Outcome
+
+**Outcome:** Iterate. Recorded as "Needs Iteration — feedback polish deferred; collection baseline accepted for subsequent prototyping."
+
+**Confidence:**
+- **Medium** for recognition and automatic proximity collection.
+- **Low** for overall satisfaction and final presentation.
+
+**Conclusion:** Floating gold is easy to find, and collecting it on contact feels natural. That is a good enough collection baseline to continue prototyping. P002 is **not** fully validated:
+- Satisfaction is moderate.
+- Feedback still needs work.
+- The pouch's contribution is unclear.
+
+**Supported findings:**
+- Floating gold is highly recognizable: 5/5 in both playtests.
+- Automatic proximity collection feels natural: 5/5, then 4/5.
+- Floating gold is preferred over grounded gold in the tested gray-box environment.
+- Gold accumulation was reasonably clear in playtest 1 (4/5).
+- All reported mechanical validation checks passed: 73 of 73 on the original setup, and 83 of 83 in each mode for iteration 1.
+
+**Unresolved:**
+- Overall satisfaction remains moderate (3/5), below the 4/5 target.
+- Audio and visual feedback still need improvement. The current sound and effects are **placeholder quality, not production-ready**.
+- The pouch's contribution remains unclear. Preference was undecided in playtest 1 and not rated in playtest 2.
+- Collection has not yet been tested alongside gold power and burden.
+- Only one tester (Quon, also a developer). Jason has not tested P002.
+
+Feedback polish is **deferred**, not abandoned. It should be revisited when audio and visual work is in scope or when satisfaction blocks a later prototype.
+
+### 19. Decision Impact
+
+- **Weakly supports** the existing Approved Directions *gold as a central, desirable resource* and *visible communication of carried wealth*. Gold is noticed and collected readily, but satisfaction is only moderate. No Decision Log change.
+- The P002 Prototype Assumptions are **retained as working choices, not promoted**:
+  - Automatic proximity pickup
+  - Floating presentation
+  - HUD counter
+  - Provisional pouch
+
+  They are not permanent gameplay decisions, character design, or narrative canon.
+- Grounded (flat) gold was **not preferred** in this test. This is evidence about one gray-box treatment, not a general rejection of grounded gold.
+- Breaking objects, digging, and river deposits remain unapproved future possibilities (§17), outside P002 and P003.
+
+### 20. Next Test
+
+**P003 — Gold Power vs. Burden.**
+
+**Working baseline carried forward from P002.** These are prototype choices, not decisions:
+- Floating gold presentation (Gold Presentation set to Floating).
+- Automatic proximity collection (0.3 m trigger).
+- The existing HUD counter.
+- The provisional pouch (still optional, contribution unclear).
+- The existing iteration 1 sound and effects, kept as placeholder quality.
+
+P003 scope does **not** include breakable objects, digging, river deposits, or further feedback polish.
 
 ---
 
