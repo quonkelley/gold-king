@@ -140,7 +140,7 @@ Do not rewrite an interpretation as if it were an observed fact.
 |---|---|---|---|---|---|
 | P001 | Player Movement & Camera | Does the chosen 2.5D presentation produce intuitive, readable movement? | Complete | Validated (Medium) | 2026-11-12 |
 | P002 | Gold Collection | Is collecting gold immediately satisfying and readable? | Concluded (current cycle) | Iterate (feedback polish deferred; working baseline accepted for P003) | 2026-11-13 |
-| P003 | Gold Power vs. Burden | Can increasing wealth feel powerful and dangerous at the same time? | Testing | Pending playtest | 2026-11-13 (started) |
+| P003 | Gold Power vs. Burden | Can increasing wealth feel powerful and dangerous at the same time? | Testing — Iteration 1 Approved | Pending (Playtest 1 recorded; speed comparison next) | 2026-11-13 (started) |
 | P004 | Gold Spill & Theft | Does losing loose gold during combat create enjoyable urgency rather than annoyance? | Planned | — | — |
 | P005 | Mini Expedition / Extraction | Does choosing between returning safely and pushing deeper create meaningful greed tension? | Planned | — | — |
 
@@ -943,11 +943,11 @@ P003 scope does **not** include breakable objects, digging, river deposits, or f
 
 ## P003 — Gold Power vs. Burden
 
-**Status:** Testing (implemented; awaiting human playtest)  
+**Status:** Testing — Iteration 1 Approved (Playtest 1 recorded; stronger-burden speed comparison approved but not yet implemented). P003 is not Validated or Complete.  
 **Date Started:** 2026-11-13  
 **Date Concluded:** —  
-**Build / Commit:** `0070266` (branch `feat/p003-gold-power-burden`)  
-**Testers:** — (planned: Quon and Jason, independently)  
+**Build / Commit:** `0070266` (branch `feat/p003-gold-power-burden`; Playtest 1 build)  
+**Testers:** Playtest 1: Quon. (Jason: not yet tested.)  
 **Related Decision(s):**
 - Gold as a central, desirable resource (Approved Direction)
 - Gold Power vs. Burden (Prototype Assumption; exact mechanic unvalidated)
@@ -1135,40 +1135,96 @@ The original P002 suite, unchanged and run against the unchanged P002 scene in b
 
 ### 12. Observations
 
-Pending human playtest.
+#### Playtest 1 — Quon
+
+Playtest 1 was recorded from Quon's player report. No trial result lines (times, strike counts, gate waits) were captured, so there are no measured comparisons between states for this playtest.
+
+- The speed reduction was barely noticeable until most or all of the available gold had been collected.
+- Because the scene has a limited amount of gold, the naturally reached Heavy state lasted a relatively short time.
+- Heavy breaking the test target in one hit, instead of three at Light, was enjoyable.
 
 ### 13. Player Comments
 
-Pending human playtest.
+#### Playtest 1 — Quon (player report)
+
+| Dimension | Rating (1–5) |
+|---|---|
+| Increased striking power | 3 |
+| Movement burden noticeability | 2 |
+| Movement enjoyment at Heavy | 4 |
+| Power-versus-burden interest | 4 |
+| Overall enjoyment | 4 |
+
+| Question | Answer |
+|---|---|
+| Preferred wealth state | Heavy |
+| Did movement penalties discourage collecting gold? | No |
+
+- Quon wants Heavy to feel more like a tank and Light to feel more like a high-DPS playstyle.
+- The mechanic is promising but needs further tuning.
 
 ### 14. What Worked
 
-Pending human playtest.
+Playtest 1:
+- The one-hit Heavy break was enjoyable.
+- Power-versus-burden interest (4/5) and overall enjoyment (4/5) were positive.
+- Heavy was the preferred state, and the movement penalty did not discourage collecting gold.
+- Movement remained enjoyable at Heavy (4/5).
 
 ### 15. What Did Not Work
 
-Pending human playtest.
+Playtest 1:
+- The movement burden was hard to notice (2/5). The slowdown registered only near or at full gold.
+- The increased striking power rated only 3/5.
+- The natural Heavy experience was short because the scene has limited gold.
 
 ### 16. Interpretation
 
-Pending human playtest.
+Single tester, single session, player report only; treat as low-confidence direction, not validation.
+
+- The current speed values (5.0 / 4.6 / 4.2 m/s) may be too close together to communicate burden. This is the reason for the stronger-burden comparison below.
+- Heavy's appeal at this stage appears to come from its power, and the burden does not yet act as a real cost. Whether the trade-off works cannot be judged until the burden is noticeable.
 
 ### 17. Unexpected Findings
 
-Pending human playtest.
+Playtest 1:
+- Quon framed the states as playstyles (Heavy as a tank, Light as high-DPS) rather than only as more power vs. more burden. This is recorded as an Experimental Idea in §19 and is not part of P003.
 
 ### 18. Outcome
 
-**Outcome:** Pending human playtest  
-**Confidence:** —
+**Outcome:** Pending. Iteration 1 approved (stronger-burden speed comparison).  
+**Confidence:** Low (one tester, one session, no recorded trial measurements).
+
+P003 is not Validated or Complete.
 
 ### 19. Decision Impact
 
-Pending human playtest.
+- No decision changes. Gold Power vs. Burden remains a Prototype Assumption.
+- **Experimental Idea (not approved):** wealth states as playstyles, with Heavy as a tank and Light as a high-DPS style. Recorded for future combat exploration only. It is not an approved combat mechanic, adds nothing to P003 scope, and is not entered in the Decision Log.
 
 ### 20. Next Test
 
-Pending human playtest.
+#### Iteration 1 — Stronger burden speed comparison (approved, not yet implemented)
+
+Compare two maximum-movement-speed configurations:
+
+| Wealth State | Current | Stronger Burden |
+|---|---|---|
+| Light | 5.0 m/s | 5.0 m/s |
+| Loaded | 4.6 m/s | 4.4 m/s |
+| Heavy | 4.2 m/s | 3.8 m/s |
+
+Held constant:
+- Strike impact stays 2 / 3 / 6 (toughness 6 → 3 / 2 / 1 hits).
+- Only maximum movement speed changes. No changes to acceleration, deceleration, attack speed (strike cooldown), or any additional burden variables.
+- Wealth thresholds (6 / 14), course, gate, and targets unchanged.
+
+Questions:
+- Does a stronger speed penalty create a satisfying sense of weight?
+- Does Heavy remain enjoyable and desirable?
+- Does the stronger penalty improve the trade-off without discouraging gold collection?
+
+Suggested for the next session: record the printed trial result lines for several runs per state and configuration, and the order they were played in.
 
 ---
 
