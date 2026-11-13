@@ -1,0 +1,103 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://game/prototypes/p002_gold_collection.tscn" id="1_base"]
+[ext_resource type="Script" path="res://game/prototypes/p003_gold_power_burden.gd" id="2_script"]
+[ext_resource type="Script" path="res://game/prototypes/p003/strike.gd" id="3_strike"]
+[ext_resource type="Texture2D" path="res://game/prototypes/p003/strike_ring.svg" id="4_ring"]
+[ext_resource type="AudioStream" path="res://game/prototypes/p003/strike_hit.wav" id="5_hit"]
+[ext_resource type="PackedScene" path="res://game/prototypes/p003/test_target.tscn" id="6_target"]
+[ext_resource type="Script" path="res://game/prototypes/p003/timed_gate.gd" id="7_gate"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_lane_wall"]
+albedo_color = Color(0.68, 0.64, 0.58, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_gate"]
+size = Vector3(0.4, 2, 2.25)
+
+[sub_resource type="BoxMesh" id="BoxMesh_gate"]
+size = Vector3(0.4, 2, 2.25)
+
+[sub_resource type="StandardMaterial3D" id="Mat_gate"]
+albedo_color = Color(0.75, 0.22, 0.15, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_line"]
+size = Vector3(0.2, 0.02, 2.25)
+
+[sub_resource type="StandardMaterial3D" id="Mat_start_line"]
+shading_mode = 0
+albedo_color = Color(0.3, 0.8, 0.35, 1)
+
+[sub_resource type="StandardMaterial3D" id="Mat_finish_line"]
+shading_mode = 0
+albedo_color = Color(0.95, 0.95, 0.95, 1)
+
+[node name="P003GoldPowerBurden" instance=ExtResource("1_base")]
+script = ExtResource("2_script")
+
+[node name="Strike" type="Node3D" parent="Player"]
+script = ExtResource("3_strike")
+
+[node name="Ring" type="Sprite3D" parent="Player/Strike"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, 0)
+cast_shadow = 0
+pixel_size = 0.0083
+alpha_cut = 1
+texture = ExtResource("4_ring")
+
+[node name="HitSound" type="AudioStreamPlayer" parent="Player/Strike"]
+stream = ExtResource("5_hit")
+volume_db = -4.0
+max_polyphony = 2
+
+[node name="Course" type="Node3D" parent="."]
+
+[node name="LaneWall" type="CSGBox3D" parent="Course"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.5, 0.3, -12.5)
+use_collision = true
+size = Vector3(17, 0.6, 0.5)
+material = SubResource("Mat_lane_wall")
+
+[node name="StartMarker" type="Marker3D" parent="Course"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, -13.875)
+
+[node name="StartLine" type="MeshInstance3D" parent="Course"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0.01, -13.875)
+cast_shadow = 0
+mesh = SubResource("BoxMesh_line")
+surface_material_override/0 = SubResource("Mat_start_line")
+
+[node name="CourseTarget" parent="Course" instance=ExtResource("6_target")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -13.875)
+
+[node name="Gate" type="StaticBody3D" parent="Course"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 0, -13.875)
+script = ExtResource("7_gate")
+
+[node name="Shape" type="CollisionShape3D" parent="Course/Gate"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("BoxShape3D_gate")
+
+[node name="Mesh" type="MeshInstance3D" parent="Course/Gate"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+mesh = SubResource("BoxMesh_gate")
+surface_material_override/0 = SubResource("Mat_gate")
+
+[node name="FinishLine" type="MeshInstance3D" parent="Course"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0.01, -13.875)
+cast_shadow = 0
+mesh = SubResource("BoxMesh_line")
+surface_material_override/0 = SubResource("Mat_finish_line")
+
+[node name="PracticeTarget" parent="." instance=ExtResource("6_target")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0, 6)
+respawn_delay = 1.0
+
+[node name="TrialLabel" type="Label" parent="HUD"]
+offset_left = 24.0
+offset_top = 64.0
+offset_right = 824.0
+offset_bottom = 160.0
+theme_override_colors/font_color = Color(0.96, 0.95, 0.9, 1)
+theme_override_colors/font_outline_color = Color(0.1, 0.07, 0.03, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 18
