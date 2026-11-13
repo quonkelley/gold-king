@@ -139,7 +139,7 @@ Do not rewrite an interpretation as if it were an observed fact.
 | ID | Prototype | Primary Question | Status | Outcome | Date |
 |---|---|---|---|---|---|
 | P001 | Player Movement & Camera | Does the chosen 2.5D presentation produce intuitive, readable movement? | Complete | Validated (Medium) | 2026-11-12 |
-| P002 | Gold Collection | Is collecting gold immediately satisfying and readable? | Concluded (pending review) | Iterate (feedback polish deferred; baseline accepted) | 2026-11-13 |
+| P002 | Gold Collection | Is collecting gold immediately satisfying and readable? | Concluded (current cycle) | Iterate (feedback polish deferred; working baseline accepted for P003) | 2026-11-13 |
 | P003 | Gold Power vs. Burden | Can increasing wealth feel powerful and dangerous at the same time? | Planned | — | — |
 | P004 | Gold Spill & Theft | Does losing loose gold during combat create enjoyable urgency rather than annoyance? | Planned | — | — |
 | P005 | Mini Expedition / Extraction | Does choosing between returning safely and pushing deeper create meaningful greed tension? | Planned | — | — |
@@ -586,7 +586,7 @@ The P001 configuration in §11 becomes the baseline for P002 unless later eviden
 
 ## P002 — Gold Collection
 
-**Status:** Testing concluded; outcome recorded (§18). Awaiting human review before merge.  
+**Status:** Concluded for the current prototype cycle. Human review was completed on 2026-11-13 and P002 was merged into `main` (merge commit `1f07e14`). Outcome: Iterate (§18). Feedback polish is deferred, and the working collection baseline is accepted for P003. P002 is not fully validated.  
 **Date Started:** 2026-11-12  
 **Date Concluded:** 2026-11-13  
 **Build / Commit:** `d2d201c` (original setup, playtest 1); `94e86aa` (iteration 1). Branch `feat/p002-gold-collection`.  
