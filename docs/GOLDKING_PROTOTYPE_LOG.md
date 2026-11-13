@@ -586,10 +586,10 @@ The P001 configuration in §11 becomes the baseline for P002 unless later eviden
 
 ## P002 — Gold Collection
 
-**Status:** Testing (playtest 1 recorded; iteration 1 approved)  
+**Status:** Testing (playtest 1 recorded; iteration 1 implemented, awaiting playtest 2)  
 **Date Started:** 2026-11-12  
 **Date Concluded:** —  
-**Build / Commit:** `d2d201c` (branch `feat/p002-gold-collection`)  
+**Build / Commit:** `d2d201c` (original setup, playtest 1); `94e86aa` (iteration 1). Branch `feat/p002-gold-collection`.  
 **Testers:** Quon (playtest 1). Planned: Jason, independently.  
 **Related Decision(s):**
 - Gold as a central, desirable resource (Approved Direction)
@@ -739,6 +739,44 @@ Implemented on branch `feat/p002-gold-collection`. All values below are prototyp
 
 Audio audibility, sparkle appearance, pouch readability, and collection feel were **not** evaluated by automation.
 
+#### Iteration 1 Setup (2026-11-12, build `94e86aa`)
+
+This iteration was approved after playtest 1, where sound/visual feedback rated 2/5 and overall satisfaction 3/5 (§13). The setup above is otherwise unchanged:
+- Same 20 pickup positions, values, and 0.3 m trigger.
+- Same HUD counting and pouch (implementation untouched).
+- Same reset.
+- P001 movement, camera, collision, and tuning unchanged.
+
+All values are prototype starting points, not design decisions.
+
+**Feedback changes** (apply to both presentations):
+
+| Element | Playtest 1 | Iteration 1 |
+|---|---|---|
+| Pickup sound | Soft two-note sine chime, 0.14 s | Metallic two-strike "ch-ing": inharmonic partials plus a short contact click, 0.38 s ring. Generated placeholder. Same −6 dB, about ±6% pitch variation, max 3 voices. |
+| Rapid pickups | Every pickup triggers a sound | Pickups less than 45 ms apart share one sound, so clusters read as separate clinks rather than a stacked smear. Every pickup still counts. |
+| Coin pop | Grow to 1.4×, then shrink, in 0.15 s | Overshoot to 1.5× with a bright color flash, lift 0.35 m, then shrink, in 0.18 s |
+| Glint | None | Four-point star flash at the coin, about 0.18 s, drawn on top of other geometry so it isn't hidden by the popping coin |
+| Sparkle | 8 solid particles, 0.35 s | 12 particles that fade white → gold → transparent, 0.45 s |
+| HUD | Number changes instantly | Number still changes instantly, plus a subtle pulse (1.15× scale, settling over 0.12 s). Set Hud Pulse Scale to 1 to disable. |
+
+**Presentation comparison** (only the coin art differs between modes):
+- **A — Floating:** the playtest 1 look. Upright Y-billboard coin at 0.35 m, bobbing 0.06 m, casting a shadow.
+- **B — Grounded:** the same coin texture and size lying flat on the floor, 0.02 m up. No bob and no shadow. From the camera it looks like a slightly squashed disc.
+- To switch, select the root node of `game/prototypes/p002_gold_collection.tscn` and change **Gold Presentation** to Floating or Grounded. It applies to all 20 pickups. Reset (R) keeps the selected mode.
+
+**Pre-playtest mechanical check (iteration 1, measured data, not a playtest):** the original throwaway suite was reused and extended with presentation and feedback checks. It passed 83 of 83 checks in **each** presentation mode on Godot 4.7.2:
+- Counting, duplicate-signal and non-player guards.
+- Full-speed trail and cluster collection.
+- The HUD matched the total on every checked physics frame.
+- Pouch stages, hiding, and facing.
+- Reachability of all 20 pickups by real movement.
+- R and gamepad Back reset.
+- P001 movement and camera regression.
+- Mode-specific coin pose, bob or no bob, a stationary trigger, glint and HUD pulse on collection, and the 45 ms sound merge.
+
+Sound quality, effect readability, grounded-coin visibility in play, and satisfaction were **not** evaluated by automation.
+
 ### 12. Observations
 
 #### Playtest 1 — Quon, 2026-11-12, build `d2d201c` (floating coins, original feedback)
@@ -796,7 +834,7 @@ Playtest 1:
 
 ### 18. Outcome
 
-**Outcome:** Pending. P002 remains Testing after playtest 1, and iteration 1 was approved: improved feedback, plus a floating vs. grounded comparison.  
+**Outcome:** Pending. P002 remains Testing after playtest 1. Iteration 1 (improved feedback, plus a floating vs. grounded comparison) is implemented, and playtest 2 has not yet been run.  
 **Confidence:** —
 
 ### 19. Decision Impact
