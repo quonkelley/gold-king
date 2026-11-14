@@ -140,7 +140,7 @@ Do not rewrite an interpretation as if it were an observed fact.
 |---|---|---|---|---|---|
 | P001 | Player Movement & Camera | Does the chosen 2.5D presentation produce intuitive, readable movement? | Complete | Validated (Medium) | 2026-11-12 |
 | P002 | Gold Collection | Is collecting gold immediately satisfying and readable? | Concluded (current cycle) | Iterate (feedback polish deferred; working baseline accepted for P003) | 2026-11-13 |
-| P003 | Gold Power vs. Burden | Can increasing wealth feel powerful and dangerous at the same time? | Testing — Pending Human Playtest 2 | Pending (Playtest 1 recorded; Iteration 1 implemented) | 2026-11-13 (started) |
+| P003 | Gold Power vs. Burden | Can increasing wealth feel powerful and dangerous at the same time? | Concluded (current cycle) | Iterate (automatic movement burden superseded; wealth-driven external danger approved for future testing) | 2026-11-14 |
 | P004 | Gold Spill & Theft | Does losing loose gold during combat create enjoyable urgency rather than annoyance? | Planned | — | — |
 | P005 | Mini Expedition / Extraction | Does choosing between returning safely and pushing deeper create meaningful greed tension? | Planned | — | — |
 
@@ -943,14 +943,15 @@ P003 scope does **not** include breakable objects, digging, river deposits, or f
 
 ## P003 — Gold Power vs. Burden
 
-**Status:** Testing — Pending Human Playtest 2 (Playtest 1 recorded; Iteration 1 stronger-burden speed comparison implemented, §11). P003 is not Validated or Complete.  
+**Status:** Concluded for the current prototype cycle (2026-11-14). Outcome: Iterate (§18). The design question is not fully validated. After Playtest 2, Quon approved a revised gold-risk direction (§19), so this entry and its implementation are kept as historical evidence of what P003 actually tested: automatic speed penalties and increased strike impact.  
 **Date Started:** 2026-11-13  
-**Date Concluded:** —  
+**Date Concluded:** 2026-11-14  
 **Build / Commit:** `0070266` (Playtest 1 build); `becbe71` (Iteration 1 build). Branch `feat/p003-gold-power-burden`.  
-**Testers:** Playtest 1: Quon. (Jason: not yet tested.)  
+**Testers:** Quon (Playtests 1 and 2). Quon is the only recorded human tester; Jason's playtest is not recorded.  
 **Related Decision(s):**
 - Gold as a central, desirable resource (Approved Direction)
-- Gold Power vs. Burden (Prototype Assumption; exact mechanic unvalidated)
+- Gold Power vs. Burden (Prototype Assumption; exact mechanic unvalidated). Its automatic physical-burden portion was superseded on 2026-11-14 (§19).
+- Gold Power With Wealth-Driven External Danger (Approved Direction, 2026-11-14; Decision Log)
 - P001 movement and camera baseline; P002 working collection baseline
 
 **Related Feature Spec:** `docs/features/p003_gold_power_burden.md`
@@ -1175,6 +1176,14 @@ Playtest 1 was recorded from Quon's player report. No trial result lines (times,
 - Because the scene has a limited amount of gold, the naturally reached Heavy state lasted a relatively short time.
 - Heavy breaking the test target in one hit, instead of three at Light, was enjoyable.
 
+#### Playtest 2 — Quon (Iteration 1, build `becbe71`)
+
+Playtest 2 compared the Original and Stronger Burden speed configurations (§11, Iteration 1 Setup). It was recorded from Quon's player report. No trial result lines were provided for this record, so there are no measured comparisons between configurations.
+
+- The Stronger Burden configuration felt like a mixture of satisfying weight and sluggishness.
+- Increased burden did not discourage collecting gold.
+- The trade-off remained interesting but did not receive a higher rating than in the Original configuration.
+
 ### 13. Player Comments
 
 #### Playtest 1 — Quon (player report)
@@ -1195,6 +1204,23 @@ Playtest 1 was recorded from Quon's player report. No trial result lines (times,
 - Quon wants Heavy to feel more like a tank and Light to feel more like a high-DPS playstyle.
 - The mechanic is promising but needs further tuning.
 
+#### Playtest 2 — Quon (player report)
+
+| Dimension | Original (5.0 / 4.6 / 4.2 m/s) | Stronger Burden (5.0 / 4.4 / 3.8 m/s) |
+|---|---|---|
+| Burden noticeability | 4 | 5 |
+| Heavy movement enjoyment | 4 | 4 |
+| Power-versus-mobility trade-off | 4 | 4 |
+
+| Question | Answer |
+|---|---|
+| Preferred configuration | Stronger Burden |
+| Did increased burden discourage collecting gold? | No |
+
+- Quon questioned whether automatic slowdown would remain suitable across entire expeditions containing substantially more gold.
+- Quon noted that designing traversal and combat around different movement speeds introduces additional balancing considerations.
+- Quon proposed exploring optional gold-powered heavy states and item-based encumbrance as alternatives.
+
 ### 14. What Worked
 
 Playtest 1:
@@ -1203,12 +1229,21 @@ Playtest 1:
 - Heavy was the preferred state, and the movement penalty did not discourage collecting gold.
 - Movement remained enjoyable at Heavy (4/5).
 
+Playtest 2:
+- Both configurations made the burden noticeable (Original 4/5, Stronger Burden 5/5).
+- Heavy movement enjoyment stayed at 4/5 in both configurations.
+- Neither configuration discouraged collecting gold. Stronger Burden was preferred.
+
 ### 15. What Did Not Work
 
 Playtest 1:
 - The movement burden was hard to notice (2/5). The slowdown registered only near or at full gold.
 - The increased striking power rated only 3/5.
 - The natural Heavy experience was short because the scene has limited gold.
+
+Playtest 2:
+- Stronger Burden also felt partly sluggish, not only weighty.
+- The trade-off rating did not improve with the stronger penalty (4/5 in both configurations).
 
 ### 16. Interpretation
 
@@ -1217,26 +1252,57 @@ Single tester, single session, player report only; treat as low-confidence direc
 - The current speed values (5.0 / 4.6 / 4.2 m/s) may be too close together to communicate burden. This is the reason for the stronger-burden comparison below.
 - Heavy's appeal at this stage appears to come from its power, and the burden does not yet act as a real cost. Whether the trade-off works cannot be judged until the burden is noticeable.
 
+After Playtest 2 (still one tester, short controlled sessions):
+- Ratings in Playtest 1 and Playtest 2 differ for the same Original speeds (burden noticeability 2/5, then 4/5). Playtest 2 was a direct side-by-side comparison of the two configurations; the reasons for the difference were not recorded, so it is not treated as a measured effect.
+- A stronger automatic speed penalty made the burden clearly noticeable without reducing Heavy enjoyment or the desire to collect gold, but it did not make the trade-off more interesting.
+- The current three-state penalty is capped at Heavy. Indefinite or continuing slowdown was not implemented or tested, so P003 says nothing about automatic slowdown across long expeditions with much more gold.
+
 ### 17. Unexpected Findings
 
 Playtest 1:
 - Quon framed the states as playstyles (Heavy as a tank, Light as high-DPS) rather than only as more power vs. more burden. This is recorded as an Experimental Idea in §19 and is not part of P003.
 
+Playtest 2:
+- Quon's main concern after Playtest 2 was long-term fit rather than short-session feel: expedition-length pacing, gold desirability at much larger totals, and designing traversal and combat around varying speeds. This led to the direction review in §19.
+
 ### 18. Outcome
 
-**Outcome:** Pending. Iteration 1 approved (stronger-burden speed comparison).  
-**Confidence:** Low (one tester, one session, no recorded trial measurements).
+**Outcome:** Iterate — automatic gold-based movement burden superseded as the intended core approach; wealth-driven external danger approved for future testing.  
+**Confidence:**
+- Medium in the short-session observations.
+- Low in long-expedition scalability and final combat identity.
 
-P003 is not Validated or Complete.
+Supported findings (one tester, short controlled sessions):
+- Increasing impact through gold is promising.
+- Automatic movement slowdown can be noticeable and tolerable during a short controlled prototype.
+- Stronger Burden was the preferred tested speed configuration.
+- Heavy movement enjoyment remained 4/5.
+- Neither configuration discouraged collecting gold.
+
+Unresolved:
+- The long-term scalability of automatic slowdown was not tested.
+- The final combat and burden systems remain unresolved.
+
+The whole P003 design question is not marked Validated. The implementation, test setup, and results above are kept as the record of what was tested.
+
+*Interim outcome after Playtest 1 (2026-11-13, kept for history): Pending; Iteration 1 approved (stronger-burden speed comparison); confidence Low.*
 
 ### 19. Decision Impact
 
-- No decision changes. Gold Power vs. Burden remains a Prototype Assumption.
-- **Experimental Idea (not approved):** wealth states as playstyles, with Heavy as a tank and Light as a high-DPS style. Recorded for future combat exploration only. It is not an approved combat mechanic, adds nothing to P003 scope, and is not entered in the Decision Log.
+*After Playtest 1 (2026-11-13, kept for history):* no decision changes; Gold Power vs. Burden remained a Prototype Assumption.
+
+After Playtest 2 (2026-11-14), Quon reviewed the findings and explicitly approved a revised gold-risk direction:
+- **New Approved Direction (Decision Log, 2026-11-14 — Gold Power With Wealth-Driven External Danger):** accumulating ordinary gold stays highly desirable and adds to the Gold King's power. Greater wealth also creates the potential for greater external danger, attention, and vulnerability. Automatic movement-speed penalties from ordinary gold are no longer the intended core downside.
+- **Superseded:** the automatic gold-based physical-burden part of the *Gold Power vs. Burden* Prototype Assumption and the matching Gameplay Foundation text. The original assumption stays in the Decision Log as history, and this entry is its evidence.
+- **Not changed:** narrative canon; gold spill and theft remain Prototype Assumptions for P004.
+- **Experimental Ideas (not approved):**
+  - Wealth states as playstyles: Heavy as a tank, Light as a high-DPS style (from Playtest 1). For future combat exploration only.
+  - An optional gold-powered heavy form (from Playtest 2).
+  - Item-based encumbrance from large treasures or equipment (from Playtest 2).
 
 ### 20. Next Test
 
-#### Iteration 1 — Stronger burden speed comparison (approved; implemented in `becbe71`, setup in §11; awaiting Human Playtest 2)
+#### Iteration 1 — Stronger burden speed comparison (implemented in `becbe71`, setup in §11; tested in Playtest 2)
 
 Compare two maximum-movement-speed configurations:
 
@@ -1257,6 +1323,12 @@ Questions:
 - Does the stronger penalty improve the trade-off without discouraging gold collection?
 
 Suggested for the next session: record the printed trial result lines for several runs per state and configuration, and the order they were played in.
+
+*Playtest 2 answered these questions for a short controlled session (§12–18). No further P003 iteration is planned for this cycle.*
+
+#### P004 handoff consideration (planning note, not a design)
+
+P004 should not automatically inherit P003's speed-penalty mechanics just because P003 is the most recent prototype. Those mechanics remain useful experimental code, but they no longer represent the intended core gold-risk direction. During P004 planning, evaluate whether to build from the P002 collection baseline or reuse selected P003 functionality (for example the strike, test targets, or trial tooling). The exact scope of P004 — Gold Spill & Theft — still needs its own feature-specification review.
 
 ---
 
@@ -1343,6 +1415,8 @@ Prove that collecting gold is readable and intrinsically satisfying.
 
 ### P003 — Gold Power vs. Burden
 Test the central assumption that more wealth can create both greater power and greater danger.
+
+*Concluded for the current cycle on 2026-11-14 (Iterate). The automatic movement-burden approach it tested was superseded by the wealth-driven external danger direction; see the P003 entry.*
 
 ### P004 — Gold Spill & Theft
 Test whether combat can make losing and recovering gold create enjoyable urgency.

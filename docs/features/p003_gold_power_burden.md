@@ -2,6 +2,7 @@
 
 **Document:** `docs/features/p003_gold_power_burden.md`  
 **Status:** Approved P003 prototype feature specification — **planning authorized; implementation not yet authorized** (approved by Quon, 2026-11-13)  
+**Status note (2026-11-14):** P003 was later implemented, playtested, and concluded (outcome: Iterate). After playtesting, Quon approved a revised gold-risk direction: wealth-driven external danger rather than automatic movement burden (Decision Log, 2026-11-14). This specification is unchanged and remains the record of the experiment as approved; see the P003 entry in `docs/GOLDKING_PROTOTYPE_LOG.md` for results.  
 **Prototype:** P003  
 **Depends on:** P001 — Player Movement & Controlled Camera (Validated, Medium confidence); P002 — Gold Collection (current-cycle conclusion: Iterate, feedback polish deferred, working collection baseline accepted)  
 **Engine / implementation context:** Godot 4.7.2 stable; typed GDScript; Mobile renderer remains a technical/prototype assumption  

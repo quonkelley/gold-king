@@ -94,27 +94,38 @@ Prototype question: does losing the entire current haul create meaningful greed 
 
 Gold is intended to be one of the central gameplay systems rather than merely a currency.
 
-- Gold is more than simple currency. It connects to temptation, power, burden, risk, and the game's themes of greed and "enough."
+- Gold is more than simple currency. It is a major source of desire, power, risk, and temptation, and connects to the game's themes of greed and "enough."
 - The player actively seeks and collects large quantities of gold.
 - The King's current amount of carried wealth should be communicated visually through animation, posture, appearance, sound, and/or carried treasure.
 
-### Prototype Assumption: Gold Power vs. Burden
-*Status: Prototype Assumption (see Decision Log). Being tested in P003 and P004. Not finalized design.*
+### Approved Direction: Gold Power With Wealth-Driven External Danger
+*Status: Approved Direction (Decision Log, 2026-11-14), informed by P003.*
 
-The specific mechanics currently being tested:
-- Carrying more gold makes the Gold King more powerful.
-- Carrying more gold also creates increasing physical burden and vulnerability.
+- Accumulating ordinary gold should remain highly desirable and contribute to the Gold King's increasing power.
+- Greater accumulated wealth should also create the potential for greater **external** danger, attention, and vulnerability. This increasing exposure is the intended core downside of carrying more gold.
+- Collecting ordinary gold should **not** automatically impair traversal. Automatic movement-speed penalties from ordinary gold are no longer the intended core downside.
+
+How external danger works is unresolved: which enemies or entities respond to wealth, how threats escalate, how escalation is communicated, and how players respond. This direction does not define a dynamic-difficulty director, enemy-spawning formula, or threat meter.
+
+**Superseded (2026-11-14):** the earlier *Gold Power vs. Burden* Prototype Assumption, under which more carried gold also created increasing physical burden. P003 tested it with automatic top-speed penalties. The results are recorded in the Prototype Log and the original assumption remains in the Decision Log as history.
+
+### Prototype Assumption: Gold Spill & Theft
+*Status: Prototype Assumption (see Decision Log). To be explored in P004. Not finalized design.*
+
 - Gold may spill when the King takes major hits.
 - Certain enemies may steal or consume gold.
 
-Prototype question: can becoming richer feel increasingly powerful and increasingly dangerous at the same time without making the player want to avoid gold?
+### Experimental Ideas (not approved)
+- An optional gold-powered heavy form.
+- Separate encumbrance from large treasures or equipment.
+- Wealth states as playstyles (for example a tank-like heavy style and a faster high-damage light style).
 
 ### Open Question: Supernatural Gold Powers / Midas-Inspired Gilding
 *Status: Open Question / Future Prototype (see Decision Log).*
 
 Midas-inspired powers, such as gilding enemies, objects, or parts of the environment, are under consideration and may be prototyped later. Whether gold provides supernatural abilities at all is an open narrative question in `GOLDKING_CONTEXT.md`. Supernatural gold mechanics are unresolved and should not be treated as canon or approved design.
 
-The exact combat formulas, load thresholds, powers, and balancing are not finalized.
+The exact combat formulas, gold power scaling, threat mechanics, powers, and balancing are not finalized.
 
 ---
 
@@ -142,12 +153,12 @@ Much of the ordinary growth of the settlement can happen automatically as people
 GoldKing currently has two complementary gameplay phases.
 
 ### Expedition Phase
-`Explore → Fight → Discover → Accumulate Gold → Become Stronger/Heavier → Find Treasure/Relics/People → Decide Whether to Push Further → Return or Fail`
+`Explore → Fight → Discover → Accumulate Gold → Become Stronger and More Exposed to Danger → Find Treasure/Relics/People → Decide Whether to Push Further → Return or Fail`
 
 ### Settlement Phase
 `Return → Secure Haul → See What Changed → Interact With Characters → Invest/Unlock → Prepare → Choose Next Destination → Depart`
 
-The "Become Stronger/Heavier" and "Return or Fail" steps depend on the Prototype Assumptions in §4 and §5 and may change with prototype evidence. The two-phase structure itself is the approved direction.
+"Become Stronger and More Exposed to Danger" follows the 2026-11-14 Approved Direction in §5 (it previously read "Become Stronger/Heavier"); its exact mechanics are unresolved. "Return or Fail" depends on the Prototype Assumption in §4 and may change with prototype evidence. The two-phase structure itself is the approved direction.
 
 The two phases should feed each other.
 
@@ -208,7 +219,7 @@ Early prototypes are **incremental**. Each answers one primary design question a
 
 1. **P001 — Player Movement & Controlled Camera**
 2. **P002 — Gold Collection**
-3. **P003 — Gold Power vs. Burden**
+3. **P003 — Gold Power vs. Burden** (concluded 2026-11-14; led to the revised direction in §5)
 4. **P004 — Gold Spill & Theft**
 5. **P005 — Mini Expedition / Extraction**
 
