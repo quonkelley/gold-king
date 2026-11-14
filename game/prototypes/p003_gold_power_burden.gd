@@ -13,6 +13,7 @@ enum Wealth { LIGHT, LOADED, HEAVY }
 enum Trial { IDLE, READY, RUNNING, FINISHED }
 
 const WEALTH_NAMES: Array[String] = ["Light", "Loaded", "Heavy"]
+const CONFIG_NAMES: Array[String] = ["Original", "Stronger burden"]
 
 @export_group("Wealth States")
 ## Gold at which the King becomes Loaded.
@@ -23,6 +24,17 @@ const WEALTH_NAMES: Array[String] = ["Light", "Loaded", "Heavy"]
 @export var light_speed: float = 5.0
 @export var loaded_speed: float = 4.6
 @export var heavy_speed: float = 4.2
+## Iteration 1 comparison: when on, the stronger-burden speeds below replace the original
+## speeds. Only top speed changes; impact, thresholds, acceleration, and strike timing do not.
+@export var stronger_burden: bool = false:
+	set(value):
+		stronger_burden = value
+		if is_node_ready():
+			_show_total()
+## Stronger-burden top speed per state in m/s (Iteration 1).
+@export var stronger_light_speed: float = 5.0
+@export var stronger_loaded_speed: float = 4.4
+@export var stronger_heavy_speed: float = 3.8
 ## Strike impact per state. Against toughness 6 this gives 3 / 2 / 1 hits.
 @export var light_impact: int = 2
 @export var loaded_impact: int = 3
@@ -126,7 +138,10 @@ func wealth_for(total: int) -> Wealth:
 
 func _apply_wealth() -> void:
 	wealth = wealth_for(gold_total)
-	_player.move_speed = [light_speed, loaded_speed, heavy_speed][wealth]
+	if stronger_burden:
+		_player.move_speed = [stronger_light_speed, stronger_loaded_speed, stronger_heavy_speed][wealth]
+	else:
+		_player.move_speed = [light_speed, loaded_speed, heavy_speed][wealth]
 	_strike.impact = [light_impact, loaded_impact, heavy_impact][wealth]
 
 
@@ -135,6 +150,8 @@ func _start_preset(gold: int) -> void:
 	_show_total()
 	_player.global_position = _start_marker.global_position
 	_player.velocity = Vector3.ZERO
+	# Each preset trial starts with the strike ready, regardless of the previous run.
+	_strike.reset_cooldown()
 	_reset_course()
 
 
@@ -185,13 +202,19 @@ func _trial_summary() -> String:
 		_ticks_to_seconds(gate_wait_ticks)]
 
 
+## Names the speed configuration under test, shown in the HUD and every result line.
+func config_name() -> String:
+	return CONFIG_NAMES[1 if stronger_burden else 0]
+
+
 func _print_result() -> void:
-	print("P003 trial | %s | gold %d | speed %.1f m/s | impact %d | %s" % [
-		WEALTH_NAMES[wealth], gold_total, _player.move_speed, _strike.impact, _trial_summary()])
+	print("P003 trial | %s | %s | gold %d | speed %.1f m/s | impact %d | %s" % [
+		config_name(), WEALTH_NAMES[wealth], gold_total, _player.move_speed, _strike.impact, _trial_summary()])
 
 
 func _update_trial_label() -> void:
-	var lines: Array[String] = []
+	# The configuration line is always shown so every playtest note can be attributed to it.
+	var lines: Array[String] = ["Config: " + config_name()]
 	if show_wealth_state:
 		lines.append("%s | speed %.1f m/s | impact %d" % [WEALTH_NAMES[wealth], _player.move_speed, _strike.impact])
 	match trial:

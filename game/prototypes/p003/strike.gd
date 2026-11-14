@@ -42,6 +42,12 @@ func _physics_process(delta: float) -> void:
 		_strike()
 
 
+## Makes the next strike available immediately. Used only when a preset trial starts;
+## the regular cooldown between strikes is unchanged.
+func reset_cooldown() -> void:
+	_cooldown_left = 0.0
+
+
 func _strike() -> void:
 	attempted.emit()
 	_show_ring()
