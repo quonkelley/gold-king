@@ -140,7 +140,7 @@ Do not rewrite an interpretation as if it were an observed fact.
 |---|---|---|---|---|---|
 | P001 | Player Movement & Camera | Does the chosen 2.5D presentation produce intuitive, readable movement? | Complete | Validated (Medium) | 2026-11-12 |
 | P002 | Gold Collection | Is collecting gold immediately satisfying and readable? | Concluded (current cycle) | Iterate (feedback polish deferred; working baseline accepted for P003) | 2026-11-13 |
-| P003 | Gold Power vs. Burden | Can increasing wealth feel powerful and dangerous at the same time? | Planned | — | — |
+| P003 | Gold Power vs. Burden | Can increasing wealth feel powerful and dangerous at the same time? | Concluded (current cycle) | Iterate (automatic movement burden superseded; wealth-driven external danger approved for future testing) | 2026-11-14 |
 | P004 | Gold Spill & Theft | Does losing loose gold during combat create enjoyable urgency rather than annoyance? | Planned | — | — |
 | P005 | Mini Expedition / Extraction | Does choosing between returning safely and pushing deeper create meaningful greed tension? | Planned | — | — |
 
@@ -939,6 +939,399 @@ P003 scope does **not** include breakable objects, digging, river deposits, or f
 
 ---
 
+# Planned Prototype 003
+
+## P003 — Gold Power vs. Burden
+
+**Status:** Concluded for the current prototype cycle (2026-11-14). Outcome: Iterate (§18). The design question is not fully validated. After Playtest 2, Quon approved a revised gold-risk direction (§19), so this entry and its implementation are kept as historical evidence of what P003 actually tested: automatic speed penalties and increased strike impact.  
+**Date Started:** 2026-11-13  
+**Date Concluded:** 2026-11-14  
+**Build / Commit:** `0070266` (Playtest 1 build); `becbe71` (Iteration 1 build). Branch `feat/p003-gold-power-burden`.  
+**Testers:** Quon (Playtests 1 and 2). Quon is the only recorded human tester; Jason's playtest is not recorded.  
+**Related Decision(s):**
+- Gold as a central, desirable resource (Approved Direction)
+- Gold Power vs. Burden (Prototype Assumption; exact mechanic unvalidated). Its automatic physical-burden portion was superseded on 2026-11-14 (§19).
+- Gold Power With Wealth-Driven External Danger (Approved Direction, 2026-11-14; Decision Log)
+- P001 movement and camera baseline; P002 working collection baseline
+
+**Related Feature Spec:** `docs/features/p003_gold_power_burden.md`
+
+### 1. Primary Design Question
+
+Can becoming richer feel increasingly powerful and increasingly dangerous at the same time, without making the player want to avoid gold?
+
+### 2. Hypothesis
+
+From spec §3:
+- A temporary strike that needs fewer hits as gold rises will make wealth feel like power.
+- A mild loss of top speed, felt against a timed gate, will make wealth feel like a cost.
+- In one short route where both matter, the trade-off will feel interesting rather than punishing, and players will still want more gold.
+
+### 3. Why This Matters
+
+"More gold = more power and more burden" is the central gold fantasy (a Prototype Assumption). If the burden only reads as friction, or the power only reads as a number, the core loop needs a different burden form before P004 and P005 build on it.
+
+### 4. Prototype Scope
+
+- Three provisional wealth states driven by the existing P002 gold total.
+- One temporary strike against stationary test targets.
+- A top-speed penalty only.
+- One combined course: start → blocking target → timed blocking gate → finish.
+- A practice target, and a movement-only course option.
+- Trial presets and reset.
+- P002 collection, HUD, pouch, and floating gold reused unchanged.
+
+### 5. Out of Scope
+
+- Enemy AI or full combat.
+- Player health, damage, death, or failure.
+- Stamina, dodge, or more than one burden mechanic.
+- Gold spill or theft (P004).
+- Expedition, extraction, or banking (P005).
+- Midas/Gilding.
+- Inventory or economy.
+- Progression or saving.
+- Breakable-loot rewards, digging, or river deposits.
+- Audio/VFX polish, and stronger effects for Heavy.
+
+### 6. Variables Being Tested
+
+- Wealth state:
+  - Light (0–5 gold)
+  - Loaded (6–13)
+  - Heavy (14+)
+- Per state, top speed (5.0 / 4.6 / 4.2 m/s) and strike impact (2 / 3 / 6 against toughness 6).
+
+### 7. Controls / Things Held Constant
+
+- Acceleration (80), deceleration (120), diagonal capping, facing, collision, and camera are unchanged in every state.
+- Strike cooldown (0.3 s), reach (1.0 m), and feedback are identical in every state.
+- Course geometry and gate schedule are identical for every trial. The gate phase resets at each trial start.
+- No pickups in the course lane, so gold is constant during a trial.
+
+### 8. Success Signals
+
+From spec §8. Reviewable, not canon.
+
+- Power and burden are both perceptible in play.
+- Gold stays attractive at higher states, and players can say when the extra wealth is worth it.
+- Basic movement stays reliable.
+- Some real preference or tension emerges in the combined course. Not everyone always picks Heavy, and not everyone always rejects it.
+- Players can describe "imposing" vs. "sluggish".
+
+### 9. Failure Signals
+
+From spec §8:
+- Players avoid gold once the burden appears.
+- A slow King feels bad to control.
+- Power is only visible as a number.
+- The course shows inconvenience but no meaningful pressure.
+
+If these appear, reconsider the burden form before adding more systems.
+
+### 10. Optional Measurements
+
+| Metric | Result |
+|---|---|
+| Combined-course time per state (several runs, with order recorded) | — |
+| Target-broken split per state | — |
+| Gate wait per state | — |
+| Ratings 1–5: perceived power, burden fairness, movement feel, desire to collect more, trade-off enjoyment | — |
+| State preference and reason | — |
+
+### 11. Test Setup
+
+Implemented on branch `feat/p003-gold-power-burden`. **All values are Prototype Assumptions and starting points for tuning, not final balance.** The implementation is prototype-local and not a proposed combat or controller architecture.
+
+**Scene:** `game/prototypes/p003_gold_power_burden.tscn` (now the project main scene). It is an inherited scene of the unchanged P002 scene, which itself inherits P001.
+- The same gray box, camera, player, 20 floating pickups, HUD, and pouch are present.
+- The controller script extends the P002 controller and uses its gold total. There is no second counter.
+- No P001 or P002 files were modified. P002 and P001 still run on their own with `--scene`.
+
+**Wealth states:**
+
+| State | Gold | Top speed | Strike impact | Hits to break (toughness 6) |
+|---|---|---|---|---|
+| Light | 0–5 | 5.0 m/s | 2 | 3 |
+| Loaded | 6–13 | 4.6 m/s | 3 | 2 |
+| Heavy | 14+ | 4.2 m/s | 6 | 1 |
+
+- The state is applied whenever the gold total changes: natural pickup, a preset key, or a reset. The HUD, pouch, speed, impact, and trial label update in the same frame.
+- Thresholds match the pouch stages (6 / 14).
+- Only top speed changes. The P003 controller sets the player's existing `move_speed` at runtime and does not touch the P001 player files.
+
+**Strike:**
+- J, Space, or gamepad X/Square, with a 0.3 s cooldown.
+- **Radial** 1.0 m reach around the King's hip. It does not aim with facing, which keeps it forgiving.
+- Shows a flat reach ring on the floor and plays a placeholder hit sound when it lands.
+- Affects P003 test targets only.
+- Targets show remaining toughness as `[######]` pips, flash on hit, and burst into debris when broken.
+- The same feedback appears in every state.
+
+**Course (north area, separate from the P001 narrow passage):**
+- A 0.6 m-high lane wall forms a 2.25 m-wide dead-end lane along the north wall. It is low so the camera can see the King inside the lane.
+- The route runs east to west: start line (x 2) → course target filling the lane (x 0) → timed gate (x −3.5) → finish line (x −12).
+- **Timed gate:**
+  - A stationary barrier whose collision and look switch on a fixed schedule: closed for 1.0 s, then open for 1.0 s, repeating. It shows a yellow floor strip for the last 0.3 s before closing.
+  - Its clock starts at zero when the trial starts, so every trial sees the same phase.
+  - **Collision-safe close:** if the King is inside the gate when it is due to close, it stays open until he is clear, then closes for the rest of that window. The schedule is not shifted, so later cycles stay on time. The delay only happens when he is standing in the gateway, so normal runs are unaffected.
+- No damage, health, pushing, gold loss, or failure.
+- The tall P001 pillar near x −6 sits between the gate and the finish.
+
+**Practice target (power only):** in the open west area at about (−12, 6). It respawns about 1 s after breaking, and the trial HUD shows how many hits the last break took.
+
+**Movement-only comparison:** untick `Course Target Enabled` on the P003 root. The course target is then absent, so trials time traversal and gate waiting only.
+
+**Measurements (shown in the trial HUD, and printed as one line per trial in the Output panel; nothing is saved):**
+- Wealth state, gold, and speed.
+- Total time, counted in physics ticks at 60 per second.
+- Time when the target broke.
+- Strike attempts and hits on the course target.
+- Time spent waiting in front of the closed gate.
+- **Caution:** the start → target-broken split includes the approach as well as striking, so it is **not** a pure measure of attack power.
+
+**Controls:**
+- P001 movement controls, unchanged.
+- **1 / 2 / 3** (or D-pad left / up / right): set gold to 0 / 10 / 20, which puts the King in Light / Loaded / Heavy. Each also moves the King to the course start and resets the target, gate phase, timer, and counters.
+- **R**: full scene reload. Gold returns to `Start Gold` (0) and the King to the P001 start.
+- Walking up to the lane entrance also arms a new trial.
+- The Light/Loaded/Heavy line in the trial HUD can be hidden with `Show Wealth State`.
+
+**Running:** open the project in Godot 4.7.2 and press F5, or run `/Applications/Godot.app/Contents/MacOS/Godot --path .`
+
+**Pre-playtest mechanical check (measured data, not a playtest):** Godot 4.7.2, all checks headless.
+
+A throwaway P003 script, not committed, passed **84 of 84** checks:
+
+| Area | What was checked |
+|---|---|
+| Thresholds | 5→6 and 13→14, both set directly and through natural pickups. Speed, impact, HUD, pouch, and trial label stay in sync. |
+| Movement | Top speed 5.0 / 4.6 / 4.2 m/s, with diagonals no faster. Acceleration and deceleration steps (80/60, 120/60 per frame) are unchanged in every state. Wall collision, the P001 passage at Heavy, facing, and camera offset are unchanged. |
+| Strike | Breaks the practice target in exactly 3 / 2 / 1 strikes. The cooldown allows one strike per 0.3 s. Strikes out of reach don't hit, and striking doesn't change gold. |
+| Course | The intact target blocks the lane, and the lane can't be bypassed. The gate schedule is correct, a closed gate blocks, and an open gate passes. The gate never closes onto the King and he can't get stuck in it. |
+| Trials | All three states complete the course. Each state took exactly 3 / 2 / 1 hits. The timer matches the frames observed. Gold stays constant during trials. Three identical scripted runs per state gave identical results. The movement-only option works. |
+| Resets | Preset keys and R reset everything as described. |
+| P002 inside P003 | Collection and HUD work, and all 20 pickups are reachable with the lane wall and practice target added. |
+
+Scripted-run results, for reference only. They come from a scripted input pattern, not a human player, so they are not evidence of feel:
+
+| State | Time | Target broken at | Gate wait |
+|---|---|---|---|
+| Light | 3.45 s | 0.85 s | 0 s |
+| Loaded | 3.33 s | 0.52 s | 0 s |
+| Heavy | 3.33 s | 0.22 s | 0.05 s |
+| Movement-only (Light) | 2.82 s | — | — |
+
+The original P002 suite, unchanged and run against the unchanged P002 scene in both presentation modes, passed 82 of 83. The one failure is its "main scene is P002" check, which is expected because the main scene is now P003. P001, P002, and P003 scenes and all new scripts load and parse with no errors or warnings.
+
+**Not evaluated by automation:** whether the King feels stronger, whether the slowdown is fair or annoying, whether the gate creates tension, whether testers still want gold, strike and hit feel, and audio and visuals.
+
+**Known limitations and risks:**
+- The gate schedule interacts strongly with the course layout. With these starting values the scripted Loaded and Heavy runs tie. Gate timing (`Closed Time`, `Open Time`, `Phase Offset`) and positions are tuning variables, not results.
+- A single run time is not conclusive. Human reaction and gate-cycle luck add variance, so record several runs per state and the order they were played in.
+- The radial strike ignores facing, so the King can hit a target behind him. This was accepted as a forgiving test instrument.
+- The 1 / 2 / 3 keys are test shortcuts, not a gameplay feature. Natural collection can only reach Heavy by collecting coins outside the lane first.
+- The input bindings overlap Godot's built-in UI actions (D-pad with `ui_left`/`ui_up`/`ui_right`, Space with `ui_accept`). This is harmless because the prototype has no focused UI.
+- The strike hit sound and all visuals are generated placeholders.
+
+#### Iteration 1 Setup (2026-11-14, build `becbe71`)
+
+Approved after Playtest 1, where movement burden noticeability rated 2/5 (§13). Only maximum movement speed changes; everything else in the setup above is unchanged.
+
+The original Iteration 1 commit (`8e4257e`, made in another environment) was not pushed and could not be recovered, so this build is a reconstruction from the approved description. It has been re-validated (below).
+
+**Configuration toggle:** `Stronger Burden` on the P003 root node (Wealth States group). Default off. Toggle it in the Inspector before running. A full reset (R) reloads the scene, so a value changed at runtime through the remote Inspector does not survive R.
+
+| Wealth State | Original | Stronger Burden |
+|---|---|---|
+| Light | 5.0 m/s | 5.0 m/s |
+| Loaded | 4.6 m/s | 4.4 m/s |
+| Heavy | 4.2 m/s | 3.8 m/s |
+
+Held constant: impact 2 / 3 / 6 (toughness 6 → 3 / 2 / 1 hits), thresholds 6 / 14, acceleration and deceleration, strike cooldown 0.3 s and reach 1.0 m, course, gate, and targets.
+
+**Configuration labels:** the trial HUD's first line is always `Config: Original` or `Config: Stronger burden`, also when the wealth-state line is hidden. Every printed result line names it, for example `P003 trial | Stronger burden | Heavy | gold 20 | speed 3.8 m/s | …`.
+
+**Strike cooldown reset:** pressing 1 / 2 / 3 clears any remaining strike cooldown, so the first strike of each preset trial is available immediately. The regular 0.3 s cooldown between strikes is unchanged during play.
+
+**Mechanical validation (Godot 4.7.2, headless):** the throwaway P003 script, extended for Iteration 1 and not committed, was run once per configuration and passed **108 of 108** in each. It covers everything in the earlier 84-check suite, with speed expectations set per configuration, plus the defaults, the configuration labels, live toggling of the configuration (speed and label change, impact does not), the cooldown reset after each preset key, and the regular cooldown still applying. The printed result lines carried the correct configuration label in both runs. The original P002 suite passed 82 of 83 in both presentation modes; the one failure is its expected "main scene is P002" check. P001, P002, and P003 scenes load headless with no errors or warnings.
+
+Scripted reference runs (identical inputs; not player performance):
+
+| State | Original | Stronger burden |
+|---|---|---|
+| Light | 3.45 s (target 0.85 s) | 3.45 s (target 0.85 s) |
+| Loaded | 3.33 s (target 0.52 s) | 3.48 s (target 0.53 s) |
+| Heavy | 3.33 s (target 0.22 s, gate wait 0.05 s) | 3.68 s (target 0.23 s, gate wait 0.00 s) |
+
+With Stronger burden the scripted Heavy run no longer ties Loaded, but gate timing still shapes the totals; treat these as tuning references only.
+
+### 12. Observations
+
+#### Playtest 1 — Quon
+
+Playtest 1 was recorded from Quon's player report. No trial result lines (times, strike counts, gate waits) were captured, so there are no measured comparisons between states for this playtest.
+
+- The speed reduction was barely noticeable until most or all of the available gold had been collected.
+- Because the scene has a limited amount of gold, the naturally reached Heavy state lasted a relatively short time.
+- Heavy breaking the test target in one hit, instead of three at Light, was enjoyable.
+
+#### Playtest 2 — Quon (Iteration 1, build `becbe71`)
+
+Playtest 2 compared the Original and Stronger Burden speed configurations (§11, Iteration 1 Setup). It was recorded from Quon's player report. No trial result lines were provided for this record, so there are no measured comparisons between configurations.
+
+- The Stronger Burden configuration felt like a mixture of satisfying weight and sluggishness.
+- Increased burden did not discourage collecting gold.
+- The trade-off remained interesting but did not receive a higher rating than in the Original configuration.
+
+### 13. Player Comments
+
+#### Playtest 1 — Quon (player report)
+
+| Dimension | Rating (1–5) |
+|---|---|
+| Increased striking power | 3 |
+| Movement burden noticeability | 2 |
+| Movement enjoyment at Heavy | 4 |
+| Power-versus-burden interest | 4 |
+| Overall enjoyment | 4 |
+
+| Question | Answer |
+|---|---|
+| Preferred wealth state | Heavy |
+| Did movement penalties discourage collecting gold? | No |
+
+- Quon wants Heavy to feel more like a tank and Light to feel more like a high-DPS playstyle.
+- The mechanic is promising but needs further tuning.
+
+#### Playtest 2 — Quon (player report)
+
+| Dimension | Original (5.0 / 4.6 / 4.2 m/s) | Stronger Burden (5.0 / 4.4 / 3.8 m/s) |
+|---|---|---|
+| Burden noticeability | 4 | 5 |
+| Heavy movement enjoyment | 4 | 4 |
+| Power-versus-mobility trade-off | 4 | 4 |
+
+| Question | Answer |
+|---|---|
+| Preferred configuration | Stronger Burden |
+| Did increased burden discourage collecting gold? | No |
+
+- Quon questioned whether automatic slowdown would remain suitable across entire expeditions containing substantially more gold.
+- Quon noted that designing traversal and combat around different movement speeds introduces additional balancing considerations.
+- Quon proposed exploring optional gold-powered heavy states and item-based encumbrance as alternatives.
+
+### 14. What Worked
+
+Playtest 1:
+- The one-hit Heavy break was enjoyable.
+- Power-versus-burden interest (4/5) and overall enjoyment (4/5) were positive.
+- Heavy was the preferred state, and the movement penalty did not discourage collecting gold.
+- Movement remained enjoyable at Heavy (4/5).
+
+Playtest 2:
+- Both configurations made the burden noticeable (Original 4/5, Stronger Burden 5/5).
+- Heavy movement enjoyment stayed at 4/5 in both configurations.
+- Neither configuration discouraged collecting gold. Stronger Burden was preferred.
+
+### 15. What Did Not Work
+
+Playtest 1:
+- The movement burden was hard to notice (2/5). The slowdown registered only near or at full gold.
+- The increased striking power rated only 3/5.
+- The natural Heavy experience was short because the scene has limited gold.
+
+Playtest 2:
+- Stronger Burden also felt partly sluggish, not only weighty.
+- The trade-off rating did not improve with the stronger penalty (4/5 in both configurations).
+
+### 16. Interpretation
+
+Single tester, single session, player report only; treat as low-confidence direction, not validation.
+
+- The current speed values (5.0 / 4.6 / 4.2 m/s) may be too close together to communicate burden. This is the reason for the stronger-burden comparison below.
+- Heavy's appeal at this stage appears to come from its power, and the burden does not yet act as a real cost. Whether the trade-off works cannot be judged until the burden is noticeable.
+
+After Playtest 2 (still one tester, short controlled sessions):
+- Ratings in Playtest 1 and Playtest 2 differ for the same Original speeds (burden noticeability 2/5, then 4/5). Playtest 2 was a direct side-by-side comparison of the two configurations; the reasons for the difference were not recorded, so it is not treated as a measured effect.
+- A stronger automatic speed penalty made the burden clearly noticeable without reducing Heavy enjoyment or the desire to collect gold, but it did not make the trade-off more interesting.
+- The current three-state penalty is capped at Heavy. Indefinite or continuing slowdown was not implemented or tested, so P003 says nothing about automatic slowdown across long expeditions with much more gold.
+
+### 17. Unexpected Findings
+
+Playtest 1:
+- Quon framed the states as playstyles (Heavy as a tank, Light as high-DPS) rather than only as more power vs. more burden. This is recorded as an Experimental Idea in §19 and is not part of P003.
+
+Playtest 2:
+- Quon's main concern after Playtest 2 was long-term fit rather than short-session feel: expedition-length pacing, gold desirability at much larger totals, and designing traversal and combat around varying speeds. This led to the direction review in §19.
+
+### 18. Outcome
+
+**Outcome:** Iterate — automatic gold-based movement burden superseded as the intended core approach; wealth-driven external danger approved for future testing.  
+**Confidence:**
+- Medium in the short-session observations.
+- Low in long-expedition scalability and final combat identity.
+
+Supported findings (one tester, short controlled sessions):
+- Increasing impact through gold is promising.
+- Automatic movement slowdown can be noticeable and tolerable during a short controlled prototype.
+- Stronger Burden was the preferred tested speed configuration.
+- Heavy movement enjoyment remained 4/5.
+- Neither configuration discouraged collecting gold.
+
+Unresolved:
+- The long-term scalability of automatic slowdown was not tested.
+- The final combat and burden systems remain unresolved.
+
+The whole P003 design question is not marked Validated. The implementation, test setup, and results above are kept as the record of what was tested.
+
+*Interim outcome after Playtest 1 (2026-11-13, kept for history): Pending; Iteration 1 approved (stronger-burden speed comparison); confidence Low.*
+
+### 19. Decision Impact
+
+*After Playtest 1 (2026-11-13, kept for history):* no decision changes; Gold Power vs. Burden remained a Prototype Assumption.
+
+After Playtest 2 (2026-11-14), Quon reviewed the findings and explicitly approved a revised gold-risk direction:
+- **New Approved Direction (Decision Log, 2026-11-14 — Gold Power With Wealth-Driven External Danger):** accumulating ordinary gold stays highly desirable and adds to the Gold King's power. Greater wealth also creates the potential for greater external danger, attention, and vulnerability. Automatic movement-speed penalties from ordinary gold are no longer the intended core downside.
+- **Superseded:** the automatic gold-based physical-burden part of the *Gold Power vs. Burden* Prototype Assumption and the matching Gameplay Foundation text. The original assumption stays in the Decision Log as history, and this entry is its evidence.
+- **Not changed:** narrative canon; gold spill and theft remain Prototype Assumptions for P004.
+- **Experimental Ideas (not approved):**
+  - Wealth states as playstyles: Heavy as a tank, Light as a high-DPS style (from Playtest 1). For future combat exploration only.
+  - An optional gold-powered heavy form (from Playtest 2).
+  - Item-based encumbrance from large treasures or equipment (from Playtest 2).
+
+### 20. Next Test
+
+#### Iteration 1 — Stronger burden speed comparison (implemented in `becbe71`, setup in §11; tested in Playtest 2)
+
+Compare two maximum-movement-speed configurations:
+
+| Wealth State | Current | Stronger Burden |
+|---|---|---|
+| Light | 5.0 m/s | 5.0 m/s |
+| Loaded | 4.6 m/s | 4.4 m/s |
+| Heavy | 4.2 m/s | 3.8 m/s |
+
+Held constant:
+- Strike impact stays 2 / 3 / 6 (toughness 6 → 3 / 2 / 1 hits).
+- Only maximum movement speed changes. No changes to acceleration, deceleration, attack speed (strike cooldown), or any additional burden variables.
+- Wealth thresholds (6 / 14), course, gate, and targets unchanged.
+
+Questions:
+- Does a stronger speed penalty create a satisfying sense of weight?
+- Does Heavy remain enjoyable and desirable?
+- Does the stronger penalty improve the trade-off without discouraging gold collection?
+
+Suggested for the next session: record the printed trial result lines for several runs per state and configuration, and the order they were played in.
+
+*Playtest 2 answered these questions for a short controlled session (§12–18). No further P003 iteration is planned for this cycle.*
+
+#### P004 handoff consideration (planning note, not a design)
+
+P004 should not automatically inherit P003's speed-penalty mechanics just because P003 is the most recent prototype. Those mechanics remain useful experimental code, but they no longer represent the intended core gold-risk direction. During P004 planning, evaluate whether to build from the P002 collection baseline or reuse selected P003 functionality (for example the strike, test targets, or trial tooling). The exact scope of P004 — Gold Spill & Theft — still needs its own feature-specification review.
+
+---
+
 # Prototype Review Guidelines
 
 ## Test One Important Question at a Time
@@ -1022,6 +1415,8 @@ Prove that collecting gold is readable and intrinsically satisfying.
 
 ### P003 — Gold Power vs. Burden
 Test the central assumption that more wealth can create both greater power and greater danger.
+
+*Concluded for the current cycle on 2026-11-14 (Iterate). The automatic movement-burden approach it tested was superseded by the wealth-driven external danger direction; see the P003 entry.*
 
 ### P004 — Gold Spill & Theft
 Test whether combat can make losing and recovering gold create enjoyable urgency.

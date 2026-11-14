@@ -253,9 +253,15 @@ Godot is not on `PATH` in that environment. Use the full path.
 
 Check the reported version before implementation work. If it does not report 4.7.2, report the mismatch rather than changing the documented target. As of 2026-11-12 the local install is verified as `4.7.2.stable.official.ed1daf0bf`.
 
-Project-specific headless validation and test commands will be added here once the testing workflow exists. No committed tests exist yet.
+**Committed regression tests** live in `tests/`. Each is a plain `SceneTree` script with no framework or addon. Run from the repository root, replacing `<godot>` with your Godot 4.7.2 executable:
 
-Until then, do not invent commands or claim validation was performed when it was not.
+```bash
+<godot> --headless --path . --script res://tests/p003_regression.gd
+```
+
+It prints `PASS`/`FAIL` per check and a final count, and exits with code 1 if any check fails. It verifies mechanical behavior only and never replaces human playtesting.
+
+Do not invent other commands or claim validation was performed when it was not.
 
 ---
 

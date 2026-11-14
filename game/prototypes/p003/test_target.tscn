@@ -1,0 +1,59 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game/prototypes/p003/test_target.gd" id="1_script"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_target"]
+size = Vector3(0.8, 1.5, 2.25)
+
+[sub_resource type="BoxMesh" id="BoxMesh_target"]
+size = Vector3(0.8, 1.5, 2.25)
+
+[sub_resource type="StandardMaterial3D" id="Mat_target"]
+albedo_color = Color(0.58, 0.42, 0.26, 1)
+
+[sub_resource type="StandardMaterial3D" id="Mat_debris"]
+shading_mode = 0
+albedo_color = Color(0.45, 0.33, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_debris"]
+material = SubResource("Mat_debris")
+size = Vector3(0.12, 0.12, 0.12)
+
+[node name="TestTarget" type="StaticBody3D"]
+script = ExtResource("1_script")
+
+[node name="Shape" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
+shape = SubResource("BoxShape3D_target")
+
+[node name="Mesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
+mesh = SubResource("BoxMesh_target")
+surface_material_override/0 = SubResource("Mat_target")
+
+[node name="Pips" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.85, 0)
+billboard = 1
+no_depth_test = true
+modulate = Color(1, 0.95, 0.85, 1)
+outline_modulate = Color(0.1, 0.07, 0.03, 1)
+font_size = 48
+outline_size = 10
+text = "[######]"
+
+[node name="Debris" type="CPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
+cast_shadow = 0
+emitting = false
+amount = 14
+lifetime = 0.5
+one_shot = true
+explosiveness = 1.0
+mesh = SubResource("BoxMesh_debris")
+emission_shape = 3
+emission_box_extents = Vector3(0.4, 0.7, 1.1)
+direction = Vector3(0, 1, 0)
+spread = 80.0
+gravity = Vector3(0, -9, 0)
+initial_velocity_min = 2.0
+initial_velocity_max = 3.5

@@ -283,6 +283,8 @@ The settlement should provide a lower-pressure contrast to expeditions without b
 
 **Status Note (2026-11-12):** The two-phase structure is approved. The "Grow Stronger and More Burdened" and "Return or Fail" steps depend on the Prototype Assumptions *Gold Power vs. Burden* and *Losing Unsecured Gold and Treasure* below, and are not finalized mechanics.
 
+**Status Note (2026-11-14):** Per *Gold Power With Wealth-Driven External Danger* (above), "More Burdened" now means greater exposure to external danger, attention, and vulnerability, not an automatic movement penalty from ordinary gold. The loop structure itself is unchanged.
+
 **Reasoning:**  
 The two loops can continuously feed one another.
 
@@ -355,6 +357,47 @@ Narrows the earlier resource-management concept for the settlement.
 - Treasury mechanics
 - Whether large treasures physically burden the player
 
+## 2026-11-14 — Gold Power With Wealth-Driven External Danger
+
+**Category:** Core Gameplay / Gold Systems / Risk and Reward
+
+**Decision:**  
+Accumulating ordinary gold should remain highly desirable and contribute to the Gold King's increasing power.
+
+Greater accumulated wealth should also create the potential for greater external danger, attention, and vulnerability.
+
+Automatic movement-speed penalties from accumulating ordinary gold are no longer the intended core downside.
+
+**Status:** Approved Direction (approved by Quon, 2026-11-14, after reviewing P003)
+
+**Reasoning:**  
+P003 showed that speed penalties can create an enjoyable short-session trade-off, but raised concerns about long-expedition pacing, gold desirability, and encounter design.
+
+Wealth-driven external danger provides another way to reinforce greed and temptation without making ordinary gold collection automatically impair traversal.
+
+**Existing Decisions Affected:**
+- Supersedes the automatic gold-based physical-burden part of the *Gold Power vs. Burden* Prototype Assumption below. That assumption is kept as historical evidence, not deleted.
+- Supersedes the matching physical-burden wording in `GOLDKING_GAMEPLAY_FOUNDATION.md` §5 and §7.
+- Clarifies the "Grow Stronger and More Burdened" step of the Expedition Loop (see its status note).
+- Gold spill and theft remain Prototype Assumptions for P004.
+- Narrative canon is unchanged.
+
+**Evidence:** `GOLDKING_PROTOTYPE_LOG.md`, P003 (Playtests 1 and 2; outcome Iterate).
+
+**Questions Still Open:**
+
+- Exact gold power scaling
+- Which enemies respond to accumulated wealth
+- Whether thieves become more frequent or more aggressive
+- How external threats escalate
+- How threat escalation is communicated
+- Whether environmental or mythological entities react to wealth
+- How players mitigate or respond to threats
+- Whether an optional gold-powered heavy form exists
+- Whether large treasures or equipment create separate encumbrance
+
+The optional gold-powered heavy form and treasure/equipment encumbrance are **Experimental Ideas**, not approved systems. This decision does not define a dynamic-difficulty director, enemy-spawning formula, or threat meter.
+
 ---
 
 # Deferred Decisions
@@ -413,7 +456,9 @@ These ideas are important enough to test but are **not yet Approved Direction**.
 
 **Category:** Core Mechanic
 
-**Status:** Prototype Assumption
+**Status:** Prototype Assumption — **partly superseded (2026-11-14).** Kept as historical record.
+
+**Status Note (2026-11-14):** P003 tested this assumption with automatic top-speed penalties and increased strike impact (see `GOLDKING_PROTOTYPE_LOG.md`, P003). After reviewing the results, Quon approved *Gold Power With Wealth-Driven External Danger* (Approved Decisions). Automatic physical burden from ordinary gold (reduced movement, dodge, recovery, or changed posture as a cost) is no longer the intended core downside. Gold-driven power is now part of that Approved Direction. Gold spilling when struck remains a Prototype Assumption for P004, and gold-seeking enemies fall under the new direction's open questions. The original text below is unchanged.
 
 **Assumption:**  
 Carrying more gold makes the Gold King increasingly powerful while simultaneously increasing physical burden and vulnerability.
@@ -510,8 +555,8 @@ Individual encounters may still use controlled arenas when appropriate.
 
 - Final combat system
 - Melee vs. ranged balance
-- Exact gold-load states
-- Exact burden mechanics
+- Exact gold power scaling
+- Wealth-driven external danger: which threats respond, how they escalate, and how this is communicated (see 2026-11-14 decision)
 - Gold powers
 - Midas/Gilding mechanics
 - Travel implementation
