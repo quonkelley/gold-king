@@ -1,0 +1,47 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://game/prototypes/p002_gold_collection.tscn" id="1_base"]
+[ext_resource type="Script" path="res://game/prototypes/p004_gold_spill_theft.gd" id="2_script"]
+[ext_resource type="PackedScene" path="res://game/prototypes/p004/thief.tscn" id="3_thief"]
+[ext_resource type="AudioStream" path="res://game/gold/gold_pickup.wav" id="4_chime"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_burrow"]
+top_radius = 0.6
+bottom_radius = 0.6
+height = 0.04
+
+[sub_resource type="StandardMaterial3D" id="Mat_burrow"]
+albedo_color = Color(0.12, 0.08, 0.06, 1)
+
+[node name="P004GoldSpillTheft" instance=ExtResource("1_base")]
+script = ExtResource("2_script")
+
+[node name="Burrow" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.5, 0.02, -13.5)
+cast_shadow = 0
+mesh = SubResource("CylinderMesh_burrow")
+surface_material_override/0 = SubResource("Mat_burrow")
+
+[node name="Thief" parent="." instance=ExtResource("3_thief")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.5, 0, -13.5)
+
+[node name="EncounterStart" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.75, 0, -6.2)
+
+[node name="SpillCoins" type="Node3D" parent="."]
+
+[node name="SpillSound" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("4_chime")
+volume_db = -4.0
+pitch_scale = 0.62
+
+[node name="EncounterLabel" type="Label" parent="HUD"]
+offset_left = 24.0
+offset_top = 64.0
+offset_right = 724.0
+offset_bottom = 124.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.1, 0.07, 0.03, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 18
+text = "Thief: waiting"
