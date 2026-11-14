@@ -140,7 +140,7 @@ Do not rewrite an interpretation as if it were an observed fact.
 |---|---|---|---|---|---|
 | P001 | Player Movement & Camera | Does the chosen 2.5D presentation produce intuitive, readable movement? | Complete | Validated (Medium) | 2026-11-12 |
 | P002 | Gold Collection | Is collecting gold immediately satisfying and readable? | Concluded (current cycle) | Iterate (feedback polish deferred; working baseline accepted for P003) | 2026-11-13 |
-| P003 | Gold Power vs. Burden | Can increasing wealth feel powerful and dangerous at the same time? | Testing — Iteration 1 Approved | Pending (Playtest 1 recorded; speed comparison next) | 2026-11-13 (started) |
+| P003 | Gold Power vs. Burden | Can increasing wealth feel powerful and dangerous at the same time? | Testing — Pending Human Playtest 2 | Pending (Playtest 1 recorded; Iteration 1 implemented) | 2026-11-13 (started) |
 | P004 | Gold Spill & Theft | Does losing loose gold during combat create enjoyable urgency rather than annoyance? | Planned | — | — |
 | P005 | Mini Expedition / Extraction | Does choosing between returning safely and pushing deeper create meaningful greed tension? | Planned | — | — |
 
@@ -943,10 +943,10 @@ P003 scope does **not** include breakable objects, digging, river deposits, or f
 
 ## P003 — Gold Power vs. Burden
 
-**Status:** Testing — Iteration 1 Approved (Playtest 1 recorded; stronger-burden speed comparison approved but not yet implemented). P003 is not Validated or Complete.  
+**Status:** Testing — Pending Human Playtest 2 (Playtest 1 recorded; Iteration 1 stronger-burden speed comparison implemented, §11). P003 is not Validated or Complete.  
 **Date Started:** 2026-11-13  
 **Date Concluded:** —  
-**Build / Commit:** `0070266` (branch `feat/p003-gold-power-burden`; Playtest 1 build)  
+**Build / Commit:** `0070266` (Playtest 1 build); `becbe71` (Iteration 1 build). Branch `feat/p003-gold-power-burden`.  
 **Testers:** Playtest 1: Quon. (Jason: not yet tested.)  
 **Related Decision(s):**
 - Gold as a central, desirable resource (Approved Direction)
@@ -1133,6 +1133,38 @@ The original P002 suite, unchanged and run against the unchanged P002 scene in b
 - The input bindings overlap Godot's built-in UI actions (D-pad with `ui_left`/`ui_up`/`ui_right`, Space with `ui_accept`). This is harmless because the prototype has no focused UI.
 - The strike hit sound and all visuals are generated placeholders.
 
+#### Iteration 1 Setup (2026-11-14, build `becbe71`)
+
+Approved after Playtest 1, where movement burden noticeability rated 2/5 (§13). Only maximum movement speed changes; everything else in the setup above is unchanged.
+
+The original Iteration 1 commit (`8e4257e`, made in another environment) was not pushed and could not be recovered, so this build is a reconstruction from the approved description. It has been re-validated (below).
+
+**Configuration toggle:** `Stronger Burden` on the P003 root node (Wealth States group). Default off. Toggle it in the Inspector before running. A full reset (R) reloads the scene, so a value changed at runtime through the remote Inspector does not survive R.
+
+| Wealth State | Original | Stronger Burden |
+|---|---|---|
+| Light | 5.0 m/s | 5.0 m/s |
+| Loaded | 4.6 m/s | 4.4 m/s |
+| Heavy | 4.2 m/s | 3.8 m/s |
+
+Held constant: impact 2 / 3 / 6 (toughness 6 → 3 / 2 / 1 hits), thresholds 6 / 14, acceleration and deceleration, strike cooldown 0.3 s and reach 1.0 m, course, gate, and targets.
+
+**Configuration labels:** the trial HUD's first line is always `Config: Original` or `Config: Stronger burden`, also when the wealth-state line is hidden. Every printed result line names it, for example `P003 trial | Stronger burden | Heavy | gold 20 | speed 3.8 m/s | …`.
+
+**Strike cooldown reset:** pressing 1 / 2 / 3 clears any remaining strike cooldown, so the first strike of each preset trial is available immediately. The regular 0.3 s cooldown between strikes is unchanged during play.
+
+**Mechanical validation (Godot 4.7.2, headless):** the throwaway P003 script, extended for Iteration 1 and not committed, was run once per configuration and passed **108 of 108** in each. It covers everything in the earlier 84-check suite, with speed expectations set per configuration, plus the defaults, the configuration labels, live toggling of the configuration (speed and label change, impact does not), the cooldown reset after each preset key, and the regular cooldown still applying. The printed result lines carried the correct configuration label in both runs. The original P002 suite passed 82 of 83 in both presentation modes; the one failure is its expected "main scene is P002" check. P001, P002, and P003 scenes load headless with no errors or warnings.
+
+Scripted reference runs (identical inputs; not player performance):
+
+| State | Original | Stronger burden |
+|---|---|---|
+| Light | 3.45 s (target 0.85 s) | 3.45 s (target 0.85 s) |
+| Loaded | 3.33 s (target 0.52 s) | 3.48 s (target 0.53 s) |
+| Heavy | 3.33 s (target 0.22 s, gate wait 0.05 s) | 3.68 s (target 0.23 s, gate wait 0.00 s) |
+
+With Stronger burden the scripted Heavy run no longer ties Loaded, but gate timing still shapes the totals; treat these as tuning references only.
+
 ### 12. Observations
 
 #### Playtest 1 — Quon
@@ -1204,7 +1236,7 @@ P003 is not Validated or Complete.
 
 ### 20. Next Test
 
-#### Iteration 1 — Stronger burden speed comparison (approved, not yet implemented)
+#### Iteration 1 — Stronger burden speed comparison (approved; implemented in `becbe71`, setup in §11; awaiting Human Playtest 2)
 
 Compare two maximum-movement-speed configurations:
 
