@@ -141,7 +141,7 @@ Do not rewrite an interpretation as if it were an observed fact.
 | P001 | Player Movement & Camera | Does the chosen 2.5D presentation produce intuitive, readable movement? | Complete | Validated (Medium) | 2026-11-12 |
 | P002 | Gold Collection | Is collecting gold immediately satisfying and readable? | Concluded (current cycle) | Iterate (feedback polish deferred; working baseline accepted for P003) | 2026-11-13 |
 | P003 | Gold Power vs. Burden | Can increasing wealth feel powerful and dangerous at the same time? | Concluded (current cycle) | Iterate (automatic movement burden superseded; wealth-driven external danger approved for future testing) | 2026-11-14 |
-| P004 | Gold Spill & Theft | Can the threat of losing collected gold create exciting, readable tension without making the player regret collecting it? | Testing — Pending Human Playtest 1 | Pending playtest | 2026-11-14 (started) |
+| P004 | Gold Spill & Theft | Can the threat of losing collected gold create exciting, readable tension without making the player regret collecting it? | Concluded (current cycle) | Iterate (promising external-threat mechanic; future expansion deferred) | 2026-11-14 |
 | P005 | Mini Expedition / Extraction | Does choosing between returning safely and pushing deeper create meaningful greed tension? | Planned | — | — |
 
 This index should remain compact. Detailed findings belong in each prototype entry below.
@@ -1336,11 +1336,11 @@ P004 should not automatically inherit P003's speed-penalty mechanics just becaus
 
 ## P004 — Gold Spill & Theft
 
-**Status:** Testing — Pending Human Playtest 1 (implemented; mechanical checks pass; no human playtest yet). Not Validated.  
+**Status:** Concluded for the current prototype cycle (2026-11-14). Outcome: Iterate (§18). Not fully Validated.  
 **Date Started:** 2026-11-14  
-**Date Concluded:** —  
+**Date Concluded:** 2026-11-14  
 **Build / Commit:** `f5aa84d` (branch `feat/p004-gold-spill-theft`)  
-**Testers:** — (planned: Quon and Jason, separately)  
+**Testers:** Quon (Human Playtest 1). Quon is the only recorded human tester; Jason's playtest is not recorded.  
 **Related Decision(s):**
 - Gold Power With Wealth-Driven External Danger (Approved Direction, 2026-11-14)
 - Losing Unsecured Gold and Treasure (Prototype Assumption; P004 does not implement expedition failure or banking)
@@ -1470,40 +1470,96 @@ Scripted reference trials (10 gold, King standing at a fixed point inside the po
 
 ### 12. Observations
 
-Pending Human Playtest 1.
+#### Human Playtest 1 — Quon (build `f5aa84d`)
+
+Recorded from Quon's player report. No individual printed trial result lines were supplied, so there are no recorded trial counts, outcomes per run, or ledger values for this playtest.
+
+- Most natural response to the thief: avoid it.
+- Collecting gold was not discouraged by the encounter.
 
 ### 13. Player Comments
 
-Pending Human Playtest 1.
+#### Human Playtest 1 — Quon (player report)
+
+| Category | Rating (1–5) |
+|---|---|
+| Thief warning readability | 5 |
+| Gold loss clarity | 5 |
+| Theft fairness | 5 |
+| Chase enjoyment | 4 |
+| Gold recovery satisfaction | 4 |
+| Overall encounter enjoyment | 4 |
+
+| Question | Answer |
+|---|---|
+| Was gold collection discouraged? | No |
+| Most natural response | Avoid the thief |
+
+- Quon found avoiding the enemy and attempting to recover stolen gold enjoyable.
+- Quon wants to expand the mechanic eventually.
 
 ### 14. What Worked
 
-Pending Human Playtest 1.
+Human Playtest 1:
+- The warning and the gold loss were clear (5/5 each).
+- Theft felt fair (5/5).
+- Chasing (4/5) and recovering gold (4/5) were enjoyable; overall encounter enjoyment 4/5.
+- The encounter did not discourage collecting gold.
 
 ### 15. What Did Not Work
 
-Pending Human Playtest 1.
+Human Playtest 1: no specific problems were reported. Chase enjoyment, recovery satisfaction, and overall enjoyment rated 4/5 rather than 5/5; no reasons were recorded.
 
 ### 16. Interpretation
 
-Pending Human Playtest 1.
+One tester, one short encounter; treat as directional.
+
+- The placeholder telegraph and spill feedback were enough to make the threat and the loss understandable.
+- A small, recoverable loss caused by a visible external actor felt fair and did not make gold less desirable. This supports the 2026-11-14 Approved Direction that accumulated wealth can create external danger.
+- Avoidance was the tester's natural first response. How often chases or recoveries happened was not recorded.
 
 ### 17. Unexpected Findings
 
-Pending Human Playtest 1.
+Human Playtest 1: avoidance, rather than chasing or recovering, emerged as the tester's preferred natural response.
 
 ### 18. Outcome
 
-**Outcome:** Pending Human Playtest 1  
-**Confidence:** —
+**Outcome:** Iterate — promising external-threat mechanic; future expansion deferred.  
+**Confidence:** Medium for the tested short encounter.
+
+Conclusions:
+- The warning and gold-loss feedback were understandable.
+- Theft felt fair to the tester.
+- Chasing and reclaiming gold were enjoyable.
+- Avoidance emerged as the tester's preferred natural response.
+- The encounter did not discourage further gold collecting.
+- These findings support the approved direction that accumulating wealth can create external danger.
+
+Limitations:
+- One human tester.
+- One thief and one encounter layout.
+- No long-expedition testing.
+- No wealth-based threat escalation.
+- No final enemy AI or production balancing.
+
+P004 is not marked fully Validated. The thief behavior, spill and theft caps, and timings remain Prototype Assumptions (spec §9).
 
 ### 19. Decision Impact
 
-Pending Human Playtest 1.
+- No decision changes. The 2026-11-14 Approved Direction (*Gold Power With Wealth-Driven External Danger*) is supported by this evidence but not otherwise altered. Gold spill and theft remain Prototype Assumptions.
+- **Deferred (not approved for implementation):**
+  - More varied thief behaviors.
+  - More interesting chase and recovery interactions.
+  - Different enemy types.
+  - Longer expedition behavior.
+- **Open Questions:**
+  - Whether and how threat escalates with wealth (out of scope for P004; already open under the 2026-11-14 decision).
+  - Avoidance and stealth opportunities, given that avoidance was the natural response.
+  - What incentives make recovering lost gold worthwhile.
 
 ### 20. Next Test
 
-Pending Human Playtest 1.
+No further P004 iteration is planned for this cycle; expansion is deferred. Any future work on the items in §19 needs its own specification and review. P005 planning should treat the P004 encounter as tested evidence for a small, readable external threat, not as an approved enemy design.
 
 ---
 
@@ -1595,6 +1651,8 @@ Test the central assumption that more wealth can create both greater power and g
 
 ### P004 — Gold Spill & Theft
 Test whether combat can make losing and recovering gold create enjoyable urgency.
+
+*Concluded for the current cycle on 2026-11-14 (Iterate). Tested as a single thief with movement-based avoidance, chase, and recovery rather than combat; see the P004 entry.*
 
 ### P005 — Mini Expedition / Extraction
 Combine exploration, gold accumulation, risk, optional treasure, and voluntary return into the first small version of the expedition loop.

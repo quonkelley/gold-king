@@ -110,7 +110,7 @@ How external danger works is unresolved: which enemies or entities respond to we
 **Superseded (2026-11-14):** the earlier *Gold Power vs. Burden* Prototype Assumption, under which more carried gold also created increasing physical burden. P003 tested it with automatic top-speed penalties. The results are recorded in the Prototype Log and the original assumption remains in the Decision Log as history.
 
 ### Prototype Assumption: Gold Spill & Theft
-*Status: Prototype Assumption (see Decision Log). To be explored in P004. Not finalized design.*
+*Status: Prototype Assumption (see Decision Log). Tested in P004 as a single thief encounter (concluded 2026-11-14, outcome Iterate; see Prototype Log). Not finalized design.*
 
 - Gold may spill when the King takes major hits.
 - Certain enemies may steal or consume gold.
@@ -220,7 +220,7 @@ Early prototypes are **incremental**. Each answers one primary design question a
 1. **P001 — Player Movement & Controlled Camera**
 2. **P002 — Gold Collection**
 3. **P003 — Gold Power vs. Burden** (concluded 2026-11-14; led to the revised direction in §5)
-4. **P004 — Gold Spill & Theft**
+4. **P004 — Gold Spill & Theft** (concluded 2026-11-14, Iterate)
 5. **P005 — Mini Expedition / Extraction**
 
 ### P001 Scope

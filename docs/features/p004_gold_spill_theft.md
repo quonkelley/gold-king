@@ -2,6 +2,7 @@
 
 **Document:** `docs/features/p004_gold_spill_theft.md`  
 **Status:** Approved P004 prototype feature specification — **planning-only repository review authorized; implementation not yet authorized** (approved by Quon, 2026-11-14)  
+**Status note (2026-11-14):** Implementation was subsequently approved by Quon. P004 was implemented and tested on `feat/p004-gold-spill-theft` (one human playtest), and its current prototype cycle is concluded (outcome: Iterate). This specification is otherwise unchanged and is kept as the historical record of the approved scope; see the P004 entry in `docs/GOLDKING_PROTOTYPE_LOG.md` for results.  
 **Prototype:** P004  
 **Depends on:** P001 — Player Movement & Controlled Camera (validated movement baseline); P002 — Gold Collection (working collection baseline accepted; feedback polish deferred); P003 — Gold Power vs. Burden (current cycle concluded, outcome Iterate; historical test only)  
 **Engine context:** Godot 4.7.2; typed GDScript; 2.5D scene with controlled camera  
