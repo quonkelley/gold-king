@@ -142,7 +142,7 @@ Do not rewrite an interpretation as if it were an observed fact.
 | P002 | Gold Collection | Is collecting gold immediately satisfying and readable? | Concluded (current cycle) | Iterate (feedback polish deferred; working baseline accepted for P003) | 2026-11-13 |
 | P003 | Gold Power vs. Burden | Can increasing wealth feel powerful and dangerous at the same time? | Concluded (current cycle) | Iterate (automatic movement burden superseded; wealth-driven external danger approved for future testing) | 2026-11-14 |
 | P004 | Gold Spill & Theft | Can the threat of losing collected gold create exciting, readable tension without making the player regret collecting it? | Concluded (current cycle) | Iterate (promising external-threat mechanic; future expansion deferred) | 2026-11-14 |
-| P005 | Mini Expedition / Extraction | Can a short expedition combining exploration, gold collection, external danger, and voluntary extraction create a satisfying loop the player wants to repeat? | Testing — Pending Human Playtest 1 | — | — |
+| P005 | Mini Expedition / Extraction | Can a short expedition combining exploration, gold collection, external danger, and voluntary extraction create a satisfying loop the player wants to repeat? | Concluded (current cycle) | Iterate (promising expedition loop; extraction rewards need development) | 2026-11-15 |
 
 This index should remain compact. Detailed findings belong in each prototype entry below.
 
@@ -1567,10 +1567,11 @@ No further P004 iteration is planned for this cycle; expansion is deferred. Any 
 
 ## P005 — Mini Expedition & Extraction
 
-**Status:** Testing — Pending Human Playtest 1  
+**Status:** Concluded for the current prototype cycle (2026-11-15). Outcome: Iterate (§18). Not fully Validated.  
 **Date Started:** 2026-11-15  
+**Date Concluded:** 2026-11-15  
 **Build / Commit:** `d86c267` (branch `feat/p005-mini-expedition-extraction`)  
-**Testers:** None recorded yet.  
+**Testers:** Quon (Human Playtest 1). Quon is the only recorded human tester.  
 **Related Decision(s):**
 - Gold Power With Wealth-Driven External Danger (Approved Direction, 2026-11-14)
 - Losing Unsecured Gold and Treasure (Prototype Assumption; P005 implements voluntary extraction and P004 theft loss only, not expedition failure)
@@ -1717,37 +1718,116 @@ Scripted reference runs (not player performance):
 
 ### 12. Observations
 
-Pending Human Playtest 1.
+#### Human Playtest 1 — Quon (build `d86c267`)
+
+Recorded from Quon's player report. No individual `P005 expedition` Output lines were supplied, so there are no recorded per-run results (secured, lost, left on the ground, not found, time) or trial counts for this playtest.
+
+- Both optional branches were explored.
+- The player did not extract before collecting everything.
+- The player felt tempted to continue exploring.
+- The thief affected the decision about returning.
 
 ### 13. Player Comments
 
-Pending Human Playtest 1.
+#### Human Playtest 1 — Quon (player report)
+
+| Category | Rating (1–5) |
+|---|---|
+| Exploration enjoyment | 4 |
+| Gold discovery and collection | 4 |
+| Threat tension | 4 |
+| Extraction clarity | 3 |
+| Satisfaction of securing the haul | 3 |
+| Overall expedition enjoyment | 4 |
+| Desire to play another expedition | 3 |
+
+| Question | Answer |
+|---|---|
+| One or both branches explored? | Both |
+| Extracted before collecting everything? | No |
+| Tempted to continue exploring? | Yes |
+| Did the thief affect the decision to return? | Yes |
+
+- Avoiding the thief and recovering stolen gold were enjoyable.
+- Quon wants more enemies, interesting discoveries, and longer routes in future expeditions.
+- Quon wants a meaningful reward for returning with more gold.
+
+**Clarification (Quon, after the playtest):** the 3/5 extraction-clarity rating primarily reflected extraction not feeling rewarding enough. It is **not** evidence that the player failed to understand the extraction controls or prompt. The original rating is kept unchanged above.
 
 ### 14. What Worked
 
-Pending Human Playtest 1.
+Human Playtest 1:
+- Exploration (4/5), gold discovery and collection (4/5), and threat tension (4/5) were positive; overall expedition enjoyment 4/5.
+- Both optional branches were explored.
+- The player felt tempted to continue, and the thief affected the decision about returning.
+- Avoiding the thief and recovering stolen gold were enjoyable.
 
 ### 15. What Did Not Work
 
-Pending Human Playtest 1.
+Human Playtest 1:
+- Securing the haul was only moderately satisfying (3/5). Per Quon's clarification, the extraction-clarity rating (3/5) also mainly reflects extraction not feeling rewarding enough.
+- Desire to play another expedition was moderate (3/5).
+- Quon wants a meaningful reward for returning with more gold.
 
 ### 16. Interpretation
 
-Pending Human Playtest 1.
+One tester, one session, player report only; treat as directional.
+
+- Exploration, gold collection, and the existing thief encounter appear to combine into a promising short expedition.
+- The return-or-continue decision showed some signal: the player was tempted to continue and weighed the thief when deciding when to return. However, the player collected everything before extracting, so an early-return choice was not observed. Whether that reflects the small thief risk (at most 1 of 25 coins, once per run; spec Risk A) or the lack of reward for securing gold is not established.
+- Extraction appears to have been understood. Its weakness is that a secured haul with no further use did not feel meaningful (spec Risk D). This may also limit replay desire, but that link is unconfirmed.
 
 ### 17. Unexpected Findings
 
-Pending Human Playtest 1.
+Human Playtest 1: after the playtest, Quon clarified that the extraction-clarity rating was mainly about reward rather than understanding (§13).
 
 ### 18. Outcome
 
-Not yet recorded. To be decided after Human Playtest 1: Validated, Iterate, or Rejected, with confidence.
+**Outcome:** Iterate — promising combined expedition loop; extraction rewards need further development.  
+**Confidence:**
+- Medium overall for short-session expedition enjoyment.
+- Low-to-medium for the strength of the return-or-continue decision and long-term replayability.
+
+Conclusions:
+- Exploration, gold collection, and the existing thief encounter work promisingly together.
+- Both optional branches were explored.
+- The player experienced temptation to continue and considered the thief when deciding when to return.
+- The player did not extract early.
+- Extraction was understood, but the secured haul did not provide enough meaningful reward.
+- Replay motivation was moderate.
+- This prototype supports further development of the expedition loop.
+
+Limitations:
+- One recorded human tester.
+- One compact authored area.
+- One thief encounter per expedition.
+- Maximum theft loss remains one gold.
+- No persistent reward or progression.
+- No longer expedition or additional encounter variety tested.
+- No recorded individual trial result lines.
+
+P005 is not marked fully Validated. The layout, gold counts, thief tuning, extraction prompt, and results UI remain Prototype Assumptions.
 
 ### 19. Decision Impact
 
-None yet. The layout, gold counts, thief tuning, extraction prompt, and results UI remain Prototype Assumptions and must not be promoted without approval.
+- No decision changes. The *Expedition and Settlement Gameplay Loops* and *Gold Power With Wealth-Driven External Danger* Approved Directions are supported by this evidence but not otherwise altered. *Losing Unsecured Gold and Treasure* remains a Prototype Assumption; P005 did not test expedition failure.
+- **Strong Recommendation (not approved):** investigate one meaningful benefit for successfully extracted gold before significantly expanding expedition size, enemy variety, or progression systems.
+- **Open Questions:**
+  - The exact reward or benefit gained from securing gold.
+  - Whether higher secured hauls produce proportionally greater benefits.
+  - How rewards affect replay desire.
+  - More meaningful return-or-continue tension.
+- **Deferred (not approved for implementation):**
+  - More interesting discoveries and optional detours.
+  - Longer expedition routes.
+  - Additional external threats.
+- **Not approved by this closeout:** a persistent economy, settlement upgrades, new enemies, larger environments, reward formulas, or a P006 feature scope. These require separate design review.
 
 ### 20. Next Test
+
+No further P005 iteration is planned for this cycle. The next experiment is not yet scoped. Per the Strong Recommendation in §19, the reward for securing gold is the suggested first question for review; any follow-up needs its own specification and approval.
+
+#### Human Playtest 1 plan (pre-playtest, kept for history)
 
 **Human Playtest 1** (spec §9):
 1. Launch the project with F5; it opens P005 at camp. Use keyboard or a controller.
@@ -1855,7 +1935,7 @@ Test whether combat can make losing and recovering gold create enjoyable urgency
 ### P005 — Mini Expedition / Extraction
 Combine exploration, gold accumulation, risk, optional treasure, and voluntary return into the first small version of the expedition loop.
 
-*Implemented 2026-11-15 on `feat/p005-mini-expedition-extraction`; testing — pending Human Playtest 1. See the P005 entry.*
+*Concluded for the current cycle on 2026-11-15 (Iterate). The combined expedition loop was promising; extraction rewards need further development. See the P005 entry.*
 
 This sequence is not permanent.
 

@@ -3,6 +3,7 @@
 **Document:** `docs/features/p005_mini_expedition_extraction.md`  
 **Status:** Approved P005 prototype feature specification — **scope approved; implementation authorized** on `feat/p005-mini-expedition-extraction` (approved by Quon, 2026-11-15)  
 **Approval history:** P005 scope approved by Quon. This specification was first drafted for review with implementation not authorized. After review of the specification and of a planning-only repository inspection, Quon approved the implementation plan and authorized implementation (2026-11-15). The approved implementation choices are recorded in the P005 entry of `docs/GOLDKING_PROTOTYPE_LOG.md`; the requirements below are unchanged from the reviewed draft.  
+**Status note (2026-11-15):** P005 was implemented and tested on `feat/p005-mini-expedition-extraction`, and Human Playtest 1 was completed. The current prototype cycle is concluded (outcome: Iterate). This specification is otherwise unchanged and is kept as the historical record of the approved scope; see the P005 entry in `docs/GOLDKING_PROTOTYPE_LOG.md` for results.  
 **Prototype:** P005  
 **Depends on:** P001 — Player Movement & Controlled Camera; P002 — Gold Collection; P004 — Gold Spill & Theft  
 **Historical reference:** P003 — Gold Power vs. Burden  

@@ -221,7 +221,7 @@ Early prototypes are **incremental**. Each answers one primary design question a
 2. **P002 — Gold Collection**
 3. **P003 — Gold Power vs. Burden** (concluded 2026-11-14; led to the revised direction in §5)
 4. **P004 — Gold Spill & Theft** (concluded 2026-11-14, Iterate)
-5. **P005 — Mini Expedition / Extraction**
+5. **P005 — Mini Expedition / Extraction** (concluded 2026-11-15, Iterate)
 
 ### P001 Scope
 
