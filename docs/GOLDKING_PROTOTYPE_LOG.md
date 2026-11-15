@@ -142,7 +142,7 @@ Do not rewrite an interpretation as if it were an observed fact.
 | P002 | Gold Collection | Is collecting gold immediately satisfying and readable? | Concluded (current cycle) | Iterate (feedback polish deferred; working baseline accepted for P003) | 2026-11-13 |
 | P003 | Gold Power vs. Burden | Can increasing wealth feel powerful and dangerous at the same time? | Concluded (current cycle) | Iterate (automatic movement burden superseded; wealth-driven external danger approved for future testing) | 2026-11-14 |
 | P004 | Gold Spill & Theft | Can the threat of losing collected gold create exciting, readable tension without making the player regret collecting it? | Concluded (current cycle) | Iterate (promising external-threat mechanic; future expansion deferred) | 2026-11-14 |
-| P005 | Mini Expedition / Extraction | Does choosing between returning safely and pushing deeper create meaningful greed tension? | Planned | — | — |
+| P005 | Mini Expedition / Extraction | Can a short expedition combining exploration, gold collection, external danger, and voluntary extraction create a satisfying loop the player wants to repeat? | Concluded (current cycle) | Iterate (promising expedition loop; extraction rewards need development) | 2026-11-15 |
 
 This index should remain compact. Detailed findings belong in each prototype entry below.
 
@@ -1563,6 +1563,284 @@ No further P004 iteration is planned for this cycle; expansion is deferred. Any 
 
 ---
 
+# Planned Prototype 005
+
+## P005 — Mini Expedition & Extraction
+
+**Status:** Concluded for the current prototype cycle (2026-11-15). Outcome: Iterate (§18). Not fully Validated.  
+**Date Started:** 2026-11-15  
+**Date Concluded:** 2026-11-15  
+**Build / Commit:** `d86c267` (branch `feat/p005-mini-expedition-extraction`)  
+**Testers:** Quon (Human Playtest 1). Quon is the only recorded human tester.  
+**Related Decision(s):**
+- Gold Power With Wealth-Driven External Danger (Approved Direction, 2026-11-14)
+- Losing Unsecured Gold and Treasure (Prototype Assumption; P005 implements voluntary extraction and P004 theft loss only, not expedition failure)
+- Expedition and Settlement Gameplay Loops (Approved Direction; P005 tests only the expedition half, with no settlement)
+- P001 movement baseline; P002 working collection baseline; P004 thief encounter (Iterate) reused as tested evidence, not as approved enemy design. P003 is not inherited.
+
+**Related Feature Spec:** `docs/features/p005_mini_expedition_extraction.md`
+
+### 1. Primary Design Question
+
+Can a short expedition combining exploration, gold collection, external danger, and voluntary extraction create a satisfying gameplay loop that the player wants to repeat?
+
+### 2. Hypothesis
+
+From the spec: a small authored area with nearby gold, a safer branch, and a richer branch guarded by the P004 thief will tempt the player to venture farther, and choosing to return to camp to secure the haul will feel meaningful even without persistent progression.
+
+### 3. Why This Matters
+
+P005 is the first test of the expedition half of the approved gameplay loop. P001–P004 tested movement, collection, burden, and theft in isolation; P005 tests whether they combine into a return-or-continue decision the player wants to repeat.
+
+### 4. Prototype Scope
+
+Approved by Quon (2026-11-15):
+- One compact authored area with two optional branches, built on the P001 arena.
+- 25 ordinary one-value gold pickups.
+- One reused P004 thief encounter with unchanged tuning.
+- A recognizable camp where the King starts and where extraction happens only on a deliberate interact press.
+- A results panel showing secured gold, and a fresh expedition with nothing carried over.
+
+### 5. Out of Scope
+
+Combat, health, or damage; more than one enemy, respawning, or threat scaling; P003 speed penalties; expedition failure or loss of the whole haul; banking, saving, upgrades, settlement, or inventory; procedural generation or multiple areas; timers; equipment, relics, or heavy gold; new story canon; audio and visual polish.
+
+### 6. Variables Being Tested
+
+Whether the layout invites exploration of both branches; whether the thief's presence affects when the player returns; whether extraction is understood as a deliberate choice; whether securing the haul is satisfying without persistence; whether the player wants another run.
+
+### 7. Controls / Things Held Constant
+
+- King movement is P001's: 5.0 m/s top speed, acceleration 80, deceleration 120, at every gold amount.
+- P002 pickups, collection trigger, gold counter, pouch, and pickup feedback are unchanged.
+- P004 thief tuning, ledger, spill, theft, interception, and recovery rules are unchanged; only its movement zone and the spill landing bounds were fitted to the new chamber.
+- Every expedition starts from the same authored state.
+
+### 8. Success Signals
+
+From spec §9 (directional, not hard gates): the loop is understood without substantial coaching; gold discovery encourages exploration; extraction is recognized as a deliberate action; returning feels like securing something valuable; the player wants another expedition; and there is at least some observable consideration of whether to return or continue.
+
+### 9. Failure Signals
+
+The player never perceives a reason to consider returning early; extraction is confusing or feels like an arbitrary end; the thief dominates the experience; or the player has no interest in another run. A player collecting every coin is not automatically a failure (spec §9).
+
+### 10. Optional Measurements
+
+One printed `P005 expedition` line per extraction (secured, lost to thief, left on ground, not found, gold collected per area, time), the printed `P004 trial` line when the thief encounter ends, and the seven ratings from spec §9.
+
+### 11. Test Setup
+
+**Scene:** `game/prototypes/p005_mini_expedition_extraction.tscn`. It is the project main scene, so F5 launches P005. P001–P004 scenes remain available to open directly and are unchanged.
+
+**Architecture (approved Option B):** the scene inherits the P001 arena, player, and camera, not the P004 or P002 scenes, so it carries none of P002's 20 coin positions or P004's encounter marker layout. The controller script extends the P004 controller (script chain P002 → P004 → P005), reusing P002's gold total, HUD, pouch, and pickup sound and P004's ledger, transfers, and thief wiring without copying them. Required by the inherited scripts, the scene provides the P002/P004 nodes they look up, re-created locally (gold label, pouch, pickup sound, thief, burrow, spill-coin root, spill sound). Two of these are compatibility-only and unused in normal play: the `EncounterStart` marker (placed at camp) and the P004 test status line (hidden; **Show Test HUD** still works). P005 overrides P004's input handler without calling it, so the 1 / 2 / 3 presets do nothing in P005 (they remain in the P003 and P004 scenes).
+
+**Layout (P005-local changes; the P001 scene file is unchanged):**
+- `DividerWest` shortened to x −12.5…5, opening a 2.5 m **west gap** at x −15…−12.5.
+- New `NorthSplit` wall at x −1 (1 m thick) from the divider to the north wall, splitting the north area into two chambers. The north-west chamber is reachable only through the west gap; the north-east chamber only through P001's existing 1.5 m central passage.
+
+| Area | Location | Gold |
+|---|---|---|
+| Camp | Disc of radius 2.5 m at (0, 11.5), with a red banner landmark; the King starts at its centre | 4 coins just north of the disc |
+| West trail | From camp toward the west gap, around `LowBlockA` | 3 |
+| East trail | From camp toward the central passage | 2 |
+| Branch A (north-west chamber, safer) | Around the existing north pillar; no thief | 6 |
+| Branch B (north-east chamber, thief) | 2 lure coins near the passage exit, outside the thief's 9 m trigger; an 8-coin cluster (4 × 2) about 2.5–4 m from the burrow, inside it | 10 |
+| **Total** | | **25** |
+
+Approximate walking distances at 5 m/s: camp to the central passage about 18 m; camp to the west gap about 22 m; a full tour of both branches took about 35 s in the scripted run.
+
+**Thief:** one P004 thief and burrow at (13.5, 0, −13.5). Its movement zone is now (0, −14.6) to (14.6, −7.4) and spilled coins land within (0.4, −14.3) to (14.3, −7.7), so neither can reach Branch A or the passage. All P004 timings, speeds, radii, and caps are unchanged (see the P004 entry §11). One encounter per expedition; once it ends, the north-east chamber is safe for the rest of the run.
+
+**Extraction:** a new `interact` action (keyboard **E**, gamepad button 0 / bottom face button). Inside the 2.5 m extraction radius a prompt reads "E — Secure haul and end expedition" (or "A (bottom button) — …" after controller input). Only an interact press inside the radius extracts; walking through or standing in camp never does, and extraction works with any amount of gold, including zero. A successful extraction sets the extracted state, takes a one-time results snapshot, pauses the scene tree (stopping the King, pickups, spilled coins, and the thief), and shows the results panel. Later presses, including repeated E and a second call in the same frame, are refused. Input is handled before physics in a frame, so no pickup or thief event can land between the snapshot and the pause.
+
+**Gold accounting:** P004's ledger is unchanged; in P005 the haul always starts at 0. The controller also counts level gold through each pickup's own `collected` signal, and `expedition_ok()` checks `carried + spilled on the ground + thief-held + lost + uncollected level gold = 25`. At extraction the 25 units are classified as:
+
+| Result | Meaning |
+|---|---|
+| Secured | Gold the King carries at that moment |
+| Lost to the thief | Gold it escaped with, plus any gold it still holds (forfeited for this run) |
+| Left on the ground | Spilled or dropped coins not recovered |
+| Not found | Level coins never collected |
+
+**Results panel:** "Expedition complete", **Gold secured** (large), "Lost to the thief" and "Left on the ground" (each only when above 0), the expedition time as m:ss, the note "Each expedition starts fresh — nothing is carried over.", and a **New Expedition (R)** button. Time is shown only here; there is no clock during play. After 0.5 s the button takes focus, so Enter, Space, or gamepad button 0 can press it without the extracting press skipping the results.
+
+**Replay:** New Expedition, or R on the results panel, unpauses and reloads the scene. R during play abandons the run and reloads without a result. Everything resets because the scene is re-created: King position and velocity, gold, HUD and pouch, all 25 pickups, spilled coins, the thief's state, position, carried coin, and visibility, ledger and encounter flags, timer, extraction state, prompt, and panel. There are no autoloads or saved data, so nothing persists between expeditions.
+
+**Controls:** WASD / arrows / left stick move. **E** (gamepad bottom button): extract at camp. **R** (gamepad Back): new expedition. 1 / 2 / 3 do nothing in P005.
+
+**Starting values (Prototype Assumptions, exported or authored in the scene; none playtest-validated):**
+
+| Parameter | Value |
+|---|---|
+| Camp centre / extraction radius | (0, 11.5) / 2.5 m (the disc is resized to the radius on start) |
+| Gold | 25 one-value pickups: camp 4, west trail 3, east trail 2, Branch A 6, Branch B 10 |
+| West gap / central passage width | 2.5 m / 1.5 m |
+| Thief | P004 values: trigger 9 m, warning 1.0 s, approach 3.0 m/s, give-up 8 s, pause 0.5 s, grab/flee 3.5 m/s, spill cap 3, theft cap 1 |
+| Results focus delay | 0.5 s |
+| Test HUD | hidden |
+
+**Mechanical validation (Godot 4.7.2, headless):** `tests/p005_regression.gd` passed **84 of 84** and exits non-zero on failure (checked with a deliberately wrong expectation). It covers:
+- Initial state: 25 one-value pickups and the per-area counts, gold 0, King at camp, thief idle at its burrow, results hidden, not paused, prompt text, camp and extraction radius, `interact` bindings, P001 and P004 tuning unchanged, thief zone and spill bounds, and coin placement relative to the split and the trigger radius.
+- 1 / 2 / 3 do not change gold or move the King.
+- Geometry: the shortened divider still blocks, the west gap and central passage are passable, and `NorthSplit` separates the chambers from both sides.
+- A scripted tour of both branches from camp and back collects all 25 coins with the HUD and pouch in sync; no automatic extraction after 5 s idle in camp with 25 gold; top speed 5.0 m/s (straight and diagonal) and unchanged acceleration and deceleration while carrying 25; camera offset unchanged.
+- Extraction: prompt hidden and E refused just outside the radius; prompt shown and E accepted just inside; results 25 / 0 / 0 / 0; time recorded; results text; five more E presses, a direct second call, and 1 s of frames change nothing; the King cannot move; the button takes focus.
+- New Expedition, R on the results panel, and R mid-run each restore an identical initial state.
+- Zero-gold extraction; camp coins only (secured 4); Branch A (secured 11).
+- Branch B: avoidance (thief warns, gives up, stays in its chamber; nothing lost); escape (lost 1, left 2); interception and recovery of all 3 spilled coins (recovered gold secured); extraction while the thief still holds a coin (forfeited as lost; same-frame second extraction refused; spilled coins cannot be recovered or pop afterwards; thief frozen).
+- The final four categories sum to 25 in every extraction, and `not found` matches a direct count of the remaining pickups.
+- The expedition-wide invariant held on every checked physics frame of scripted play (more than 1,000 frames).
+- P001–P005 scenes instantiate.
+
+`tests/p004_regression.gd` still passes 71 of 71 and `tests/p003_regression.gd` 114 of 114. One P004 check was changed: it asserted that P004 is the default scene, which stopped being true when P005 became the default; it now checks that the P004 scene is present. P001–P005 scenes run headless with no errors or warnings.
+
+Scripted reference runs (not player performance):
+
+| Run | Printed result |
+|---|---|
+| Both branches, thief held still | secured 25, not found 0, time 0:35 |
+| Camp coins only | secured 4, not found 21 |
+| Branch A | secured 11 (camp 2, west trail 3, Branch A 6) |
+| Branch B, retreat after the warning | thief avoided; secured 6 |
+| Branch B, standing still | thief escapes with 1; secured 3, lost 1, left 2 |
+| Branch B, immediate chase, then recover | intercepted; all 3 spilled coins recovered; secured 6 |
+| Extract while the thief holds a coin | secured 3, lost 1, left 2 |
+
+**Windowed check:** screenshots from a scripted run at the default window size show the camp disc, banner, and prompt at start; the coin trail at the fork; the west gap; the north-west chamber around the pillar; the passage; the Branch B lures, the cluster, and the thief's "!" warning; the spill; the thief carrying a stolen coin; the return path; the results panel (secured 9, lost 1, left 2, time 0:25, with the note and button); and a clean reset after New Expedition. The controlled camera shows the King, nearby gold, the thief, and the encounter clearly. Not checked: launching with F5 from the editor (the main scene was launched from the command line instead), controller input, audio, and how readable any of this is to a player.
+
+**Known limitations and risks:**
+- The follow camera shows only a small area around the King, so neither branch opening is visible from camp (confirmed in the screenshots); the coin trails do the guiding. Whether players notice both branches is a playtest question.
+- The thief can take at most 1 of 25 coins and appears once per expedition, so the risk may be too small to create return-or-continue tension (spec Risk A). Recorded, not compensated.
+- After the encounter ends, Branch B is safe for the rest of the run.
+- The 2.5 m dividers block the elevated camera's view of a strip of floor just north of them, as the same walls did in P004. The coins nearest the dividers were visible in the screenshots, but this was not checked from every position.
+- Gold secured is a per-run result; whether this feels consequential without persistence is a playtest question (spec Risk D).
+- The P005 controller depends on the P004 controller's node paths and functions. P004 is concluded and its tests guard it; any future change to the P004 scripts must rerun both tests.
+
+### 12. Observations
+
+#### Human Playtest 1 — Quon (build `d86c267`)
+
+Recorded from Quon's player report. No individual `P005 expedition` Output lines were supplied, so there are no recorded per-run results (secured, lost, left on the ground, not found, time) or trial counts for this playtest.
+
+- Both optional branches were explored.
+- The player did not extract before collecting everything.
+- The player felt tempted to continue exploring.
+- The thief affected the decision about returning.
+
+### 13. Player Comments
+
+#### Human Playtest 1 — Quon (player report)
+
+| Category | Rating (1–5) |
+|---|---|
+| Exploration enjoyment | 4 |
+| Gold discovery and collection | 4 |
+| Threat tension | 4 |
+| Extraction clarity | 3 |
+| Satisfaction of securing the haul | 3 |
+| Overall expedition enjoyment | 4 |
+| Desire to play another expedition | 3 |
+
+| Question | Answer |
+|---|---|
+| One or both branches explored? | Both |
+| Extracted before collecting everything? | No |
+| Tempted to continue exploring? | Yes |
+| Did the thief affect the decision to return? | Yes |
+
+- Avoiding the thief and recovering stolen gold were enjoyable.
+- Quon wants more enemies, interesting discoveries, and longer routes in future expeditions.
+- Quon wants a meaningful reward for returning with more gold.
+
+**Clarification (Quon, after the playtest):** the 3/5 extraction-clarity rating primarily reflected extraction not feeling rewarding enough. It is **not** evidence that the player failed to understand the extraction controls or prompt. The original rating is kept unchanged above.
+
+### 14. What Worked
+
+Human Playtest 1:
+- Exploration (4/5), gold discovery and collection (4/5), and threat tension (4/5) were positive; overall expedition enjoyment 4/5.
+- Both optional branches were explored.
+- The player felt tempted to continue, and the thief affected the decision about returning.
+- Avoiding the thief and recovering stolen gold were enjoyable.
+
+### 15. What Did Not Work
+
+Human Playtest 1:
+- Securing the haul was only moderately satisfying (3/5). Per Quon's clarification, the extraction-clarity rating (3/5) also mainly reflects extraction not feeling rewarding enough.
+- Desire to play another expedition was moderate (3/5).
+- Quon wants a meaningful reward for returning with more gold.
+
+### 16. Interpretation
+
+One tester, one session, player report only; treat as directional.
+
+- Exploration, gold collection, and the existing thief encounter appear to combine into a promising short expedition.
+- The return-or-continue decision showed some signal: the player was tempted to continue and weighed the thief when deciding when to return. However, the player collected everything before extracting, so an early-return choice was not observed. Whether that reflects the small thief risk (at most 1 of 25 coins, once per run; spec Risk A) or the lack of reward for securing gold is not established.
+- Extraction appears to have been understood. Its weakness is that a secured haul with no further use did not feel meaningful (spec Risk D). This may also limit replay desire, but that link is unconfirmed.
+
+### 17. Unexpected Findings
+
+Human Playtest 1: after the playtest, Quon clarified that the extraction-clarity rating was mainly about reward rather than understanding (§13).
+
+### 18. Outcome
+
+**Outcome:** Iterate — promising combined expedition loop; extraction rewards need further development.  
+**Confidence:**
+- Medium overall for short-session expedition enjoyment.
+- Low-to-medium for the strength of the return-or-continue decision and long-term replayability.
+
+Conclusions:
+- Exploration, gold collection, and the existing thief encounter work promisingly together.
+- Both optional branches were explored.
+- The player experienced temptation to continue and considered the thief when deciding when to return.
+- The player did not extract early.
+- Extraction was understood, but the secured haul did not provide enough meaningful reward.
+- Replay motivation was moderate.
+- This prototype supports further development of the expedition loop.
+
+Limitations:
+- One recorded human tester.
+- One compact authored area.
+- One thief encounter per expedition.
+- Maximum theft loss remains one gold.
+- No persistent reward or progression.
+- No longer expedition or additional encounter variety tested.
+- No recorded individual trial result lines.
+
+P005 is not marked fully Validated. The layout, gold counts, thief tuning, extraction prompt, and results UI remain Prototype Assumptions.
+
+### 19. Decision Impact
+
+- No decision changes. The *Expedition and Settlement Gameplay Loops* and *Gold Power With Wealth-Driven External Danger* Approved Directions are supported by this evidence but not otherwise altered. *Losing Unsecured Gold and Treasure* remains a Prototype Assumption; P005 did not test expedition failure.
+- **Strong Recommendation (not approved):** investigate one meaningful benefit for successfully extracted gold before significantly expanding expedition size, enemy variety, or progression systems.
+- **Open Questions:**
+  - The exact reward or benefit gained from securing gold.
+  - Whether higher secured hauls produce proportionally greater benefits.
+  - How rewards affect replay desire.
+  - More meaningful return-or-continue tension.
+- **Deferred (not approved for implementation):**
+  - More interesting discoveries and optional detours.
+  - Longer expedition routes.
+  - Additional external threats.
+- **Not approved by this closeout:** a persistent economy, settlement upgrades, new enemies, larger environments, reward formulas, or a P006 feature scope. These require separate design review.
+
+### 20. Next Test
+
+No further P005 iteration is planned for this cycle. The next experiment is not yet scoped. Per the Strong Recommendation in §19, the reward for securing gold is the suggested first question for review; any follow-up needs its own specification and approval.
+
+#### Human Playtest 1 plan (pre-playtest, kept for history)
+
+**Human Playtest 1** (spec §9):
+1. Launch the project with F5; it opens P005 at camp. Use keyboard or a controller.
+2. **Pass A — natural expedition:** give minimal explanation ("explore, and come back to camp when you want to finish"). Do not coach extraction timing or tell the tester to collect everything. Observe where they go first, whether they notice both branches, how they respond to visible gold and to the thief, when they return, and whether they understand how to extract.
+3. **Pass B — different strategy:** start a New Expedition and ask for a different route or approach. Compare exploration choices, extraction timing, and reaction to the thief.
+4. After each run, copy the `P005 expedition` line (and any `P004 trial` line) from the Godot Output panel.
+5. Rate 1–5: exploration enjoyment; gold discovery and collection satisfaction; external-threat tension; return-to-camp extraction clarity; satisfaction of securing the haul; overall expedition enjoyment; desire to play another expedition.
+6. Record: one or both branches explored; whether they extracted before collecting everything, and why; whether the thief affected the decision to continue or return; whether they felt tempted to pursue more treasure; whether they immediately wanted another run; anything incomplete, repetitive, or confusing; and whether audio and controller input worked.
+
+Report enjoyment and the strength of the return-or-continue decision separately.
+
+---
+
 # Prototype Review Guidelines
 
 ## Test One Important Question at a Time
@@ -1656,6 +1934,8 @@ Test whether combat can make losing and recovering gold create enjoyable urgency
 
 ### P005 — Mini Expedition / Extraction
 Combine exploration, gold accumulation, risk, optional treasure, and voluntary return into the first small version of the expedition loop.
+
+*Concluded for the current cycle on 2026-11-15 (Iterate). The combined expedition loop was promising; extraction rewards need further development. See the P005 entry.*
 
 This sequence is not permanent.
 
