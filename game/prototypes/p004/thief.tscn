@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game/prototypes/p004/thief.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://game/prototypes/p004/thief_placeholder.svg" id="2_art"]
+[ext_resource type="Texture2D" path="res://game/gold/gold_coin.svg" id="3_coin"]
+
+[node name="Thief" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="Visual" type="Sprite3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.67, 0)
+pixel_size = 0.0042
+billboard = 2
+alpha_cut = 1
+texture = ExtResource("2_art")
+
+[node name="Alert" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.75, 0)
+visible = false
+pixel_size = 0.01
+billboard = 1
+no_depth_test = true
+modulate = Color(1, 0.3, 0.2, 1)
+outline_modulate = Color(0.1, 0.02, 0.02, 1)
+text = "!"
+font_size = 96
+outline_size = 18
+
+[node name="CarriedCoin" type="Sprite3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+visible = false
+pixel_size = 0.0045
+billboard = 2
+no_depth_test = true
+alpha_cut = 1
+texture = ExtResource("3_coin")

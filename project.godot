@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Gold King"
-run/main_scene="res://game/prototypes/p003_gold_power_burden.tscn"
+run/main_scene="res://game/prototypes/p004_gold_spill_theft.tscn"
 config/features=PackedStringArray("4.7", "Mobile")
 config/icon="res://icon.svg"
 

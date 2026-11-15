@@ -141,7 +141,7 @@ Do not rewrite an interpretation as if it were an observed fact.
 | P001 | Player Movement & Camera | Does the chosen 2.5D presentation produce intuitive, readable movement? | Complete | Validated (Medium) | 2026-11-12 |
 | P002 | Gold Collection | Is collecting gold immediately satisfying and readable? | Concluded (current cycle) | Iterate (feedback polish deferred; working baseline accepted for P003) | 2026-11-13 |
 | P003 | Gold Power vs. Burden | Can increasing wealth feel powerful and dangerous at the same time? | Concluded (current cycle) | Iterate (automatic movement burden superseded; wealth-driven external danger approved for future testing) | 2026-11-14 |
-| P004 | Gold Spill & Theft | Does losing loose gold during combat create enjoyable urgency rather than annoyance? | Planned | — | — |
+| P004 | Gold Spill & Theft | Can the threat of losing collected gold create exciting, readable tension without making the player regret collecting it? | Concluded (current cycle) | Iterate (promising external-threat mechanic; future expansion deferred) | 2026-11-14 |
 | P005 | Mini Expedition / Extraction | Does choosing between returning safely and pushing deeper create meaningful greed tension? | Planned | — | — |
 
 This index should remain compact. Detailed findings belong in each prototype entry below.
@@ -1332,6 +1332,237 @@ P004 should not automatically inherit P003's speed-penalty mechanics just becaus
 
 ---
 
+# Planned Prototype 004
+
+## P004 — Gold Spill & Theft
+
+**Status:** Concluded for the current prototype cycle (2026-11-14). Outcome: Iterate (§18). Not fully Validated.  
+**Date Started:** 2026-11-14  
+**Date Concluded:** 2026-11-14  
+**Build / Commit:** `f5aa84d` (branch `feat/p004-gold-spill-theft`)  
+**Testers:** Quon (Human Playtest 1). Quon is the only recorded human tester; Jason's playtest is not recorded.  
+**Related Decision(s):**
+- Gold Power With Wealth-Driven External Danger (Approved Direction, 2026-11-14)
+- Losing Unsecured Gold and Treasure (Prototype Assumption; P004 does not implement expedition failure or banking)
+- Gold spill and theft (Prototype Assumption; tested here)
+- P001 movement baseline; P002 working collection baseline. P003 is not inherited (historical experiment).
+
+**Related Feature Spec:** `docs/features/p004_gold_spill_theft.md`
+
+### 1. Primary Design Question
+
+Can the threat of losing collected gold create exciting, readable tension and motivate the player to protect their fortune without making them regret collecting it?
+
+### 2. Hypothesis
+
+From the spec: one readable thief that spills a little carried gold on contact, tries to take one coin, and can be caught by chasing it will create "That's *my* gold — get back here!" tension, while the loss stays small and recoverable enough that the player still wants more gold.
+
+### 3. Why This Matters
+
+The 2026-11-14 Approved Direction makes external danger, not automatic slowdown, the core downside of wealth. P004 is the first test of whether an external actor taking gold feels fair and motivating before P005 builds an expedition around it.
+
+### 4. Prototype Scope
+
+- One placeholder thief in one authored area, once per reset.
+- Contact spill (cap 3), one theft (cap 1), movement-only interception, limited loss on escape.
+- P002 floating gold, collection, gold counter, pouch, and pickup feedback reused unchanged.
+- Test presets, full reload, a test-only status line, and a printed result per encounter.
+
+### 5. Out of Scope
+
+Combat, strikes, health or damage; P003 wealth states and speed penalties; more than one thief or any enemy framework, navigation, or threat scaling; banking, expedition failure, permanent loss, inventory; heavy forms, encumbrance, Gilding; audio/visual polish.
+
+### 6. Variables Being Tested
+
+Thief readability, spill readability, the recover-or-chase choice, and whether a small real loss changes the desire to collect gold.
+
+### 7. Controls / Things Held Constant
+
+- King movement is P001's: 5.0 m/s top speed, acceleration 80, deceleration 120, at every gold amount and after spills.
+- P002 pickups, positions, values, trigger, and feedback are unchanged.
+- Thief behavior is deterministic: the same inputs produce the same encounter.
+
+### 8. Success Signals
+
+From spec §7 (directional, not hard gates): testers can explain spill and recovery without a tutorial; no counting or unreachable-drop bugs; a real movement-based way to avoid, chase, or recover; gold desirability stays high (aim 4/5+); tension visible in behavior.
+
+### 9. Failure Signals
+
+Persistent irritation, loss of agency, losses that feel unavoidable, or players avoiding gold to avoid the thief, even if the encounter works mechanically.
+
+### 10. Optional Measurements
+
+The printed result line per encounter (outcome, start gold, level gold, spilled, recovered, stolen, dropped, lost, carried, on ground), plus tester ratings from spec §7.
+
+### 11. Test Setup
+
+**Scene:** `game/prototypes/p004_gold_spill_theft.tscn`, inheriting the unchanged P002 scene. It is now the project main scene, so F5 launches P004. P001–P003 scenes remain available to open directly.
+
+**Encounter area:** the arena's existing north-east pocket (open floor from x −3 to 14.6, z −14.6 to −7.4), reached through P001's narrow passage. No new geometry. The thief only moves in straight lines inside this rectangle, so it cannot cross walls.
+
+| Item | Position |
+|---|---|
+| Burrow (dark disc; thief's start and escape point) | (13.5, 0, −13.5) |
+| Preset start marker | (5.75, 0, −6.2), in the passage mouth, ~10.6 m from the burrow (outside the trigger radius) |
+
+The start marker was moved from the planned (5.75, −4) because walking north from there collects P002's `Passage` coin during the first preset trial only, which made trials unrepeatable.
+
+**Thief states:** IDLE at the burrow → ALERT ("!" for the warning time; only if the King carries gold and is inside the trigger radius) → APPROACH → contact: PAUSE → GRAB (heads for the nearest landed spilled coin) → FLEE to the burrow → GONE. If the approach times out, it flees empty-handed. Interception is only possible during FLEE while the thief carries gold; it then drops the coin as a pickup and keeps fleeing empty-handed. One encounter per reset. A King with 0 gold never triggers it; that case prints a "no gold" result once and does not use up the encounter.
+
+**Gold accounting:** the P004 controller is the single owner of every transfer and keeps `carried + coins on the ground + thief-held + lost = starting gold + level gold collected` true after each one (asserted in debug builds and checked by the test). Ordinary level gold enters through the normal P002 pickups and is counted separately. Spilled and dropped coins are a P004-local variant of the P002 pickup: they cannot be collected while scattering, and they ask the controller whether the King receives them *before* any pop, sparkle, sound, or HUD pulse. A coin the thief has claimed is removed silently, so the King never sees collection feedback for gold he did not get. The P002 pickup script is unchanged.
+
+**Level-coin reset policy:** preset keys never respawn or remove level pickups. Collected level coins stay collected and uncollected ones stay where they are. A preset starts a new haul at the preset amount; gold from earlier level pickups is replaced by the preset, not added to it. R reloads the whole scene, restoring all 20 level coins and 0 gold.
+
+**Controls:** WASD / arrows / left stick move. **1 / 2 / 3** (also D-pad left / up / right): new trial with 0 / 10 / 20 gold. This clears spilled coins, ledger, and counters, returns the thief to its burrow, and puts the King at the start marker. These reuse the P003-named `trial_light/loaded/heavy` actions. **R** (gamepad Back): full reload. No attack input.
+
+**Starting values (Prototype Assumptions, exported; none playtest-validated):**
+
+| Parameter | Value |
+|---|---|
+| Trigger radius from burrow | 9 m |
+| Warning | 1.0 s |
+| Approach speed | 3.0 m/s |
+| Approach give-up | 8 s |
+| Contact radius | 0.8 m |
+| Pause after spill | 0.5 s |
+| Grab speed / escape speed | 3.5 / 3.5 m/s |
+| Claim radius | 0.4 m |
+| Interception radius | 1.0 m |
+| Spill cap / theft cap | 3 / 1 |
+| Spill placement | 1.6 m from the King at 60°, −60°, then 180° from the King-to-thief direction (two on the thief's side, so its escape leads away from the King; one behind him) |
+| Coin hop | 0.3 s, 0.6 m high |
+| Dropped coin | 0.6 m ahead of the intercepted thief |
+| Presets | 0 / 10 / 20 |
+| Test HUD | visible by default; untick **Show Test HUD** on the P004 root to hide it (the gold counter stays) |
+
+**Feedback:** "!" over the thief during the warning; spilled coins hop out with a lower-pitched pickup sound; a gold coin over the thief's head while it carries stolen gold; a brief red flash and the coin hopping out on interception. All placeholder.
+
+**Mechanical validation (Godot 4.7.2, headless):** `tests/p004_regression.gd` passed **71 of 71** and exits non-zero on failure (checked with a deliberately wrong expectation). It covers:
+- Ledger balance throughout; spill caps for 0 / 1 / 2 / 3 / 10 / 20 gold; theft cap; no negative gold.
+- No collection while scattering; each coin recovered once; claim-versus-pickup in the same physics frame in both orders, with collection feedback only when the King receives the coin.
+- Warning before approach; avoidance by retreating and the thief giving up; one encounter per reset; zero-gold case.
+- No interception during GRAB or while fleeing empty-handed; interception drops the coin and it is recoverable.
+- Preset resets and repeatability; level-coin policy; R reload.
+- P001/P002 behavior inside P004 (speed 5.0 at 0 / 10 / 20 gold and after a spill, acceleration and deceleration, walls, passage, facing, camera, level pickups, gold counter and pouch); P001–P004 scenes instantiate.
+
+`tests/p003_regression.gd` still passes 114 of 114. P001–P004 scenes and the default launch run headless with no errors or warnings.
+
+Scripted reference trials (10 gold, King standing at a fixed point inside the pocket; not player performance):
+
+| Scenario | Result |
+|---|---|
+| No pursuit | Thief escapes with 1 gold; the other 2 spilled coins stay on the ground |
+| Chase as soon as it takes a coin | Intercepted |
+| Chase 0.5 s late | Intercepted |
+| Chase 1.5 s late | Escapes with 1 gold |
+| 1 gold, King collects the spilled coin first | Thief leaves empty-handed |
+| 10 gold, King collects the coin nearest the thief first | King recovers 1, thief steals 1 and escapes |
+
+**Windowed check:** screenshots from a scripted run at 1280×720 show the thief at its burrow from the preset start, the "!" warning, the spill, the carried-coin indicator, the interception drop, and the escape, with the gold counter matching the ledger. A HUD bug found this way was fixed: the status line did not update when the thief changed state. Not checked: launching with F5 from the editor (the default main scene was launched from the command line instead), audio, and how readable any of this is to a player.
+
+**Known limitations and risks:**
+- With 3 spilled coins, recovering all of them before the thief claims one needs near-optimal play. Chasing immediately is easy at these values. Both are tuning questions for the playtest.
+- The thief cannot leave the pocket, so a King in the passage cannot be reached until it gives up.
+- Level coins `North1` and `North2` are inside the pocket and can add gold mid-trial; the ledger counts them, but results then differ from a clean preset run.
+- A King who runs between the thief and its burrow can intercept it easily. That is allowed as deliberate play.
+- The `trial_light/loaded/heavy` action names come from P003.
+- Quitting the headless test while effects are still animating prints engine leak warnings at exit. These come from the test harness, not gameplay.
+
+### 12. Observations
+
+#### Human Playtest 1 — Quon (build `f5aa84d`)
+
+Recorded from Quon's player report. No individual printed trial result lines were supplied, so there are no recorded trial counts, outcomes per run, or ledger values for this playtest.
+
+- Most natural response to the thief: avoid it.
+- Collecting gold was not discouraged by the encounter.
+
+### 13. Player Comments
+
+#### Human Playtest 1 — Quon (player report)
+
+| Category | Rating (1–5) |
+|---|---|
+| Thief warning readability | 5 |
+| Gold loss clarity | 5 |
+| Theft fairness | 5 |
+| Chase enjoyment | 4 |
+| Gold recovery satisfaction | 4 |
+| Overall encounter enjoyment | 4 |
+
+| Question | Answer |
+|---|---|
+| Was gold collection discouraged? | No |
+| Most natural response | Avoid the thief |
+
+- Quon found avoiding the enemy and attempting to recover stolen gold enjoyable.
+- Quon wants to expand the mechanic eventually.
+
+### 14. What Worked
+
+Human Playtest 1:
+- The warning and the gold loss were clear (5/5 each).
+- Theft felt fair (5/5).
+- Chasing (4/5) and recovering gold (4/5) were enjoyable; overall encounter enjoyment 4/5.
+- The encounter did not discourage collecting gold.
+
+### 15. What Did Not Work
+
+Human Playtest 1: no specific problems were reported. Chase enjoyment, recovery satisfaction, and overall enjoyment rated 4/5 rather than 5/5; no reasons were recorded.
+
+### 16. Interpretation
+
+One tester, one short encounter; treat as directional.
+
+- The placeholder telegraph and spill feedback were enough to make the threat and the loss understandable.
+- A small, recoverable loss caused by a visible external actor felt fair and did not make gold less desirable. This supports the 2026-11-14 Approved Direction that accumulated wealth can create external danger.
+- Avoidance was the tester's natural first response. How often chases or recoveries happened was not recorded.
+
+### 17. Unexpected Findings
+
+Human Playtest 1: avoidance, rather than chasing or recovering, emerged as the tester's preferred natural response.
+
+### 18. Outcome
+
+**Outcome:** Iterate — promising external-threat mechanic; future expansion deferred.  
+**Confidence:** Medium for the tested short encounter.
+
+Conclusions:
+- The warning and gold-loss feedback were understandable.
+- Theft felt fair to the tester.
+- Chasing and reclaiming gold were enjoyable.
+- Avoidance emerged as the tester's preferred natural response.
+- The encounter did not discourage further gold collecting.
+- These findings support the approved direction that accumulating wealth can create external danger.
+
+Limitations:
+- One human tester.
+- One thief and one encounter layout.
+- No long-expedition testing.
+- No wealth-based threat escalation.
+- No final enemy AI or production balancing.
+
+P004 is not marked fully Validated. The thief behavior, spill and theft caps, and timings remain Prototype Assumptions (spec §9).
+
+### 19. Decision Impact
+
+- No decision changes. The 2026-11-14 Approved Direction (*Gold Power With Wealth-Driven External Danger*) is supported by this evidence but not otherwise altered. Gold spill and theft remain Prototype Assumptions.
+- **Deferred (not approved for implementation):**
+  - More varied thief behaviors.
+  - More interesting chase and recovery interactions.
+  - Different enemy types.
+  - Longer expedition behavior.
+- **Open Questions:**
+  - Whether and how threat escalates with wealth (out of scope for P004; already open under the 2026-11-14 decision).
+  - Avoidance and stealth opportunities, given that avoidance was the natural response.
+  - What incentives make recovering lost gold worthwhile.
+
+### 20. Next Test
+
+No further P004 iteration is planned for this cycle; expansion is deferred. Any future work on the items in §19 needs its own specification and review. P005 planning should treat the P004 encounter as tested evidence for a small, readable external threat, not as an approved enemy design.
+
+---
+
 # Prototype Review Guidelines
 
 ## Test One Important Question at a Time
@@ -1420,6 +1651,8 @@ Test the central assumption that more wealth can create both greater power and g
 
 ### P004 — Gold Spill & Theft
 Test whether combat can make losing and recovering gold create enjoyable urgency.
+
+*Concluded for the current cycle on 2026-11-14 (Iterate). Tested as a single thief with movement-based avoidance, chase, and recovery rather than combat; see the P004 entry.*
 
 ### P005 — Mini Expedition / Extraction
 Combine exploration, gold accumulation, risk, optional treasure, and voluntary return into the first small version of the expedition loop.
