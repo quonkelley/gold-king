@@ -258,6 +258,7 @@ Check the reported version before implementation work. If it does not report 4.7
 ```bash
 <godot> --headless --path . --script res://tests/p003_regression.gd
 <godot> --headless --path . --script res://tests/p004_regression.gd
+<godot> --headless --path . --script res://tests/p005_regression.gd
 ```
 
 Each prints `PASS`/`FAIL` per check and a final count, and exits with code 1 if any check fails. They verify mechanical behavior only and never replace human playtesting.
