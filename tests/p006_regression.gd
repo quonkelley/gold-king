@@ -31,6 +31,13 @@ const ROUTE_TO_LURES: Array[Vector3] = [
 const ENGAGE := Vector3(6.5, 0, -10.0)
 ## Within the Branch A merchant's interact radius, clear of every pickup.
 const MERCHANT_SPOT := Vector3(-12.4, 0, -12.6)
+## Every camp and trail coin (4 + 2 east + 3 west = 9) and back, along P005 route segments.
+const ROUTE_NINE: Array[Vector3] = [
+	Vector3(-1.6, 0, 9.2), Vector3(-0.6, 0, 8.0), Vector3(0.6, 0, 8.0), Vector3(1.6, 0, 9.2), Vector3(0.6, 0, 8.0),
+	Vector3(3.5, 0, 1.5), Vector3(5.75, 0, -1.0), Vector3(3.5, 0, 1.5), Vector3(0.6, 0, 8.0), Vector3(-0.6, 0, 8.0),
+	Vector3(-4.5, 0, 3.0), Vector3(-8.5, 0, 0.5), Vector3(-12.5, 0, -1.5), Vector3(-8.5, 0, 0.5), Vector3(-4.5, 0, 3.0), CAMP]
+## In front of the camp stall's counter, inside its interact radius.
+const STALL_SPOT := Vector3(5.5, 0, -1.6)
 const ROUTE_HOME_FROM_B: Array[Vector3] = [Vector3(5.75, 0, -7.6), Vector3(5.75, 0, -1.0), Vector3(3.5, 0, 1.5), CAMP]
 
 var passes: int = 0
@@ -228,6 +235,18 @@ func focus_delay() -> void:
 	await process_frame
 
 
+## From the hub: walk to the stall and press E.
+func open_shop() -> bool:
+	await walk_to(STALL_SPOT)
+	await tap_key(KEY_E)
+	return scene().shop_open and scene().get_node("Shop").visible
+
+
+func focus_shop() -> void:
+	await create_timer(scene().shop_focus_delay + 0.15).timeout
+	await process_frame
+
+
 func expected_hoard(gold: int) -> int:
 	var stage: int = 0
 	for t: int in scene().hoard_thresholds:
@@ -388,6 +407,64 @@ func _run() -> void:
 	check(session.merchant_recruited and not scene().results.merchant_met, "merchant stays recruited")
 	check(await continue_to_camp() and scene().get_node("Stall").visible and scene().get_node("Stall").get_parent().get_children().filter(
 		func(n: Node) -> bool: return n.name.begins_with("Stall")).size() == 1, "still exactly one stall")
+
+	print("--- Shop: 19 refused, 20 buys once")
+	# Test-only setup: the balance is set directly to probe the price boundary.
+	session.treasury = 19
+	scene().refresh()
+	check(await open_shop(), "E at the stall opens the shop and pauses camp")
+	check(paused and scene().get_node("Shop/Panel/Box/Buy").disabled
+		and (scene().get_node("Shop/Panel/Box/Buy") as Button).text == "Not enough gold (need 1 more)"
+		and (scene().get_node("Shop/Panel/Box/Balance") as Label).text == "Your treasury: 19 gold"
+		and (scene().get_node("Shop/Panel/Box/Item") as Label).text == "First Sword — 20 gold", "19 gold: price, balance, and refusal shown")
+	check(not scene().buy_sword() and session.treasury == 19 and not session.sword_owned, "19 gold: purchase refused, nothing changes")
+	await focus_shop()
+	await tap_key(KEY_ESCAPE)
+	check(not scene().shop_open and not paused, "Esc closes the shop and resumes camp")
+	session.treasury = 20
+	scene().refresh()
+	check(await open_shop(), "shop reopened with 20 gold")
+	check(not session.sword_owned, "the press that opened the shop did not buy")
+	await focus_shop()
+	await tap_key(KEY_ENTER)
+	check(session.sword_owned and session.treasury == 0 and session.purchase_count == 1, "20 gold: Enter buys the sword for exactly 20")
+	check((scene().get_node("Shop/Panel/Box/Buy") as Button).text == "Owned" and scene().get_node("Shop/Panel/Box/Buy").disabled, "shop shows Owned")
+	await tap_key(KEY_ENTER)
+	check(not scene().buy_sword() and session.treasury == 0 and session.purchase_count == 1, "second purchase refused")
+	scene().close_shop()
+	check(scene().get_node("HUD/SwordLabel").visible and scene().hoard_stage() == 0, "camp shows the sword owned and an emptied hoard")
+
+	print("--- Shop: 11 + 9 from two real runs, then 21 leaves 1")
+	await new_session()
+	check(session.treasury == 0 and not session.sword_owned and not session.merchant_recruited, "fresh session after reload")
+	check(await depart(), "departure for an 11-gold run")
+	await walk_route(ROUTE_WEST.slice(0, 9))
+	await walk_to(MERCHANT_SPOT)
+	await tap_key(KEY_E)
+	check(await walk_route(ROUTE_WEST.slice(8)) == -1 and scene().merchant_met, "met the merchant and finished the west route")
+	check(await extract_at_camp() and session.treasury == 11 and session.merchant_recruited, "first run secures 11")
+	check(await continue_to_camp(), "back to camp")
+	check(await open_shop() and not session.can_buy_sword() and scene().get_node("Shop/Panel/Box/Buy").disabled, "11 gold is not enough")
+	scene().close_shop()
+	check(await depart(), "departure for a 9-gold run")
+	check(await walk_route(ROUTE_NINE) == -1 and scene().gold_total == 9, "collected exactly 9 (camp and trail coins)")
+	check(await extract_at_camp() and session.treasury == 20, "second run brings the treasury to 20")
+	check(await continue_to_camp(), "back to camp")
+	check(await open_shop(), "shop opened with 20 accumulated")
+	await focus_shop()
+	await tap_key(KEY_ENTER)
+	check(session.sword_owned and session.treasury == 0, "accumulated 11 + 9 buys the sword")
+	scene().close_shop()
+
+	await new_session()
+	session.treasury = 21
+	session.merchant_recruited = true
+	scene().refresh()
+	check(await open_shop(), "test setup: 21 gold with the merchant present")
+	await focus_shop()
+	await tap_key(KEY_ENTER)
+	check(session.sword_owned and session.treasury == 1, "21 gold: exactly 20 deducted, 1 left")
+	scene().close_shop()
 
 	print("--- Expedition invariant")
 	check(invariant_breaks == 0 and frames_checked > 500,

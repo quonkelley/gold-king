@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" path="res://game/player/player.tscn" id="2_player"]
 [ext_resource type="Script" path="res://game/prototypes/p001_follow_camera.gd" id="3_camera"]
 [ext_resource type="PackedScene" path="res://game/prototypes/p006/merchant.tscn" id="4_merchant"]
+[ext_resource type="AudioStream" path="res://game/gold/gold_pickup.wav" id="5_chime"]
 
 [sub_resource type="Environment" id="Environment_camp"]
 background_mode = 1
@@ -59,6 +60,22 @@ height = 0.5
 top_radius = 1.6
 bottom_radius = 1.6
 height = 0.04
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_panel"]
+content_margin_left = 32.0
+content_margin_top = 24.0
+content_margin_right = 32.0
+content_margin_bottom = 24.0
+bg_color = Color(0.12, 0.09, 0.06, 0.94)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.45, 0.85, 0.8, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 
 [node name="P006CampHub" type="Node3D"]
 script = ExtResource("1_script")
@@ -307,3 +324,82 @@ theme_override_font_sizes/font_size = 26
 text = "E — Depart on an expedition"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="SwordLabel" type="Label" parent="HUD"]
+offset_left = 24.0
+offset_top = 64.0
+offset_right = 424.0
+offset_bottom = 96.0
+theme_override_colors/font_color = Color(0.85, 0.92, 1, 1)
+theme_override_colors/font_outline_color = Color(0.1, 0.07, 0.03, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 20
+text = "First Sword — owned"
+
+[node name="PurchaseSound" type="AudioStreamPlayer" parent="."]
+process_mode = 3
+stream = ExtResource("5_chime")
+volume_db = -2.0
+pitch_scale = 0.8
+
+[node name="Shop" type="CanvasLayer" parent="."]
+process_mode = 3
+layer = 2
+visible = false
+
+[node name="Dim" type="ColorRect" parent="Shop"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.5)
+
+[node name="Panel" type="PanelContainer" parent="Shop"]
+custom_minimum_size = Vector2(460, 0)
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBox_panel")
+
+[node name="Box" type="VBoxContainer" parent="Shop/Panel"]
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="Shop/Panel/Box"]
+theme_override_font_sizes/font_size = 28
+text = "Merchant's Stall"
+horizontal_alignment = 1
+
+[node name="Item" type="Label" parent="Shop/Panel/Box"]
+theme_override_colors/font_color = Color(0.85, 0.92, 1, 1)
+theme_override_font_sizes/font_size = 30
+text = "First Sword — 20 gold"
+horizontal_alignment = 1
+
+[node name="Balance" type="Label" parent="Shop/Panel/Box"]
+theme_override_colors/font_color = Color(1, 0.84, 0.25, 1)
+theme_override_font_sizes/font_size = 24
+text = "Your treasury: 0 gold"
+horizontal_alignment = 1
+
+[node name="Status" type="Label" parent="Shop/Panel/Box"]
+theme_override_colors/font_color = Color(0.85, 0.82, 0.75, 1)
+theme_override_font_sizes/font_size = 18
+text = ""
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Buy" type="Button" parent="Shop/Panel/Box"]
+custom_minimum_size = Vector2(0, 48)
+theme_override_font_sizes/font_size = 22
+text = "Buy (20 gold)"
+
+[node name="Close" type="Button" parent="Shop/Panel/Box"]
+custom_minimum_size = Vector2(0, 44)
+theme_override_font_sizes/font_size = 20
+text = "Close (Esc)"
