@@ -5,6 +5,7 @@
 [ext_resource type="Script" path="res://game/prototypes/p001_follow_camera.gd" id="3_camera"]
 [ext_resource type="PackedScene" path="res://game/prototypes/p006/merchant.tscn" id="4_merchant"]
 [ext_resource type="AudioStream" path="res://game/gold/gold_pickup.wav" id="5_chime"]
+[ext_resource type="Script" path="res://game/prototypes/p006/panel_input.gd" id="6_guard"]
 
 [sub_resource type="Environment" id="Environment_camp"]
 background_mode = 1
@@ -349,6 +350,7 @@ pitch_scale = 0.8
 process_mode = 3
 layer = 2
 visible = false
+script = ExtResource("6_guard")
 
 [node name="Dim" type="ColorRect" parent="Shop"]
 anchors_preset = 15

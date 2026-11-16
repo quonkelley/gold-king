@@ -5,9 +5,13 @@
 [ext_resource type="PackedScene" path="res://game/prototypes/p006/merchant.tscn" id="3_merchant"]
 [ext_resource type="PackedScene" path="res://game/prototypes/p006/sword.tscn" id="4_sword"]
 [ext_resource type="PackedScene" path="res://game/prototypes/p006/treasure_container.tscn" id="5_container"]
+[ext_resource type="Script" path="res://game/prototypes/p006/panel_input.gd" id="6_guard"]
 
 [node name="P006Expedition" instance=ExtResource("1_base")]
 script = ExtResource("2_script")
+
+[node name="Results" parent="."]
+script = ExtResource("6_guard")
 
 [node name="Note" parent="Results/Panel/Box" index="5"]
 text = "Secured gold is kept in your camp treasury."

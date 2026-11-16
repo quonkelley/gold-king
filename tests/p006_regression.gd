@@ -239,6 +239,72 @@ func focus_delay() -> void:
 	await process_frame
 
 
+func key_event(code: Key, pressed: bool) -> void:
+	var ev := InputEventKey.new()
+	ev.physical_keycode = code
+	ev.keycode = code
+	ev.pressed = pressed
+	Input.parse_input_event(ev)
+
+
+## A key held across physics frames, so physics-polled actions (the sword) see it.
+func press_key_physics(code: Key) -> void:
+	key_event(code, true)
+	await step()
+	await step()
+	key_event(code, false)
+	await step()
+
+
+func tap_pad(button: JoyButton) -> void:
+	var ev := InputEventJoypadButton.new()
+	ev.button_index = button
+	ev.pressed = true
+	Input.parse_input_event(ev)
+	await physics_frame
+	await process_frame
+	var up: InputEventJoypadButton = ev.duplicate()
+	up.pressed = false
+	Input.parse_input_event(up)
+	await process_frame
+	await physics_frame
+
+
+## True when a P006 panel's input guard lets a left click through untouched.
+func mouse_passes_guard(panel: Node) -> bool:
+	var ev := InputEventMouseButton.new()
+	ev.button_index = MOUSE_BUTTON_LEFT
+	ev.pressed = true
+	panel._input(ev)
+	return not root.is_input_handled()
+
+
+## Positive control for mouse_passes_guard: the same direct call does mark Space as handled.
+func space_blocked_by_guard(panel: Node) -> bool:
+	var ev := InputEventKey.new()
+	ev.physical_keycode = KEY_SPACE
+	ev.keycode = KEY_SPACE
+	ev.pressed = true
+	panel._input(ev)
+	return root.is_input_handled()
+
+
+func action_keys(action: String) -> Array:
+	var keys: Array = []
+	for ev in InputMap.action_get_events(action):
+		if ev is InputEventKey:
+			keys.append(ev.physical_keycode)
+	return keys
+
+
+func action_pads(action: String) -> Array:
+	var pads: Array = []
+	for ev in InputMap.action_get_events(action):
+		if ev is InputEventJoypadButton:
+			pads.append(ev.button_index)
+	return pads
+
+
 ## One attack press read on a physics frame, as the sword polls it.
 func attack() -> void:
 	Input.action_press("attack")
@@ -477,6 +543,96 @@ func _run() -> void:
 	await tap_key(KEY_ENTER)
 	check(session.sword_owned and session.treasury == 1, "21 gold: exactly 20 deducted, 1 left")
 	scene().close_shop()
+
+	print("--- Space never confirms P006 UI; Enter, pad confirm, and mouse still do")
+	check(action_keys("attack") == [KEY_J, KEY_SPACE] and action_pads("attack") == [JOY_BUTTON_X]
+		and action_keys("strike") == [KEY_J, KEY_SPACE] and action_pads("strike") == [JOY_BUTTON_X], "attack and P003 strike keep J, Space, pad west")
+	await new_session()
+	# Test-only setup: balance and merchant set directly; earning them is covered above.
+	session.treasury = 40
+	session.merchant_recruited = true
+	scene().refresh()
+	check(await open_shop(), "shop open with 40 gold")
+	await focus_shop()
+	var buy: Button = scene().get_node("Shop/Panel/Box/Buy")
+	check(root.gui_get_focus_owner() == buy, "Buy has focus")
+	await tap_key(KEY_SPACE)
+	await tap_key(KEY_SPACE)
+	check(not session.sword_owned and session.treasury == 40 and scene().shop_open, "Space with Buy focused does not purchase")
+	await tap_pad(JOY_BUTTON_X)
+	check(not session.sword_owned and session.treasury == 40, "pad west (attack) does not purchase")
+	await tap_pad(JOY_BUTTON_A)
+	check(session.sword_owned and session.treasury == 20 and session.purchase_count == 1, "pad confirm buys the sword")
+	await tap_pad(JOY_BUTTON_A)
+	await tap_pad(JOY_BUTTON_A)
+	await tap_key(KEY_ENTER)
+	check(session.treasury == 20 and session.purchase_count == 1, "repeated confirmation cannot buy twice")
+	scene().close_shop()
+	check(root.gui_get_focus_owner() == null, "closing the shop leaves no hidden button focused")
+	await tap_key(KEY_SPACE)
+	check(session.treasury == 20 and session.purchase_count == 1, "Space in camp after closing the shop does nothing")
+	# Test-only setup: un-own the sword to try a mouse purchase.
+	session.sword_owned = false
+	scene().refresh()
+	check(await open_shop(), "shop reopened for a mouse purchase")
+	await focus_shop()
+	# Synthetic mouse events do not reach the GUI under this test harness, so the mouse path is
+	# checked in two parts: the panel guard leaves mouse clicks unhandled, and a click's signal
+	# (Button.pressed) buys under the same rules.
+	check(mouse_passes_guard(scene().get_node("Shop")) and space_blocked_by_guard(scene().get_node("Shop")),
+		"the shop's input guard lets mouse clicks through but stops Space")
+	buy.pressed.emit()
+	check(session.sword_owned and session.treasury == 0 and session.purchase_count == 2, "a Buy click (pressed) purchases")
+	buy.pressed.emit()
+	check(session.treasury == 0 and session.purchase_count == 2, "a click once Owned does not buy again")
+	scene().close_shop()
+
+	check(await depart(), "departure with the sword")
+	var space_sword: Node3D = player().get_node("Sword")
+	teleport(EAST_CHEST_SPOT)
+	await wait(2)
+	await press_key_physics(KEY_SPACE)
+	check(space_sword.swings == 1 and scene().get_node("Containers/EastTrailChest").broken and not scene().extracted and not scene().merchant_met,
+		"Space swings the sword and opens the chest; nothing else happens")
+	await wait(25)
+	await press_key_physics(KEY_J)
+	check(space_sword.swings == 2, "J swings the sword")
+	await wait(25)
+	await tap_pad(JOY_BUTTON_X)
+	await wait(1)
+	check(space_sword.swings == 3, "pad west swings the sword")
+	teleport(CAMP)
+	await wait(30)
+	var space_deposits: int = session.deposit_count
+	await tap_key(KEY_E)
+	check(scene().extracted, "extracted")
+	await focus_delay()
+	var results_id: int = scene().get_instance_id()
+	await tap_key(KEY_SPACE)
+	await tap_key(KEY_SPACE)
+	await wait(3)
+	check(in_expedition() and scene().get_instance_id() == results_id and scene().get_node("Results").visible
+		and session.deposit_count == space_deposits + 1, "Space does not advance the results panel")
+	await tap_pad(JOY_BUTTON_A)
+	check(await await_switch(results_id) and in_hub(), "pad confirm continues to camp")
+	var hub_id_pad: int = scene().get_instance_id()
+	await wait(5)
+	check(scene().get_instance_id() == hub_id_pad and session.deposit_count == space_deposits + 1, "one transition, one deposit")
+
+	check(await depart(), "departure to test Enter on results")
+	await tap_key(KEY_E)
+	await focus_delay()
+	var enter_id: int = scene().get_instance_id()
+	var enter_deposits: int = session.deposit_count
+	# Two Enter presses before the deferred scene switch runs.
+	for i in 2:
+		key_event(KEY_ENTER, true)
+		key_event(KEY_ENTER, false)
+	check(await await_switch(enter_id) and in_hub(), "Enter continues to camp")
+	var hub_id_enter: int = scene().get_instance_id()
+	await wait(5)
+	check(scene().get_instance_id() == hub_id_enter and session.deposit_count == enter_deposits and session.run_id == 2,
+		"double Enter: one transition, no extra deposit, no new run")
 
 	print("--- Sword: unavailable before purchase")
 	await new_session()

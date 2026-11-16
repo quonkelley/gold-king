@@ -122,6 +122,9 @@ func close_shop() -> void:
 	if not shop_open:
 		return
 	shop_open = false
+	# A hidden button must not keep keyboard focus in camp.
+	_buy_button.release_focus()
+	_close_button.release_focus()
 	_shop.visible = false
 	get_tree().paused = false
 	refresh()
