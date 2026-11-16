@@ -290,7 +290,7 @@ Early prototypes are **incremental**. Each answers one primary design question a
 4. **P004 — Gold Spill & Theft** (concluded 2026-11-14, Iterate)
 5. **P005 — Mini Expedition / Extraction** (concluded 2026-11-15, Iterate)
 
-Next intended investigation: **P006**, meaningful rewards for successfully extracted gold (production priority; specification not yet approved). See the Prototype Log planning note and the Decision Log (2026-11-15).
+**P006 — Meaningful Extraction Rewards** concluded on 2026-11-16 with outcome Iterate. The integrated expedition-to-settlement reward loop showed promise. See the Prototype Log for findings and limitations. Combat Foundation is the next recommended investigation; its scope and prototype number are not yet approved.
 
 ### P001 Scope
 
