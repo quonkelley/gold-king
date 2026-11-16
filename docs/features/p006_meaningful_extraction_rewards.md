@@ -2,6 +2,7 @@
 
 **Document:** `docs/features/p006_meaningful_extraction_rewards.md`  
 **Status:** Approved feature specification for P006 planning (Quon, 2026-11-15) — **implementation not authorized**  
+**Status note (2026-11-16):** P006 was subsequently implemented on `feat/p006-meaningful-extraction-rewards` (final build `fcd69da`; the implementation authorization is not recorded in this file) and playtested by three people. The current prototype cycle is concluded (outcome: Iterate). This specification is otherwise unchanged and is kept as the historical record of the approved scope; see the P006 entry in `docs/GOLDKING_PROTOTYPE_LOG.md` for results.  
 **Prototype:** P006  
 **Prepared:** 2026-11-15  
 **Engine context:** Godot 4.7.2, typed GDScript; controlled 2.5D presentation  
