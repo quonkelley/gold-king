@@ -169,7 +169,7 @@ outline_size = 8
 text = "The King's Tent"
 
 [node name="Treasury" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -4)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -3.2)
 
 [node name="Chest" type="CSGBox3D" parent="Treasury"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
@@ -203,13 +203,13 @@ mesh = SubResource("CylinderMesh_pile_top")
 surface_material_override/0 = SubResource("Mat_gold")
 
 [node name="Caption" type="Label3D" parent="Treasury"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.1, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.75, 0)
 billboard = 1
 no_depth_test = true
 modulate = Color(1, 0.84, 0.25, 1)
 outline_modulate = Color(0.1, 0.07, 0.03, 1)
-font_size = 44
-outline_size = 10
+font_size = 64
+outline_size = 14
 text = "Treasury
 0 gold"
 
@@ -296,11 +296,14 @@ theme_override_font_sizes/font_size = 32
 text = "Treasury: 0"
 
 [node name="Notice" type="Label" parent="HUD"]
-anchors_preset = 10
+anchors_preset = 12
+anchor_top = 1.0
 anchor_right = 1.0
-offset_top = 72.0
-offset_bottom = 152.0
+anchor_bottom = 1.0
+offset_top = -200.0
+offset_bottom = -110.0
 grow_horizontal = 2
+grow_vertical = 0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.1, 0.07, 0.03, 1)
 theme_override_constants/outline_size = 8

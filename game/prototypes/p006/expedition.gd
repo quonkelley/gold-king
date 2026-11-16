@@ -72,9 +72,12 @@ func _ready() -> void:
 	# In P006, R only ever means "abandon"; the results panel is left with the explicit button.
 	_new_button.shortcut = null
 	_new_button.text = "Continue to Camp"
+	# Treasury right under "Gold secured"; the other P006 lines just above the time.
 	var box: Node = _new_button.get_parent()
+	box.move_child(_treasury_label, _secured_label.get_index() + 1)
+	for label: Label in [_bonus_label, _not_found_label, _merchant_label]:
+		box.move_child(label, _time_label.get_index())
 	for label: Label in _result_lines():
-		box.move_child(label, _new_button.get_index())
 		label.visible = false
 	_update_hints()
 
