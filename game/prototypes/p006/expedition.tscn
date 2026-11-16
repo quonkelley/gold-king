@@ -2,12 +2,16 @@
 
 [ext_resource type="PackedScene" path="res://game/prototypes/p005_mini_expedition_extraction.tscn" id="1_base"]
 [ext_resource type="Script" path="res://game/prototypes/p006/expedition.gd" id="2_script"]
+[ext_resource type="PackedScene" path="res://game/prototypes/p006/merchant.tscn" id="3_merchant"]
 
 [node name="P006Expedition" instance=ExtResource("1_base")]
 script = ExtResource("2_script")
 
 [node name="Note" parent="Results/Panel/Box" index="5"]
 text = "Secured gold is kept in your camp treasury."
+
+[node name="Merchant" parent="." instance=ExtResource("3_merchant")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.2, 0, -13.6)
 
 [node name="AbandonHint" type="Label" parent="HUD"]
 anchors_preset = 1
@@ -36,4 +40,10 @@ horizontal_alignment = 1
 [node name="NotFound" type="Label" parent="Results/Panel/Box"]
 theme_override_font_sizes/font_size = 22
 text = "Never picked up: 0"
+horizontal_alignment = 1
+
+[node name="MerchantNews" type="Label" parent="Results/Panel/Box"]
+theme_override_colors/font_color = Color(0.75, 1, 0.95, 1)
+theme_override_font_sizes/font_size = 22
+text = "The traveling merchant is heading to your camp."
 horizontal_alignment = 1

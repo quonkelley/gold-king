@@ -80,7 +80,7 @@ func refresh() -> void:
 	_chest_caption.text = "Treasury\n%d gold" % gold
 	for i in _hoard.get_child_count():
 		(_hoard.get_child(i) as Node3D).visible = i < hoard_thresholds.size() and gold >= hoard_thresholds[i]
-	_stall.visible = false
+	_stall.visible = session != null and session.merchant_recruited
 
 
 func hoard_stage() -> int:

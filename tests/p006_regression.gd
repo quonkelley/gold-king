@@ -29,6 +29,8 @@ const ROUTE_TO_LURES: Array[Vector3] = [
 	Vector3(1.6, 0, 9.2), Vector3(0.6, 0, 8.0), Vector3(3.5, 0, 1.5), Vector3(5.75, 0, -1.0), Vector3(5.75, 0, -7.6),
 	Vector3(3.5, 0, -9.0), Vector3(2.0, 0, -11.0)]
 const ENGAGE := Vector3(6.5, 0, -10.0)
+## Within the Branch A merchant's interact radius, clear of every pickup.
+const MERCHANT_SPOT := Vector3(-12.4, 0, -12.6)
 const ROUTE_HOME_FROM_B: Array[Vector3] = [Vector3(5.75, 0, -7.6), Vector3(5.75, 0, -1.0), Vector3(3.5, 0, 1.5), CAMP]
 
 var passes: int = 0
@@ -226,6 +228,14 @@ func focus_delay() -> void:
 	await process_frame
 
 
+func expected_hoard(gold: int) -> int:
+	var stage: int = 0
+	for t: int in scene().hoard_thresholds:
+		if gold >= t:
+			stage += 1
+	return stage
+
+
 func results_sum_ok() -> bool:
 	var r: Dictionary = scene().results
 	return r.secured + r.lost_to_thief + r.left_on_ground + r.not_found + r.get("bonus_left", 0) == 25 + r.get("bonus_generated", 0)
@@ -321,6 +331,63 @@ func _run() -> void:
 	check((scene().get_node("HUD/Notice") as Label).text == session.ABANDON_NOTICE and scene().get_node("HUD/Notice").visible,
 		"camp says nothing was secured")
 	check(not session.complete_expedition(session.run_id, 7, false), "an abandoned run cannot deposit later")
+
+	print("--- Treasury visual")
+	check(scene().hoard_stage() == expected_hoard(session.treasury), "hoard piles match treasury %d (stage %d)" % [session.treasury, scene().hoard_stage()])
+	check((scene().get_node("Treasury/Caption") as Label3D).text == "Treasury\n%d gold" % session.treasury, "chest caption shows the exact balance")
+	var hub: Node = scene()
+	check(flat(hub.get_node("Stall").global_position, hub.get_node("Departure").global_position) > 2.0 * hub.interact_radius,
+		"stall and departure interaction ranges never overlap")
+
+	print("--- Merchant: discovery is discarded by abandoning")
+	check(await depart(), "departure to find the merchant")
+	var merchant: Node3D = scene().get_node("Merchant")
+	check(flat(merchant.global_position, CAMP) > merchant.interact_radius + scene().extraction_radius, "merchant and camp ranges never overlap")
+	check(merchant.global_position.x < -1.0 and merchant.global_position.z < -7.0, "merchant stands in Branch A")
+	check(await walk_route(ROUTE_WEST.slice(0, 9)) == -1 and await walk_to(MERCHANT_SPOT), "walked to the merchant along the west route")
+	check(thief().state == thief().State.IDLE and not scene().encounter_used, "reaching the merchant does not involve the thief")
+	check(scene().can_meet_merchant() and scene().get_node("HUD/ExtractPrompt").visible
+		and (scene().get_node("HUD/ExtractPrompt") as Label).text == "E — Invite the merchant to your camp", "merchant prompt shown in reach")
+	var gold_before_meet: int = scene().gold_total
+	await tap_key(KEY_E)
+	check(scene().merchant_met and scene().gold_total == gold_before_meet and not scene().extracted, "E meets the merchant at no cost")
+	await tap_key(KEY_E)
+	check(scene().merchant_met and not scene().can_meet_merchant() and not scene().extracted, "meeting again does nothing")
+	check(not session.merchant_recruited, "recruitment is pending until extraction")
+	var old_exp: int = scene().get_instance_id()
+	await tap_key(KEY_R)
+	check(await await_switch(old_exp) and in_hub() and not session.merchant_recruited and not scene().get_node("Stall").visible,
+		"abandoning discards the pending discovery")
+
+	print("--- Merchant: zero-gold extraction recruits")
+	check(await depart(), "departure for recruitment")
+	check(scene().get_node("Merchant").visible and not scene().merchant_met, "merchant is back on the road for a fresh run")
+	teleport(MERCHANT_SPOT)
+	await wait(2)
+	await tap_key(KEY_E)
+	teleport(CAMP)
+	await wait(2)
+	check(scene().merchant_met and scene().gold_total == 0, "met the merchant carrying nothing")
+	var treasury_before_zero: int = session.treasury
+	await tap_key(KEY_E)
+	check(scene().extracted and session.merchant_recruited and session.treasury == treasury_before_zero, "0-gold extraction recruits the merchant")
+	check(scene().get_node("Results/Panel/Box/MerchantNews").visible, "results announce the merchant")
+	check(await continue_to_camp(), "back to camp")
+	check(scene().get_node("Stall").visible and (scene().get_node("HUD/Notice") as Label).text.contains("merchant"),
+		"stall appears with an arrival notice")
+
+	print("--- Merchant: persists and cannot be recruited twice")
+	check(await depart(), "departure after recruitment")
+	check(not scene().get_node("Merchant").visible, "recruited merchant is no longer on the road")
+	teleport(MERCHANT_SPOT)
+	await wait(2)
+	check(not scene().can_meet_merchant(), "cannot meet the recruited merchant again")
+	teleport(CAMP)
+	await wait(2)
+	await tap_key(KEY_E)
+	check(session.merchant_recruited and not scene().results.merchant_met, "merchant stays recruited")
+	check(await continue_to_camp() and scene().get_node("Stall").visible and scene().get_node("Stall").get_parent().get_children().filter(
+		func(n: Node) -> bool: return n.name.begins_with("Stall")).size() == 1, "still exactly one stall")
 
 	print("--- Expedition invariant")
 	check(invariant_breaks == 0 and frames_checked > 500,
