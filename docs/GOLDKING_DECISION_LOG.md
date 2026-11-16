@@ -400,6 +400,74 @@ The optional gold-powered heavy form and treasure/equipment encumbrance are **Ex
 
 ---
 
+## 2026-11-15 — Light, Primarily Automated Settlement Progression
+
+**Category:** Settlement Progression / Scope
+
+**Decision:**  
+GoldKing's current settlement direction remains light, primarily automated, and focused on supporting the expedition-action experience. Growth should visibly reflect the King's accomplishments without requiring routine construction or settlement maintenance.
+
+**Status:** Approved Direction (reaffirmed by Quon, 2026-11-15)
+
+**Reasoning:**  
+The settlement should feel increasingly alive, impressive, personal, and functional while preserving adventure, exploration, and action as central gameplay activities.
+
+**Existing Decisions Affected:**  
+Clarifies and reaffirms *Persistent Settlement Without City-Builder Maintenance* (2026-11-11). Does not overturn the rejection of traditional city-builder maintenance. Details are in `GOLDKING_GAMEPLAY_FOUNDATION.md` §6.
+
+Settlement characters/followers and specialist services are recorded there as **Experimental Ideas**; reputation, influence, and legendary status are **Open Questions**. Neither is approved by this decision.
+
+**Questions Still Open:**
+
+- Exact structures
+- Followers
+- Specialist services
+- Progression stages
+- Optional customization
+- Whether greater management depth becomes desirable later
+
+---
+
+## 2026-11-15 — Immediate Prototype Priority: Extraction Rewards (P006)
+
+**Category:** Production Priority / Prototype Sequencing
+
+**Decision:**  
+The next prototype investigation (P006) focuses on extraction rewards, before combat implementation begins.
+
+Research question: does giving successfully extracted gold a meaningful, persistent benefit improve:
+
+1. Extraction satisfaction
+2. Motivation to begin another expedition
+3. Return-or-continue decisions
+
+These outcomes should be evaluated separately.
+
+**Status:** Approved Direction (production/design priority, approved by Quon, 2026-11-15). This is **not** approval of a P006 feature specification.
+
+**Reasoning:**  
+P005 (Iterate) found that extraction was understood but the secured haul did not feel rewarding enough, and replay desire was moderate. The P005 closeout recommended investigating one meaningful benefit for extracted gold before expanding expedition size, enemy variety, or progression systems.
+
+**Existing Decisions Affected:**  
+Acts on the P005 Strong Recommendation (`GOLDKING_PROTOTYPE_LOG.md`, P005 §19). Does not change P005's outcome. No other decision changes.
+
+**Strong Recommendations / Prototype candidates (not approved):**
+
+- A visible growing hoard
+- One settlement milestone
+
+**Subsequent priority (Strong Recommendation, not authorized):** a combat-foundation experiment after P006. Its scope and prototype number are not set. Quon's current combat preferences are recorded in `GOLDKING_GAMEPLAY_FOUNDATION.md` §9 as unresolved exploration, not Approved Direction.
+
+**Questions Still Open:**
+
+- The exact reward or benefit
+- Thresholds
+- Number of expeditions required
+- Persistence implementation
+- Milestone behavior
+
+---
+
 # Deferred Decisions
 
 ## 2026-11-11 — Procedural Generation
@@ -569,6 +637,10 @@ Individual encounters may still use controlled arenas when appropriate.
 - Treasure mechanics
 - Equipment structure
 - Final settlement size
+- Settlement characters, followers, and specialist services (Experimental Ideas; see Gameplay Foundation §6)
+- Whether reputation, influence, or legendary status is communicated mechanically, and how
+- Combat identity: weapons, relic combinations, defensive mechanics (current preferences in Gameplay Foundation §9)
+- Expedition milestone layers and regional variety (Experimental Ideas; see Gameplay Foundation §10)
 - Whether the settlement becomes a new kingdom
 - Potential old-kingdom vs. new-kingdom narrative choice
 - Final visual style
