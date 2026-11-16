@@ -36,6 +36,10 @@ const ROUTE_NINE: Array[Vector3] = [
 	Vector3(-1.6, 0, 9.2), Vector3(-0.6, 0, 8.0), Vector3(0.6, 0, 8.0), Vector3(1.6, 0, 9.2), Vector3(0.6, 0, 8.0),
 	Vector3(3.5, 0, 1.5), Vector3(5.75, 0, -1.0), Vector3(3.5, 0, 1.5), Vector3(0.6, 0, 8.0), Vector3(-0.6, 0, 8.0),
 	Vector3(-4.5, 0, 3.0), Vector3(-8.5, 0, 0.5), Vector3(-12.5, 0, -1.5), Vector3(-8.5, 0, 0.5), Vector3(-4.5, 0, 3.0), CAMP]
+## West of the east-trail container, King facing right (the default), within sword reach.
+const EAST_CHEST_SPOT := Vector3(6.4, 0, 1.0)
+## South of the Branch B container, King facing right, within sword reach.
+const B_CHEST_SPOT := Vector3(3.0, 0, -12.4)
 ## In front of the camp stall's counter, inside its interact radius.
 const STALL_SPOT := Vector3(5.5, 0, -1.6)
 const ROUTE_HOME_FROM_B: Array[Vector3] = [Vector3(5.75, 0, -7.6), Vector3(5.75, 0, -1.0), Vector3(3.5, 0, 1.5), CAMP]
@@ -233,6 +237,14 @@ func continue_to_camp() -> bool:
 func focus_delay() -> void:
 	await create_timer(scene().results_focus_delay + 0.15).timeout
 	await process_frame
+
+
+## One attack press read on a physics frame, as the sword polls it.
+func attack() -> void:
+	Input.action_press("attack")
+	await step()
+	Input.action_release("attack")
+	await step()
 
 
 ## From the hub: walk to the stall and press E.
@@ -465,6 +477,116 @@ func _run() -> void:
 	await tap_key(KEY_ENTER)
 	check(session.sword_owned and session.treasury == 1, "21 gold: exactly 20 deducted, 1 left")
 	scene().close_shop()
+
+	print("--- Sword: unavailable before purchase")
+	await new_session()
+	check(await depart(), "departure without a sword")
+	var sword: Node3D = player().get_node("Sword")
+	var east_chest: Node = scene().get_node("Containers/EastTrailChest")
+	var b_chest: Node = scene().get_node("Containers/BranchBChest")
+	check(scene().get_node("Containers").get_child_count() == 2 and not east_chest.broken and not b_chest.broken, "two intact containers")
+	check(flat(east_chest.global_position, Vector3(7.5, 0, 1)) < 0.01 and b_chest.global_position.x > 0.0 and b_chest.global_position.z < -7.0,
+		"one container on the east trail, one in Branch B")
+	check(not sword.owned and not sword.visible and not scene().get_node("HUD/AttackHint").visible, "no sword or swing hint before purchase")
+	teleport(EAST_CHEST_SPOT)
+	await wait(2)
+	await attack()
+	await tap_key(KEY_E)
+	check(not east_chest.broken and sword.swings == 0 and sword.swing() == -1 and scene().bonus_generated == 0 and not scene().extracted,
+		"attack and E do nothing to a container without the sword")
+	var abandon_id: int = scene().get_instance_id()
+	await tap_key(KEY_R)
+	await await_switch(abandon_id)
+
+	print("--- Sword: breaks each container once; bonus coins collected")
+	# Test-only setup: ownership is granted directly; purchasing is covered above.
+	session.sword_owned = true
+	check(await depart(), "departure with the sword")
+	sword = player().get_node("Sword")
+	east_chest = scene().get_node("Containers/EastTrailChest")
+	b_chest = scene().get_node("Containers/BranchBChest")
+	check(sword.owned and sword.visible and scene().get_node("HUD/AttackHint").visible
+		and (scene().get_node("HUD/AttackHint") as Label).text == "J / Space — Swing sword", "sword and swing hint shown when owned")
+	check(not east_chest.broken and not b_chest.broken and scene().bonus_generated == 0, "containers reset for the new run")
+	teleport(EAST_CHEST_SPOT)
+	await wait(2)
+	await attack()
+	check(sword.swings == 1 and east_chest.broken and not b_chest.broken, "one swing opens the east-trail container")
+	check(scene().bonus_generated == 3 and scene().bonus_ground.size() == 3 and scene().get_node("BonusCoins").get_child_count() == 3,
+		"it releases exactly 3 loose bonus coins")
+	var hopping: Node = scene().bonus_ground[0]
+	hopping._on_body_entered(player())
+	check(not hopping.collectable and scene().bonus_collected == 0 and scene().gold_total == 0, "a bonus coin cannot be taken mid-hop")
+	await wait(20)
+	await attack()
+	check(scene().bonus_generated == 3 and sword.swings == 2, "a broken container releases nothing more")
+	for spot in [Vector3(7.5, 0, 2.1), Vector3(8.45, 0, 0.45), Vector3(6.55, 0, 0.45)]:
+		await walk_to(spot)
+		await wait(2)
+	check(scene().bonus_collected == 3 and scene().bonus_ground.is_empty() and scene().gold_total == 3 and scene().level_collected == 3,
+		"all 3 bonus coins collected through the normal path")
+	check((scene().get_node("HUD/GoldLabel") as Label).text == "Gold: 3", "HUD counts bonus gold")
+	check(scene().uncollected_level_gold() == 25 and scene().get_node("Gold").get_child_count() == 25, "the 25 standard coins are untouched")
+	check(is_equal_approx(await top_speed(Vector2.LEFT), player().move_speed), "carrying bonus gold does not slow the King")
+
+	print("--- Bonus gold through the thief")
+	await walk_to(Vector3(3.5, 0, 1.5))
+	check(await walk_route(ROUTE_TO_LURES.slice(3)) == -1 and await walk_to(B_CHEST_SPOT), "walked to the Branch B container")
+	check(thief().state == thief().State.IDLE, "breaking the Branch B container does not need the thief")
+	await attack()
+	check(b_chest.broken and scene().bonus_generated == 6, "Branch B container opens: 6 bonus generated")
+	await wait(20)
+	var first_b: Node = scene().bonus_ground[0]
+	var gold_now: int = scene().gold_total
+	check(scene()._try_take_bonus(first_b) and not scene()._try_take_bonus(first_b) and scene().gold_total == gold_now + 1,
+		"a bonus coin can be taken only once")
+	for spot in [Vector3(3.0, 0, -12.2), Vector3(3.95, 0, -13.85), Vector3(2.05, 0, -13.85)]:
+		await walk_to(spot)
+		await wait(2)
+	check(scene().bonus_collected == 6 and scene().bonus_ground.is_empty(), "all 6 bonus coins collected")
+	var carried_before_thief: int = scene().gold_total
+	await walk_to(ENGAGE)
+	check(await wait_until(func() -> bool: return thief().state == thief().State.PAUSE, 400) and scene().spilled == mini(3, carried_before_thief),
+		"thief contact spills carried gold that includes bonus gold")
+	await wait_until(func() -> bool: return thief().state == thief().State.GONE, 900)
+	await wait(30)
+	for coin in scene().ground.duplicate():
+		if is_instance_valid(coin):
+			await walk_to(coin.global_position, 360, 0.2)
+			await wait(2)
+	check(scene().ground.is_empty() and scene().expedition_ok(), "spilled gold recovered or claimed; accounting balanced (outcome: %s)" % scene().outcome)
+	await walk_route(ROUTE_HOME_FROM_B)
+	var carried_at_end: int = scene().gold_total
+	var before_b: int = session.treasury
+	check(await extract_at_camp(), "extracted after the thief")
+	r = scene().results
+	check(r.secured == carried_at_end and r.bonus_generated == 6 and r.bonus_collected == 6 and r.bonus_left == 0
+		and r.lost_to_thief == scene().lost + scene().thief_held and results_sum_ok(),
+		"results: secured %d, lost %d, bonus 6/6, totals add up to 25 + 6" % [r.secured, r.lost_to_thief])
+	check(session.treasury == before_b + r.secured and session.deposit_count == 1, "deposit equals carried gold, once")
+	check(scene().get_node("Results/Panel/Box/Bonus").visible, "results show the bonus line")
+	check(await continue_to_camp(), "back to camp")
+
+	print("--- Loose bonus coins at extraction are not deposited")
+	var before_loose: int = session.treasury
+	check(await depart(), "departure to leave bonus gold behind")
+	check(not scene().get_node("Containers/EastTrailChest").broken, "containers reset again")
+	teleport(EAST_CHEST_SPOT)
+	await wait(2)
+	await attack()
+	teleport(CAMP)
+	await wait(30)
+	check(scene().bonus_ground.size() == 3 and scene().gold_total == 0, "3 bonus coins left loose")
+	await tap_key(KEY_E)
+	r = scene().results
+	check(scene().extracted and r.secured == 0 and r.bonus_left == 3 and r.bonus_generated == 3 and results_sum_ok(),
+		"results count loose bonus gold as left behind")
+	check(session.treasury == before_loose, "loose bonus gold is not deposited")
+	check((scene().get_node("Results/Panel/Box/Left") as Label).text == "Left on the ground: 3 (3 bonus)", "results show the loose bonus coins")
+	for coin in scene().bonus_ground:
+		coin._on_body_entered(player())
+	check(scene().bonus_collected == 0 and scene().gold_total == 0, "bonus coins cannot be taken after extraction")
+	check(await continue_to_camp(), "back to camp")
 
 	print("--- Expedition invariant")
 	check(invariant_breaks == 0 and frames_checked > 500,
