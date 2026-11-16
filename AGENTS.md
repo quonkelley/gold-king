@@ -259,7 +259,10 @@ Check the reported version before implementation work. If it does not report 4.7
 <godot> --headless --path . --script res://tests/p003_regression.gd
 <godot> --headless --path . --script res://tests/p004_regression.gd
 <godot> --headless --path . --script res://tests/p005_regression.gd
+<godot> --headless --path . --script res://tests/p006_regression.gd
 ```
+
+The default main scene (F5) is P006. To play an earlier prototype, open its scene in `game/prototypes/` and use Run Current Scene (F6).
 
 Each prints `PASS`/`FAIL` per check and a final count, and exits with code 1 if any check fails. They verify mechanical behavior only and never replace human playtesting.
 

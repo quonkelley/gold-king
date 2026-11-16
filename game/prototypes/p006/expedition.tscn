@@ -1,0 +1,90 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://game/prototypes/p005_mini_expedition_extraction.tscn" id="1_base"]
+[ext_resource type="Script" path="res://game/prototypes/p006/expedition.gd" id="2_script"]
+[ext_resource type="PackedScene" path="res://game/prototypes/p006/merchant.tscn" id="3_merchant"]
+[ext_resource type="PackedScene" path="res://game/prototypes/p006/sword.tscn" id="4_sword"]
+[ext_resource type="PackedScene" path="res://game/prototypes/p006/treasure_container.tscn" id="5_container"]
+[ext_resource type="Script" path="res://game/prototypes/p006/panel_input.gd" id="6_guard"]
+
+[node name="P006Expedition" instance=ExtResource("1_base")]
+script = ExtResource("2_script")
+
+[node name="Results" parent="."]
+script = ExtResource("6_guard")
+
+[node name="Note" parent="Results/Panel/Box" index="5"]
+text = "Secured gold is kept in your camp treasury."
+
+[node name="Merchant" parent="." instance=ExtResource("3_merchant")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.2, 0, -13.6)
+
+[node name="Sword" parent="Player" node_paths=PackedStringArray("king_visual") instance=ExtResource("4_sword")]
+king_visual = NodePath("../Visual")
+
+[node name="Containers" type="Node3D" parent="."]
+
+[node name="EastTrailChest" parent="Containers" instance=ExtResource("5_container")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.5, 0, 1)
+
+[node name="BranchBChest" parent="Containers" instance=ExtResource("5_container")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, -13.3)
+
+[node name="BonusCoins" type="Node3D" parent="."]
+
+[node name="AttackHint" type="Label" parent="HUD"]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -560.0
+offset_top = 48.0
+offset_right = -24.0
+offset_bottom = 80.0
+grow_horizontal = 0
+theme_override_colors/font_color = Color(0.85, 0.92, 1, 1)
+theme_override_colors/font_outline_color = Color(0.1, 0.07, 0.03, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 18
+text = "J / Space — Swing sword"
+horizontal_alignment = 2
+
+[node name="AbandonHint" type="Label" parent="HUD"]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -560.0
+offset_top = 16.0
+offset_right = -24.0
+offset_bottom = 48.0
+grow_horizontal = 0
+theme_override_colors/font_color = Color(1, 0.9, 0.85, 1)
+theme_override_colors/font_outline_color = Color(0.1, 0.07, 0.03, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 18
+text = "R — Abandon expedition (carried gold is lost)"
+horizontal_alignment = 2
+
+[node name="Treasury" type="Label" parent="Results/Panel/Box"]
+theme_override_colors/font_color = Color(1, 0.84, 0.25, 1)
+theme_override_colors/font_outline_color = Color(0.1, 0.07, 0.03, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 26
+text = "Treasury: 0 + 0 = 0"
+horizontal_alignment = 1
+
+[node name="NotFound" type="Label" parent="Results/Panel/Box"]
+theme_override_font_sizes/font_size = 22
+text = "Never picked up: 0"
+horizontal_alignment = 1
+
+[node name="MerchantNews" type="Label" parent="Results/Panel/Box"]
+theme_override_colors/font_color = Color(0.75, 1, 0.95, 1)
+theme_override_font_sizes/font_size = 22
+text = "The traveling merchant is heading to your camp."
+horizontal_alignment = 1
+
+[node name="Bonus" type="Label" parent="Results/Panel/Box"]
+theme_override_colors/font_color = Color(0.85, 0.92, 1, 1)
+theme_override_font_sizes/font_size = 22
+text = "Bonus gold from chests: 0 collected of 0"
+horizontal_alignment = 1

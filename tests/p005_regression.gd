@@ -262,7 +262,10 @@ func _run() -> void:
 	var t = thief()
 
 	print("--- Scene and initial state")
-	check(ProjectSettings.get_setting("application/run/main_scene") == P005, "main scene is P005")
+	# The default main scene moved to P006 on 2026-11-15 (checked in tests/p006_regression.gd). This
+	# suite keeps exercising P005 itself: confirm it loaded the real P005 scene and controller.
+	check(scene.scene_file_path == P005 and scene.get_script().resource_path == "res://game/prototypes/p005_mini_expedition_extraction.gd",
+		"P005 scene and controller loaded directly")
 	var coins: Array = scene.get_node("Gold").get_children()
 	var all_one := true
 	var by_area: Dictionary = {}
