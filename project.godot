@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Gold King"
-run/main_scene="res://game/prototypes/p005_mini_expedition_extraction.tscn"
+run/main_scene="res://game/prototypes/p006_meaningful_extraction_rewards.tscn"
 config/features=PackedStringArray("4.7", "Mobile")
 config/icon="res://icon.svg"
 

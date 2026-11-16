@@ -1,0 +1,309 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game/prototypes/p006/camp_hub.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://game/player/player.tscn" id="2_player"]
+[ext_resource type="Script" path="res://game/prototypes/p001_follow_camera.gd" id="3_camera"]
+[ext_resource type="PackedScene" path="res://game/prototypes/p006/merchant.tscn" id="4_merchant"]
+
+[sub_resource type="Environment" id="Environment_camp"]
+background_mode = 1
+background_color = Color(0.55, 0.6, 0.65, 1)
+ambient_light_source = 2
+ambient_light_color = Color(1, 1, 1, 1)
+ambient_light_energy = 0.5
+
+[sub_resource type="StandardMaterial3D" id="Mat_ground"]
+albedo_color = Color(0.47, 0.45, 0.36, 1)
+
+[sub_resource type="StandardMaterial3D" id="Mat_fence"]
+albedo_color = Color(0.42, 0.3, 0.2, 1)
+
+[sub_resource type="StandardMaterial3D" id="Mat_tent"]
+albedo_color = Color(0.72, 0.2, 0.16, 1)
+
+[sub_resource type="StandardMaterial3D" id="Mat_dark"]
+albedo_color = Color(0.18, 0.1, 0.08, 1)
+
+[sub_resource type="StandardMaterial3D" id="Mat_wood"]
+albedo_color = Color(0.45, 0.3, 0.18, 1)
+
+[sub_resource type="StandardMaterial3D" id="Mat_gold"]
+albedo_color = Color(1, 0.8, 0.22, 1)
+metallic = 0.6
+roughness = 0.35
+emission_enabled = true
+emission = Color(0.45, 0.32, 0.05, 1)
+
+[sub_resource type="StandardMaterial3D" id="Mat_canopy"]
+albedo_color = Color(0.16, 0.55, 0.52, 1)
+
+[sub_resource type="StandardMaterial3D" id="Mat_road"]
+albedo_color = Color(0.66, 0.55, 0.38, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_pile_small"]
+top_radius = 0.2
+bottom_radius = 0.38
+height = 0.22
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_pile_mid"]
+top_radius = 0.25
+bottom_radius = 0.5
+height = 0.38
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_pile_top"]
+top_radius = 0.05
+bottom_radius = 0.55
+height = 0.5
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_road"]
+top_radius = 1.6
+bottom_radius = 1.6
+height = 0.04
+
+[node name="P006CampHub" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_camp")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, -0.409576, 0.286788, 0, 0.573576, 0.819152, -0.5, -0.709406, 0.496732, 0, 10, 0)
+shadow_enabled = true
+
+[node name="Geometry" type="Node3D" parent="."]
+
+[node name="Ground" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+use_collision = true
+size = Vector3(20, 1, 16)
+material = SubResource("Mat_ground")
+
+[node name="FenceNorth" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, -7.75)
+use_collision = true
+size = Vector3(20, 0.8, 0.5)
+material = SubResource("Mat_fence")
+
+[node name="FenceSouthWest" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0.3, 7.75)
+use_collision = true
+size = Vector3(8, 0.6, 0.5)
+material = SubResource("Mat_fence")
+
+[node name="FenceSouthEast" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0.3, 7.75)
+use_collision = true
+size = Vector3(8, 0.6, 0.5)
+material = SubResource("Mat_fence")
+
+[node name="RoadBlock" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 7.75)
+use_collision = true
+size = Vector3(4, 0.6, 0.5)
+material = SubResource("Mat_road")
+
+[node name="FenceWest" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.75, 0.4, 0)
+use_collision = true
+size = Vector3(0.5, 0.8, 16)
+material = SubResource("Mat_fence")
+
+[node name="FenceEast" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.75, 0.4, 0)
+use_collision = true
+size = Vector3(0.5, 0.8, 16)
+material = SubResource("Mat_fence")
+
+[node name="Tent" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.5, 0, -3.5)
+
+[node name="Body" type="CSGPolygon3D" parent="Tent"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.2)
+use_collision = true
+polygon = PackedVector2Array(-1.5, 0, 1.5, 0, 0, 2)
+depth = 2.4
+material = SubResource("Mat_tent")
+
+[node name="Flap" type="MeshInstance3D" parent="Tent"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 1.22)
+mesh = SubResource("CylinderMesh_pile_small")
+skeleton = NodePath("")
+surface_material_override/0 = SubResource("Mat_dark")
+
+[node name="Pennant" type="CSGBox3D" parent="Tent"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.35, 2.35, 0)
+size = Vector3(0.6, 0.35, 0.04)
+material = SubResource("Mat_gold")
+
+[node name="Pole" type="CSGCylinder3D" parent="Tent"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.25, 0)
+radius = 0.05
+height = 2.6
+material = SubResource("Mat_wood")
+
+[node name="Caption" type="Label3D" parent="Tent"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.9, 0)
+billboard = 1
+no_depth_test = true
+modulate = Color(1, 0.92, 0.85, 1)
+outline_modulate = Color(0.1, 0.07, 0.03, 1)
+font_size = 36
+outline_size = 8
+text = "The King's Tent"
+
+[node name="Treasury" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -4)
+
+[node name="Chest" type="CSGBox3D" parent="Treasury"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
+use_collision = true
+size = Vector3(1.3, 0.8, 0.85)
+material = SubResource("Mat_wood")
+
+[node name="Band" type="CSGBox3D" parent="Treasury"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.62, 0)
+size = Vector3(1.34, 0.1, 0.89)
+material = SubResource("Mat_gold")
+
+[node name="Hoard" type="Node3D" parent="Treasury"]
+
+[node name="Pile1" type="MeshInstance3D" parent="Treasury/Hoard"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.15, 0.11, 0.3)
+visible = false
+mesh = SubResource("CylinderMesh_pile_small")
+surface_material_override/0 = SubResource("Mat_gold")
+
+[node name="Pile2" type="MeshInstance3D" parent="Treasury/Hoard"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, 0.19, 0.3)
+visible = false
+mesh = SubResource("CylinderMesh_pile_mid")
+surface_material_override/0 = SubResource("Mat_gold")
+
+[node name="Pile3" type="MeshInstance3D" parent="Treasury/Hoard"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.05, 0)
+visible = false
+mesh = SubResource("CylinderMesh_pile_top")
+surface_material_override/0 = SubResource("Mat_gold")
+
+[node name="Caption" type="Label3D" parent="Treasury"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.1, 0)
+billboard = 1
+no_depth_test = true
+modulate = Color(1, 0.84, 0.25, 1)
+outline_modulate = Color(0.1, 0.07, 0.03, 1)
+font_size = 44
+outline_size = 10
+text = "Treasury
+0 gold"
+
+[node name="Stall" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.5, 0, -3)
+visible = false
+
+[node name="Counter" type="CSGBox3D" parent="Stall"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0.4)
+use_collision = true
+size = Vector3(2.2, 0.9, 0.7)
+material = SubResource("Mat_wood")
+
+[node name="PoleWest" type="CSGCylinder3D" parent="Stall"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.15, 1.15, 0.6)
+radius = 0.05
+height = 2.3
+material = SubResource("Mat_wood")
+
+[node name="PoleEast" type="CSGCylinder3D" parent="Stall"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.15, 1.15, 0.6)
+radius = 0.05
+height = 2.3
+material = SubResource("Mat_wood")
+
+[node name="Canopy" type="CSGBox3D" parent="Stall"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.35, 0.1)
+size = Vector3(2.6, 0.12, 1.6)
+material = SubResource("Mat_canopy")
+
+[node name="Merchant" parent="Stall" instance=ExtResource("4_merchant")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.4)
+idle_caption = "Merchant's Stall"
+
+[node name="Departure" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 6)
+
+[node name="Road" type="MeshInstance3D" parent="Departure"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 0)
+cast_shadow = 0
+mesh = SubResource("CylinderMesh_road")
+surface_material_override/0 = SubResource("Mat_road")
+
+[node name="Post" type="CSGCylinder3D" parent="Departure"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0.9, 0)
+radius = 0.07
+height = 1.8
+material = SubResource("Mat_wood")
+
+[node name="Sign" type="CSGBox3D" parent="Departure"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 1.55, 0)
+size = Vector3(1, 0.4, 0.06)
+material = SubResource("Mat_wood")
+
+[node name="Caption" type="Label3D" parent="Departure"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+billboard = 1
+no_depth_test = true
+modulate = Color(1, 1, 1, 1)
+outline_modulate = Color(0.1, 0.07, 0.03, 1)
+font_size = 40
+outline_size = 10
+text = "Expedition Road"
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2)
+
+[node name="Camera" type="Camera3D" parent="." node_paths=PackedStringArray("target")]
+fov = 45.0
+script = ExtResource("3_camera")
+target = NodePath("../Player")
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="TreasuryLabel" type="Label" parent="HUD"]
+offset_left = 24.0
+offset_top = 16.0
+offset_right = 324.0
+offset_bottom = 64.0
+theme_override_colors/font_color = Color(1, 0.84, 0.25, 1)
+theme_override_colors/font_outline_color = Color(0.1, 0.07, 0.03, 1)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 32
+text = "Treasury: 0"
+
+[node name="Notice" type="Label" parent="HUD"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 72.0
+offset_bottom = 152.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.1, 0.07, 0.03, 1)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 24
+text = "Notice"
+horizontal_alignment = 1
+
+[node name="Prompt" type="Label" parent="HUD"]
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -96.0
+offset_bottom = -48.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.1, 0.07, 0.03, 1)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 26
+text = "E — Depart on an expedition"
+horizontal_alignment = 1
+vertical_alignment = 1
