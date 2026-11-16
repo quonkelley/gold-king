@@ -143,6 +143,7 @@ Do not rewrite an interpretation as if it were an observed fact.
 | P003 | Gold Power vs. Burden | Can increasing wealth feel powerful and dangerous at the same time? | Concluded (current cycle) | Iterate (automatic movement burden superseded; wealth-driven external danger approved for future testing) | 2026-11-14 |
 | P004 | Gold Spill & Theft | Can the threat of losing collected gold create exciting, readable tension without making the player regret collecting it? | Concluded (current cycle) | Iterate (promising external-threat mechanic; future expansion deferred) | 2026-11-14 |
 | P005 | Mini Expedition / Extraction | Can a short expedition combining exploration, gold collection, external danger, and voluntary extraction create a satisfying loop the player wants to repeat? | Concluded (current cycle) | Iterate (promising expedition loop; extraction rewards need development) | 2026-11-15 |
+| P006 | Meaningful Extraction Rewards | Does giving gold brought home from an expedition a persistent, meaningful use make extraction more satisfying and make the player want to embark on another expedition? | Concluded (current cycle) | Iterate (promising integrated expedition-to-settlement reward loop, Medium; individual elements, replay, and return-or-continue effects Low) | 2026-11-16 |
 
 This index should remain compact. Detailed findings belong in each prototype entry below.
 
@@ -1841,6 +1842,240 @@ Report enjoyment and the strength of the return-or-continue decision separately.
 
 ---
 
+# Planned Prototype 006
+
+## P006 — Meaningful Extraction Rewards
+
+**Status:** Concluded for the current prototype cycle (2026-11-16). Outcome: Iterate (§18). Not Validated; not production-ready.  
+**Date Started:** 2026-11-15 (specification approved)  
+**Date Concluded:** 2026-11-16  
+**Build / Commit:** `fcd69da` (branch `feat/p006-meaningful-extraction-rewards`)  
+**Testers:** Quon (developer) and two coworkers outside the development team: three people in total. Findings were summarized by Quon on 2026-11-16; no individual playtest transcripts, ratings, or Output lines were supplied.  
+**Related Decision(s):**
+- Immediate Prototype Priority: Extraction Rewards (P006) (Approved Direction, 2026-11-15)
+- Expedition and Settlement Gameplay Loops (Approved Direction)
+- Light, Primarily Automated Settlement Progression (Approved Direction, reaffirmed 2026-11-15)
+- Gold Power With Wealth-Driven External Danger (Approved Direction, 2026-11-14)
+- Losing Unsecured Gold and Treasure (Prototype Assumption; not tested by P006)
+- P005 (Iterate) reused as the expedition baseline; its findings are unchanged.
+
+**Related Feature Spec:** `docs/features/p006_meaningful_extraction_rewards.md`
+
+### 1. Primary Design Question
+
+Does giving gold brought home from an expedition a persistent, meaningful use make extraction more satisfying and make the player want to embark on another expedition?
+
+The spec asks for three outcomes to be evaluated separately: (1) extraction satisfaction, (2) replay motivation, and (3) whether the 20-gold purchase goal affects return-or-continue decisions.
+
+### 2. Hypothesis
+
+From the spec: securing gold into a persistent in-session treasury, recruiting a merchant who then appears at camp, and spending secured gold on a first sword with a small functional use will make extraction feel like an accomplishment and create a desire to depart again. The purchase goal may or may not change when the player chooses to return; improving the first two outcomes without the third would be a mixed but useful result.
+
+### 3. Why This Matters
+
+P005 (Iterate) found that the expedition loop was promising but that a secured haul with no further use did not feel rewarding (satisfaction of securing the haul 3/5; desire for another expedition 3/5, one tester). P006 is the first test of the settlement half of the approved expedition ↔ settlement loop and the first time secured gold has any persistent use.
+
+### 4. Prototype Scope
+
+Approved by Quon (spec, 2026-11-15), as Prototype Assumptions for testing:
+- A small, separate playable camp hub with the King's tent, a treasury chest with an exact balance and coarse fill stages, a departure point, and a merchant stall that appears only after the merchant is discovered and an extraction succeeds.
+- A P006 expedition derived from P005, with the 25 standard pickups and the P004 thief unchanged.
+- An optional merchant in Branch A, recruited by interaction at zero gold cost, confirmed only by a successful extraction.
+- Depositing the extracted haul into the treasury exactly once, with a results → treasury → hub return flow and voluntary redeparture.
+- A one-item shop: the First Sword for 20 secured gold.
+- One sword swing and two optional breakable treasure containers that release bonus gold after purchase.
+- In-session persistence only.
+
+### 5. Out of Scope
+
+From spec §5: a combat system, fightable enemies, health, or damage; inventory or equipment frameworks; multiple items, stock, selling, or trading; city-builder features, workers, construction, or reputation; save/load or cross-launch persistence; new regions, enemies, or thief scaling; P003 movement slowdown; expedition failure or loss of secured treasury; production art, final merchant identity or dialogue, sword powers, or new story canon.
+
+### 6. Variables Being Tested
+
+Taken together, as one integrated reward loop (spec Risk 1): persistent secured treasury, visible hoard growth, merchant discovery and arrival, a purchasable sword with a 20-gold price, and a minimal functional use for the sword. The design does not isolate the effect of any one element.
+
+### 7. Controls / Things Held Constant
+
+- P001 movement and camera; ordinary carried gold does not slow the King.
+- P005's 25 standard pickups, their layout, the two branches, camp extraction rules, and the P004 thief tuning, ledger, spill, theft, and recovery rules.
+- The P005 scene and script are unchanged; P006 extends them in a separate derivative scene.
+
+### 8. Success Signals
+
+From spec §7 (directional, not hard gates): the player understands that returned gold remains available in the session; identifies a desirable purchase target; chooses to return and purchase; expresses satisfaction with ownership; willingly uses the sword and departs again; deposit and replay ratings improve over the player's own P005 report.
+
+### 9. Failure Signals
+
+From spec §7: merchant discovery eclipses extraction; repeated runs on the same map feel like grind; the treasury increase is unclear or less rewarding than the purchase itself; the sword feels like an arbitrary key; the player cannot understand where to go or why to buy the sword. **Inconclusive** if interface problems or bugs prevent a fair purchase/use experience, the merchant is never found, or too many changes make the result unexplainable.
+
+### 10. Optional Measurements
+
+One printed `P006 expedition` line per extraction (run, secured, treasury before → after, standard and bonus gold, thief losses, merchant met, time, sword ownership) and one `P006 purchase` line per purchase. The spec §7 table proposed ratings for deposit satisfaction and replay desire with a directional target of ≥4/5 against P005's 3/5.
+
+None of these measurements was supplied for the human playtest (§12).
+
+### 11. Test Setup
+
+**Entry point:** `game/prototypes/p006_meaningful_extraction_rewards.tscn` is the project main scene (F5). Earlier prototypes open with Run Current Scene (F6).
+
+**Structure (prototype scene split, not world architecture):** the session root (`p006_meaningful_extraction_rewards.gd`) holds the in-session state (treasury, merchant recruited, sword owned, run identity) and shows one child at a time: the camp hub (`game/prototypes/p006/camp_hub.tscn`) or an expedition (`game/prototypes/p006/expedition.tscn`). Nothing is written to disk; quitting resets everything. The expedition script extends the P005 controller and overrides only the P006 hooks; run on its own it falls back to P005 reload behaviour.
+
+**Camp hub:** the King's tent, a treasury chest with a caption and a HUD line showing the exact balance, three hoard piles beside the chest that appear at 1, 10, and 20 spendable gold (so they shrink after a purchase), an "Expedition Road" departure point, and a merchant stall that is hidden until recruited. Interact (E / gamepad bottom button) within 2.2 m departs or opens the shop. A notice reports arrivals (for example, the merchant joining). A HUD line "First Sword — owned" appears once the sword is bought; the sword itself is not shown on the King in the hub.
+
+**Expedition:** P005's layout, 25 pickups, thief, and manual extraction at the field camp, starting each run with 0 carried. Additions:
+- **Merchant** in Branch A's north-west chamber. Interact invites them ("I'll set up at your camp — if you make it back."); recruitment costs nothing and is confirmed only by a successful extraction, including a 0-gold extraction.
+- **Two treasure containers:** one on the east trail (visible before the sword is owned) and one in Branch B. Only the sword opens them, once each per run; each releases **3** bonus coins that must be collected like ordinary gold.
+- **Results:** gold secured, the treasury as "before + deposited = after", gold lost to the thief, left on the ground, never picked up, bonus gold collected of generated, merchant news, time, and a **Continue to Camp** button. The deposit happens once, guarded by run identity.
+- **Abandon:** R (gamepad Back) abandons the run, secures nothing, discards the pending merchant discovery, and returns to camp with a notice.
+
+**Shop:** item and price ("First Sword — 20 gold"), current treasury, and **Buy (20 gold)**, **Not enough gold (need N more)**, or **Owned**, with **Close (Esc)**. A purchase subtracts exactly 20 once. A 0.3 s focus delay prevents the opening press from buying.
+
+**Sword:** a provisional `attack` action — J or Space, gamepad west face button (X). One swing with a 0.3 s cooldown and a small sphere hit (1.1 m reach) on the side the King faces. It only opens P006 containers; there are no enemies or damage.
+
+**Panel input fix (`fcd69da`):** Space is bound to both `attack` and Godot's built-in `ui_accept`, so it could press a focused Buy or Continue button. While a P006 shop or results panel is visible, keys that are both `attack` and `ui_accept` are now consumed, and the gamepad interact button presses the focused enabled button (the project's `ui_accept` has no gamepad binding). Enter and mouse clicks are unchanged. P001–P005 input is unchanged.
+
+**Gold accounting:** the P004 ledger is unchanged. Loose bonus coins are tracked separately; once collected they are ordinary carried gold. The P006 invariant checked each frame is: carried + spilled on ground + thief-held + lost + uncollected standard + loose bonus = 25 + bonus generated.
+
+**Starting values (Prototype Assumptions; none playtest-validated):**
+
+| Parameter | Value |
+|---|---|
+| Sword price | 20 secured gold |
+| Bonus gold per container | 3 (2 containers; 6 per sword-owned run) |
+| Hoard pile thresholds | 1, 10, 20 spendable gold |
+| Hub interact radius / merchant interact radius | 2.2 m / 2.0 m |
+| Sword cooldown / reach | 0.3 s / 1.1 m |
+| Shop focus delay | 0.3 s |
+| Arrival notice duration | 5.0 s |
+| P005 / P004 values | unchanged (see the P005 entry §11) |
+
+**Mechanical validation (previously reported; not rerun during this closeout):** the implementation report for `fcd69da` stated that the committed headless regression suites passed under Godot 4.7.2:
+
+| Suite | Passed | Failed |
+|---|---:|---:|
+| `tests/p003_regression.gd` | 114 | 0 |
+| `tests/p004_regression.gd` | 71 | 0 |
+| `tests/p005_regression.gd` | 84 | 0 |
+| `tests/p006_regression.gd` | 161 | 0 |
+| **Total** | **430** | **0** |
+
+`tests/p006_regression.gd` covers, per its own description, session state, scene transitions, deposits and their idempotency, abandon, merchant recruitment and arrival, shop affordability (19 / 20 / 21+ gold, repeat purchase, accumulation across runs), sword ownership and use, containers, and bonus-gold conservation. It is mechanical only. During the 2026-11-16 closeout, Godot was not available in the closeout environment, so these counts are attributed to the prior implementation report and were **not** independently revalidated.
+
+**Known limitations:**
+- Persistence lasts only for the current game session.
+- The sword performs a minimal container-breaking interaction, not combat against enemies.
+- UI communication and sword-ownership visibility need later improvement (see §15).
+- Some regression runs produced resource-cleanup warnings at exit (reported, not investigated in this closeout).
+- Exact mouse-click behaviour on the P006 panels was not confirmed by the automated input tests, and there is no record that it was checked afterwards.
+- The implementation is a prototype and is not production-ready.
+
+### 12. Observations
+
+#### Human Playtest 1 — Quon and two coworkers (build `fcd69da`)
+
+Recorded from Quon's summary (2026-11-16). This is secondhand for the two coworkers. No `P006 expedition` or `P006 purchase` Output lines, run counts, expedition times, gold totals, ratings, or replay counts were supplied, and there is no record of whether every tester completed every step of the spec §7 plan.
+
+- One coworker took longer than expected to work out where to go to begin the first expedition.
+- One coworker wondered where the purchased sword was; its visual and function appear only once the player enters an expedition.
+- The testers encountered some uncertainty about what to do. No major gameplay blockers were reported.
+
+### 13. Player Comments
+
+#### Quon (player report)
+
+- Enjoyed the overall P006 gameplay loop more than P005.
+- Liked seeing the settlement gain more features.
+- Having a functional merchant made the camp more interesting and useful.
+- Purchasing the first sword was enjoyable.
+- Seeing the gold hoard grow after a successful extraction was satisfying.
+- Seeing the hoard become smaller after spending gold on the sword was also interesting.
+
+#### Two coworkers (reported by Quon)
+
+- Generally liked the game.
+- Usability points are recorded in §12. No direct quotations were supplied.
+
+No numerical ratings were given for P006. The P005 numerical baseline (one tester, Quon) is unchanged and was not re-measured.
+
+### 14. What Worked
+
+- **Mechanical:** the integrated loop — exploration, gold collection, extraction, secured treasury, merchant recruitment, purchase, and a functional sword reward — worked end to end in previously reported regression tests and in human play, with no major blockers reported.
+- **Player report (Quon):** the overall loop was more enjoyable than P005; returning to a camp that gains features, a useful merchant, buying the sword, and watching the hoard grow (and shrink after spending) were all positive.
+- **Player report (coworkers, secondhand):** generally liked the game.
+
+### 15. What Did Not Work
+
+- Finding the way to begin the first expedition was slow for one coworker (departure-point readability / camp navigation).
+- Sword ownership was not obvious in the camp: one coworker wondered where the sword was because it only appears in the expedition. The hub shows only a HUD text line.
+- Testers were sometimes uncertain what to do.
+- The sword is a key for containers, not a weapon used against anything (expected limitation, spec Risk 5).
+- No measurements were recorded to compare against P005 or the spec's directional targets.
+
+### 16. Interpretation
+
+Three testers, one summarized report, no ratings or Output lines; treat as directional.
+
+- **Integrated loop (supported, medium confidence):** the positive reports on returning to camp, watching wealth accumulate, and spending it on something useful suggest the expedition-to-settlement reward loop is a promising structure. Quon's statement that P006 was more enjoyable than P005 supports this, but it is one developer's comparison, not a measured improvement.
+- **Hypothesis 1 — extraction satisfaction:** directionally supported by Quon's report that hoard growth after extraction was satisfying. Not measured against the P005 3/5 baseline.
+- **Hypothesis 2 — replay motivation:** not established. No redeparture counts or ratings were recorded; the reported enjoyment of the loop is suggestive only.
+- **Hypothesis 3 — return-or-continue decisions:** not established. There is no evidence about whether the 20-gold goal changed when anyone extracted, and no evidence of early extraction.
+- **Attribution:** the merchant, hub, treasury, hoard visuals, and sword arrived together (spec Risk 1). The evidence cannot isolate which element produced the positive response.
+- **Usability:** the reported confusion points to camp navigation and equipment feedback rather than to the reward concept itself, but this is an interpretation of a summary, not an observed cause.
+
+### 17. Unexpected Findings
+
+- Quon found the hoard **shrinking** after the purchase interesting, not just its growth. The spec had flagged the falling spendable balance as a risk to communicate (spec Risk 6); in this report it was a positive.
+- The missing sword in camp was noticed by a tester even though a HUD text line shows ownership; a text line alone may not communicate ownership of a physical item.
+
+### 18. Outcome
+
+**Outcome:** Iterate — current prototype cycle concluded.  
+**Confidence:**
+- **Medium** for the promise of the integrated expedition-to-settlement reward loop.
+- **Low** for isolating the effect of individual reward elements, measuring replay motivation, or determining the influence on return-or-continue decisions.
+
+Conclusions:
+- P006 demonstrated a mechanically functioning integrated progression loop connecting exploration, gold collection, extraction, persistent treasury wealth, merchant recruitment, purchasing, and a functional sword reward.
+- Early human feedback was positive, especially about the value of returning to camp, seeing wealth accumulate, and spending it on something useful.
+- The feedback supports continuing development of the expedition-to-settlement structure.
+- The evidence does not independently validate all three original hypotheses, and the prototype has expected usability and presentation limitations.
+
+Limitations:
+- Three testers; findings summarized by one developer; no transcripts, ratings, Output lines, run counts, or times.
+- No measurement of voluntary redeparture or early extraction.
+- All reward elements introduced together.
+- One short, known map repeated.
+- In-session persistence only; no combat; the sword only opens containers.
+- Regression counts are from the prior implementation report and were not rerun at closeout.
+
+No additional P006 iteration is planned for the current cycle. Quon reviewed the results and agreed that further P006 polish is unnecessary before the next prototype.
+
+### 19. Decision Impact
+
+- **Supported (no change in status):** the existing Approved Directions on gold as a desirable and meaningful resource (*Gold Power With Wealth-Driven External Danger*; P006 did not test external danger), complementary expedition and settlement phases (*Expedition and Settlement Gameplay Loops*), and a persistent, lightly automated settlement that develops through player accomplishments (*Persistent Settlement Without City-Builder Maintenance*; *Light, Primarily Automated Settlement Progression*).
+- **Not promoted — remain Prototype Assumptions:** the merchant's identity and recruitment process; the 20-gold sword price; the sword's current attack behaviour; treasure-container gold rewards; treasury visual thresholds; the session-root architecture and scene transitions; the shop interface.
+- **Promising directions, production implementation open:** a functional merchant at the settlement and visible wealth progression.
+- **Open Questions:**
+  - Whether a persistent use for gold changes when players choose to extract (hypothesis 3).
+  - How strongly the reward loop drives voluntary replay (hypothesis 2).
+  - Which elements (treasury, hoard visuals, merchant, purchase, sword use) carry the effect.
+  - How the settlement should communicate where to go and what the player owns.
+  - The production economy: prices, item categories, merchant roster, persistence model.
+- **Deferred (not approved for implementation):** fixes for the departure-point/navigation, sword-ownership, and general UI-guidance issues in §15. These are recorded for future UI, navigation, equipment-feedback, or presentation work.
+- **Not approved by this closeout:** a permanent merchant or economy system, settlement upgrades, save/load, or any change to the Decision Log or Gameplay Foundation.
+
+### 20. Next Test
+
+No further P006 iteration is planned for this cycle.
+
+**Strong Recommendation (not approved):** the next major investigation should be a **Combat Foundation** prototype. Potential research question:
+
+> Can a responsive basic weapon attack against a fightable enemy create enjoyable, readable combat within GoldKing's existing 2.5D presentation?
+
+No prototype number, specification, or implementation is assigned here. Any combat prototype needs its own specification and approval.
+
+---
+
 # Prototype Review Guidelines
 
 ## Test One Important Question at a Time
@@ -1943,6 +2178,18 @@ Combine exploration, gold accumulation, risk, optional treasure, and voluntary r
 - Candidates under consideration: persistent secured wealth and visible milestone progression.
 - P006's exact specification and implementation are **not yet approved**. No P006 entry exists until it is scoped.
 - A combat-foundation experiment is the recommended next major investigation after P006 (not numbered or scoped).
+
+*Planning note above kept as history. P006 was subsequently specified, approved, implemented, and playtested.*
+
+### P006 — Meaningful Extraction Rewards
+Give gold secured by extraction a persistent, meaningful use: an in-session treasury, a recruitable merchant, and a purchasable first sword with a minimal functional use.
+
+*Concluded for the current cycle on 2026-11-16 (Iterate). The integrated expedition-to-settlement reward loop was promising (Medium confidence); individual-element, replay, and return-or-continue effects remain unestablished (Low confidence). See the P006 entry.*
+
+### Planning Note (2026-11-16): Next Recommended Investigation
+- **Combat Foundation** is the next recommended major investigation (Strong Recommendation, not approved).
+- Potential research question: *Can a responsive basic weapon attack against a fightable enemy create enjoyable, readable combat within GoldKing's existing 2.5D presentation?*
+- No prototype number, specification, or implementation is assigned.
 
 This sequence is not permanent.
 
