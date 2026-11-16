@@ -1937,6 +1937,13 @@ Combine exploration, gold accumulation, risk, optional treasure, and voluntary r
 
 *Concluded for the current cycle on 2026-11-15 (Iterate). The combined expedition loop was promising; extraction rewards need further development. See the P005 entry.*
 
+### Planning Note (2026-11-15): Next Intended Investigation
+- **P006** is the next intended prototype investigation (production priority approved by Quon; see Decision Log, 2026-11-15).
+- Current focus: meaningful rewards for successfully extracted gold.
+- Candidates under consideration: persistent secured wealth and visible milestone progression.
+- P006's exact specification and implementation are **not yet approved**. No P006 entry exists until it is scoped.
+- A combat-foundation experiment is the recommended next major investigation after P006 (not numbered or scoped).
+
 This sequence is not permanent.
 
 Prototype findings may reveal that another question should be tested first.

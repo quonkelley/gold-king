@@ -146,6 +146,35 @@ The settlement should grow primarily through major accomplishments, characters e
 
 Much of the ordinary growth of the settlement can happen automatically as people choose to live there.
 
+### Clarification (2026-11-15): Light, Primarily Automated Settlement
+*Status: Approved Direction (reaffirmed by Quon; see Decision Log, 2026-11-15). Clarifies the direction above; does not approve a city-builder.*
+
+- The settlement begins as a modest camp and can gradually become more populated, impressive, comfortable, and functional.
+- Growth is driven primarily by expedition accomplishments, discoveries, story progression, significant investments, and characters encountered.
+- The player should experience the satisfaction of watching their home develop.
+- Ordinary construction and population growth can happen automatically.
+- The player should not routinely manage building placement, hunger, worker schedules, resource-production chains, or repetitive settlement chores.
+- The settlement supports the expedition adventure rather than replacing it with a management simulator.
+- Greater management depth may be reconsidered later only if there is a compelling gameplay reason.
+
+### Experimental Ideas: Settlement Characters and Followers (not approved)
+- Important characters discovered during expeditions could later join or contribute to the settlement.
+- Specialists could unlock new services or gameplay opportunities.
+- Followers could gradually arrive as the King's influence and accomplishments grow.
+- A growing population could visibly communicate rising status and influence.
+- Buildings and inhabitants could help the settlement feel alive and functional.
+
+*Illustrative example only:* the player discovers a blacksmith during an expedition; after a relevant objective is completed, the blacksmith joins the settlement, a workshop becomes available automatically, and an equipment-related service opens without manual construction or management. **This is not an approved character, quest, building, or mechanic.**
+
+Follower recruitment rules, NPC jobs, automated production, settlement layouts, building upgrades, and any castle progression sequence are not defined.
+
+### Open Questions: Reputation, Influence, and Legendary Status
+Whether the King's growing status could be communicated through more followers, increased recognition, new opportunities, visible settlement development, influence or reputation, or heroism, renown, or legendary status.
+
+"Reputation/influence" above names a possible growth driver only. No progression currency, reputation meter, faction system, or status formula is defined or approved.
+
+Growing wealth, gaining power, attracting followers, earning loyalty, and becoming worthy of ruling remain distinct (see `GOLDKING_CONTEXT.md`). Settlement growth or a larger following should not be treated as proof of loyalty or redemption.
+
 ---
 
 ## 7. Approved Direction: Expedition ↔ Settlement Loop
@@ -187,6 +216,44 @@ Generic material inventories such as large quantities of wood, stone, leather, i
 
 ---
 
+## 9. Combat Identity — Current Design Preferences
+*Status: Experimental Ideas / Quon's current design preferences (2026-11-15). Not Approved Direction for any combat system.*
+
+Current preference:
+
+> **Consistent, responsive movement and defensive fundamentals, with offensive combat styles that can change substantially depending on weapons, enemies, and environments.**
+
+- Combat should balance fast, aggressive action with deliberate positioning and timing.
+- Combat rhythm may vary with the equipped weapon and the area or encounter.
+- GoldKing should remain a substantial action game: fighting, survival, dangerous encounters, obstacles, and dungeons.
+- Strong interest in a hybrid of diverse weapons and relic combinations.
+- Weapons may significantly change attack patterns and fighting styles.
+- Relics and special discoveries may modify weapons and produce interesting combinations.
+- The Gold King's personality should stay recognizable across builds; his greed, charisma, pride, and relationship with gold may inspire distinctive gameplay possibilities.
+
+**Open Questions:** combat controls and aiming; dodge/defensive mechanics; weapon types and equipment slots; relic behavior and synergy rules; temporary vs. permanent combat abilities; weapon discovery and unlock rules; combat progression; enemy designs and balancing; supernatural gold powers and Midas-inspired abilities (see §5; not canon).
+
+No weapon roster, synergy framework, combat architecture, or implementation sequence is approved.
+
+---
+
+## 10. Expedition Milestones and Exploration
+*Status: Experimental Ideas (2026-11-15). Supports the approved hybrid-world (§3) and continuous-zone (§2) directions; not approved mechanics.*
+
+Possible layers of progression:
+- Short-term milestones achievable within a single expedition.
+- Medium-term milestones spanning multiple expeditions.
+- Larger objectives involving several connected quests or expedition stages.
+- Intermediate accomplishments contributing to larger rewards.
+
+Possible reasons to explore:
+- Distinct regions with different atmospheres, environments, enemies, discoveries, and gameplay challenges.
+- Treasure, relics, unusual weapons, important characters, mythology, and folklore.
+
+No biome list, region names, quest system, environmental mechanics, reward requirements, or milestone formulas are approved. Example region types raised in discussion are not world canon.
+
+---
+
 # Open Design Question: Procedural Generation
 
 **No decision has been made yet about procedural level generation.**
@@ -222,6 +289,8 @@ Early prototypes are **incremental**. Each answers one primary design question a
 3. **P003 — Gold Power vs. Burden** (concluded 2026-11-14; led to the revised direction in §5)
 4. **P004 — Gold Spill & Theft** (concluded 2026-11-14, Iterate)
 5. **P005 — Mini Expedition / Extraction** (concluded 2026-11-15, Iterate)
+
+Next intended investigation: **P006**, meaningful rewards for successfully extracted gold (production priority; specification not yet approved). See the Prototype Log planning note and the Decision Log (2026-11-15).
 
 ### P001 Scope
 
