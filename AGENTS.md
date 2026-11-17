@@ -27,7 +27,12 @@ Do not silently invent missing requirements.
 **Team size:** Small independent team  
 **Primary presentation:** 2.5D top-down; 3D environments with 2D characters  
 **Camera:** Controlled top-down/elevated gameplay camera  
-**Current priority:** Prove the core gameplay through small playable prototypes before expanding scope.
+**Current priority:** Planning the First Integrated Playable Experience. The P001–P007 foundational prototype cycle concluded on 2026-11-17 (see `docs/GOLDKING_PROTOTYPE_LOG.md` and `docs/GOLDKING_DECISION_LOG.md`).
+
+- No First Integrated Playable specification or implementation is authorized yet.
+- Focused prototypes remain available for significant unresolved questions.
+- Approved gameplay directions and Established Canon remain authoritative.
+- Prioritize coherent playable experiences while keeping appropriate testing and scope discipline.
 
 GoldKing is a folklore- and mythology-inspired game about a good-hearted but deeply flawed king whose obsession with gold caused him to neglect his kingdom. Gold is intended to function as more than currency: it is tied to power, burden, temptation, progression, and the game's themes.
 
@@ -260,6 +265,13 @@ Check the reported version before implementation work. If it does not report 4.7
 <godot> --headless --path . --script res://tests/p004_regression.gd
 <godot> --headless --path . --script res://tests/p005_regression.gd
 <godot> --headless --path . --script res://tests/p006_regression.gd
+<godot> --headless --path . --script res://tests/p007_regression.gd
+```
+
+P007 also has a **report-only diagnostic** (not a regression suite; it prints scripted play-style results with no pass/fail expectations):
+
+```bash
+<godot> --headless --path . --script res://tests/p007_combat_diagnostic.gd
 ```
 
 The default main scene (F5) is P006. To play an earlier prototype, open its scene in `game/prototypes/` and use Run Current Scene (F6).
