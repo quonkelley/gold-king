@@ -460,6 +460,8 @@ Acts on the P005 Strong Recommendation (`GOLDKING_PROTOTYPE_LOG.md`, P005 §19).
 
 **Update 2026-11-16:** This combat-foundation experiment is now **P007 — Combat Foundation**. Quon approved its scope and feature specification (`docs/features/p007_combat_foundation.md`) and authorized implementation on 2026-11-16. Its tuning and mechanics remain Prototype Assumptions; §9 of the Gameplay Foundation is unchanged.
 
+**Update 2026-11-16 (Iteration 1):** After P007 Human Playtest 1, Quon approved **P007 Iteration 1 — Lightweight Target Focus** as a controlled experiment (spec §10). It narrows the spec's target-lock / aim-assist exclusion for that experiment only. Target focus remains an Experimental Idea; no targeting or combat direction is approved by this.
+
 **Questions Still Open:**
 
 - The exact reward or benefit

@@ -294,6 +294,8 @@ Early prototypes are **incremental**. Each answers one primary design question a
 
 **Update 2026-11-16:** Quon approved **P007 — Combat Foundation** (`docs/features/p007_combat_foundation.md`) as the next prototype, and authorized its implementation. P007 is a standalone combat test; its timings and values are Prototype Assumptions, not combat rules. No human playtest result exists yet.
 
+**Update 2026-11-16 (Iteration 1):** P007 Human Playtest 1 (Quon, developer) is recorded in the Prototype Log. Quon approved **P007 Iteration 1 — Lightweight Target Focus**, an A/B experiment comparing the original movement-based facing with a toggleable single-enemy target focus (spec §10). Target focus is an Experimental Idea under test, not an approved combat mechanic. P007 has no outcome yet.
+
 ### P001 Scope
 
 P001 tests only:

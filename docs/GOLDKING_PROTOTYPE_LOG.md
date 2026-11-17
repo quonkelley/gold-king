@@ -2076,6 +2076,73 @@ No prototype number, specification, or implementation is assigned here. Any comb
 
 ---
 
+# Prototype 007 (in progress)
+
+## P007 — Combat Foundation
+
+**Status:** In progress. **No outcome assigned; P007 is not concluded.** Human Playtest 1 is recorded below as the baseline for Iteration 1.  
+**Date Started:** 2026-11-16 (specification approved; implementation authorized)  
+**Build / Commit (Human Playtest 1):** `706c9d5` (branch `feat/p007-combat-foundation`; Godot 4.7.2)  
+**Iteration 1 branch:** `feat/p007-target-focus`, branched from `706c9d5`  
+**Testers so far:** Quon (developer), one tester.  
+**Related Feature Spec:** `docs/features/p007_combat_foundation.md` (Iteration 1: §10)
+
+The remaining sections of the standard 20-section format (measured data, interpretation, outcome, confidence, decision impact, next test) are completed only when P007 closes.
+
+### 1. Primary Design Question
+
+> Can one responsive directional sword attack, a brief invulnerable dodge, and one readable melee enemy produce an enjoyable combat exchange within GoldKing's existing 2.5D presentation?
+
+### Test Configuration — Human Playtest 1
+
+Build defaults at `706c9d5` (the spec starting values, unchanged): sword 110°, 1.4 m, windup/active/recovery 0.08/0.12/0.20 s, dodge cancel in the last 0.10 s of recovery; dodge 1.75 m in 0.20 s, invulnerable 0.04–0.16 s, cooldown 0.70 s from dodge start; King health 3; enemy health 3, speed 3.0 m/s, trigger range 1.5 m, windup 0.50 s (direction commits at 0.25 s), strike 0.15 s (1.8 m, 90°), recovery 0.60 s. Eight-direction movement-based facing. No `P007 encounter` Output lines or attempt counts were supplied for this playtest.
+
+### 12. Observations
+
+#### Human Playtest 1 — Quon, developer (build `706c9d5`)
+
+Developer playtest observations as reported by Quon (2026-11-16). They are not independently verified technical defects.
+
+- Combat was enjoyable in principle but felt clunky and awkward.
+- Movement-based facing made it difficult to attack in the intended direction.
+- Retreating caused the King to face away from the enemy.
+- The player sometimes ran past the enemy while attempting to attack.
+- The dodge worked mechanically but was difficult to interpret visually.
+- Enemy attack readability was weak.
+- Better animations and effects may eventually improve clarity, but this has not been demonstrated.
+
+### 13. Player Comments
+
+#### Quon — ratings (Human Playtest 1)
+
+| Dimension | Rating |
+|---|---|
+| Overall combat enjoyment | 3/5 |
+| Sword responsiveness | 3/5 |
+| Attack direction and accuracy | 2/5 |
+| Dodge feel | 2/5 |
+| Enemy attack readability | 2/5 |
+| Desire to fight again | 2/5 |
+
+One tester; small-sample developer ratings. The spec's tentative supportive target (4/5 or better for responsiveness and overall exchange enjoyment) was not reached in this playtest.
+
+### Iteration 1 — Lightweight Target Focus (approved 2026-11-16)
+
+**Research question:** Does lightweight target focus improve directional melee control and combat enjoyment compared with P007's original eight-direction movement-based facing?
+
+**Motivation:** the Playtest 1 facing observations above (attack direction 2/5; retreating turns the King away; running past the enemy).
+
+**Variable being tested:** the source of the King's facing. Mode A: movement input (original baseline, unchanged). Mode B: optional toggleable focus on the single enemy; while focused, the direction toward the enemy chooses the facing.
+
+**Held constant:** eight-direction snapping, sword timing/reach/arc/damage and attack-direction snapshot, dodge (including neutral dodge along current facing), enemy behavior, arena, camera, and spawns. See spec §10 for the full constraints and exclusions.
+
+**Deliberate constraints to observe, not fix:** a neutral dodge while focused travels toward the enemy and may be stopped by its body; snapped focused facing may alternate between neighbouring directions when the enemy sits near a 22.5° boundary.
+
+**Technical findings:** to be recorded after implementation.  
+**A/B human comparison:** not yet performed. No Iteration 1 playtest result exists.
+
+---
+
 # Prototype Review Guidelines
 
 ## Test One Important Question at a Time
@@ -2190,6 +2257,13 @@ Give gold secured by extraction a persistent, meaningful use: an in-session trea
 - **Combat Foundation** is the next recommended major investigation (Strong Recommendation, not approved).
 - Potential research question: *Can a responsive basic weapon attack against a fightable enemy create enjoyable, readable combat within GoldKing's existing 2.5D presentation?*
 - No prototype number, specification, or implementation is assigned.
+
+*Planning note above kept as history. Combat Foundation was subsequently specified and approved as P007.*
+
+### P007 — Combat Foundation
+Test whether one directional sword attack, a brief invulnerable dodge, and one readable melee enemy produce an enjoyable combat exchange.
+
+*In progress. Human Playtest 1 (2026-11-16) recorded as the baseline; Iteration 1 (Lightweight Target Focus) approved as an A/B experiment. No outcome assigned. See the P007 entry.*
 
 This sequence is not permanent.
 

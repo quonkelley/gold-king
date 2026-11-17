@@ -3,6 +3,7 @@
 **Document:** `docs/features/p007_combat_foundation.md`  
 **Status:** Feature specification **approved for technical planning** — implementation not authorized  
 **Status update (2026-11-16):** Implementation **authorized** by Quon on the `feat/p007-combat-foundation` branch (local commits only; no push or merge). See the Approval Record.  
+**Status update (2026-11-16, Iteration 1):** After P007 Human Playtest 1, Quon approved **Iteration 1 — Lightweight Target Focus**, a controlled A/B experiment on the `feat/p007-target-focus` branch. See §10 and the Approval Record. P007 is not concluded.  
 **Prototype:** P007 — Combat Foundation (approved feature specification)  
 **Prepared:** 2026-11-16  
 **Engine context:** Existing Godot 4.x / typed GDScript project and controlled elevated 2.5D presentation; verify the current engine version in the repository before planning  
@@ -188,6 +189,8 @@ Do **not** implement or imply approval of:
 - Procedural arena generation, authored-world content, quest dialogue, new narrative lore/canon, or a permanent arena-based level structure.
 - Final animation pipeline, eight-direction production sprite sets, polished materials/VFX, full UI, sound design pipeline, production save/load, or generalized combat engine abstractions.
 
+> **Iteration 1 note (2026-11-16):** For the Iteration 1 experiment only (§10), Quon narrowed the *target-lock* / *aim assist* exclusion above to allow one toggleable, single-enemy target focus that chooses the King's eight-direction facing. The exclusion otherwise stands, and this does not approve target-lock or aim assistance as a production mechanic.
+
 The **Approved Direction** of wealth-driven *external danger* remains intact but is not tested here. Never reintroduce automatic movement penalties from ordinary gold as a shortcut for combat balance.
 
 ## 6. Mechanical Acceptance Criteria — after separate implementation authorization
@@ -295,6 +298,29 @@ Build the smallest playable P007 and mechanically validate it. Preserve old prot
 
 Add a P007 entry to `docs/GOLDKING_PROTOTYPE_LOG.md` using its established **20-section format**, including actual Godot/build/commit, test configuration and values, tester count, Direct Observations, Measured Data, Player Reports, Developer Interpretations, regression outputs, limitations, outcome (**Validated / Iterate / Rejected / Inconclusive / Deferred**), confidence, and next test. Record any consequential approved decisions separately; do not silently promote sword timings, dodge frames, enemy archetype, or training arena to permanent design.
 
+## 10. Iteration 1 — Lightweight Target Focus (approved 2026-11-16)
+
+**Why:** In P007 Human Playtest 1 (Quon, developer; build `706c9d5`; see the Prototype Log), attack direction and accuracy were rated 2/5. The main reported problem was that movement-based facing turns the King away from the enemy while retreating, so attacking while retreating or strafing was unreliable. This is a developer playtest observation, not an independently verified defect.
+
+**Research question:** Does lightweight target focus improve directional melee control and combat enjoyment compared with P007's original eight-direction movement-based facing?
+
+**Controlled comparison (same arena, camera, spawns, sword, dodge, and enemy in both modes):**
+
+- **Mode A — original baseline:** eight-direction movement-based facing exactly as implemented at `706c9d5`. Target focus is unavailable. Mode A remains the comparison baseline.
+- **Mode B — toggleable target focus:** the player may toggle focus on the single living Training Enemy. While focused, the direction toward the enemy (instead of movement input) chooses the King's facing; movement still moves the King in the same world/screen directions.
+
+**Constraints (Amendment B of the technical plan):**
+
+- Focused facing uses the **existing eight-direction snapping**. No continuous aiming and no smoothing at the 22.5° boundaries.
+- **Neutral dodge behavior is unchanged** in both modes: with no movement input the dodge travels along the current facing. While focused this can send the King toward the enemy, where solid collision stops him. This is a deliberate experimental constraint; any awkwardness is to be recorded, not corrected, during this iteration.
+- Sword timing, reach, arc, damage, attack-direction snapshot, and hit resolution are unchanged. Focus never moves the King, never redirects an active swing, and never enlarges the hit area.
+- Dodge distance, duration, invulnerability, cooldown, late-recovery cancellation, and collision are unchanged. Focus persists through dodges.
+- Acquisition range 7.0 m and release range 9.0 m (ground plane), Tab / gamepad RB toggle, and F2 facilitator mode switch are starting Prototype Assumptions.
+
+**Excluded from Iteration 1:** camera lock-on or rotation, target cycling, multiple enemies, independent mouse/right-stick aiming, aim magnetism, expanded hitboxes, new attacks or weapons, sword/dodge/enemy balance changes, new telegraphs or dodge VFX, polished animation, generalized targeting architecture, changes to P001–P006, and any permanent combat decision.
+
+**Known P007 findings not addressed by Iteration 1:** the centre-point hit/miss readability finding, dodge readability, and enemy telegraph readability remain recorded findings.
+
 ---
 
 ## Approval Record
@@ -313,3 +339,8 @@ Add a P007 entry to `docs/GOLDKING_PROTOTYPE_LOG.md` using its established **20-
 **Feature branch / implementation:** Authorized (2026-11-16).  
 **Push / merge:** Not authorized.  
 **Human playtest outcome:** Not yet recorded.
+
+**2026-11-16 — Quon:** Approved **P007 Iteration 1 — Lightweight Target Focus** (§10) as a controlled experiment comparing Mode A (original movement-based facing) with Mode B (toggleable single-enemy target focus), and approved the technical plan with Amendment B. Implementation authorized on `feat/p007-target-focus`, branched from `706c9d5` so the Human Playtest 1 build remains available. The §5 target-lock / aim-assist exclusion is narrowed for this experiment only. Pushing, merging, and concluding P007 are not authorized.
+
+**Iteration 1 implementation:** Authorized (2026-11-16).  
+**Push / merge / P007 outcome:** Not authorized; P007 remains open.
