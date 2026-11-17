@@ -81,6 +81,17 @@ distance = 11.0
 stream = ExtResource("6_hit")
 volume_db = -3.0
 
+[node name="FocusMarker" type="Label3D" parent="."]
+visible = false
+pixel_size = 0.006
+billboard = 1
+no_depth_test = true
+modulate = Color(0.3, 0.95, 1, 1)
+outline_modulate = Color(0, 0.08, 0.12, 1)
+text = "▼"
+font_size = 72
+outline_size = 14
+
 [node name="HUD" type="CanvasLayer" parent="."]
 
 [node name="HealthLabel" type="Label" parent="HUD"]
@@ -124,6 +135,17 @@ theme_override_colors/font_outline_color = Color(0.1, 0.07, 0.03, 1)
 theme_override_constants/outline_size = 6
 theme_override_font_sizes/font_size = 16
 text = "Move: WASD / arrows / left stick    Attack: J / Space / X(west)    Dodge: Left Shift / B(east)    Retry: R / Back    Debug: F3 / hold enemy: F4"
+
+[node name="ModeLabel" type="Label" parent="HUD"]
+offset_left = 24.0
+offset_top = 60.0
+offset_right = 824.0
+offset_bottom = 90.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.1, 0.07, 0.03, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 18
+text = "Mode A: original free facing    (F2: switch to Mode B)"
 
 [node name="DebugLabel" type="Label" parent="HUD"]
 visible = false

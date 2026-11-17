@@ -144,6 +144,8 @@ func _run() -> void:
 	await test_focus_facing()
 	await test_focus_sword()
 	await test_focus_dodge()
+	await test_focus_inputs()
+	await test_focus_mode_and_logging()
 	print("\n%d passed, %d failed" % [passes, fails])
 	quit(0 if fails == 0 else 1)
 
@@ -1281,3 +1283,118 @@ func test_focus_dodge() -> void:
 	check(not k.try_dodge(Vector2(1, 0)), "focused: cooldown still blocks at 0.683 s")
 	await wait(1)
 	check(k.try_dodge(Vector2(1, 0)), "focused: dodge accepted at 0.70 s")
+
+
+## Presses F2 (mode switch) and waits for the reloaded scene.
+func switch_mode_with_key() -> bool:
+	var old_id: int = current_scene.get_instance_id()
+	await press_key(KEY_F2)
+	for i in 30:
+		await process_frame
+		if current_scene != null and current_scene.get_instance_id() != old_id and current_scene.is_node_ready():
+			await physics_frame
+			return true
+	return false
+
+
+func test_focus_inputs() -> void:
+	print("-- target_focus input isolation")
+	check(events_of("target_focus") == ["key:%d" % KEY_TAB, "joy:%d" % JOY_BUTTON_RIGHT_SHOULDER], "target_focus = Tab + gamepad RB")
+	var overlaps: bool = false
+	for ev: InputEvent in InputMap.action_get_events("target_focus"):
+		for action: String in ["ui_accept", "ui_cancel", "ui_select", "attack", "strike", "dodge", "interact", "restart_test"]:
+			if InputMap.action_has_event(action, ev):
+				overlaps = true
+	check(not overlaps, "target_focus shares no event with UI confirm/cancel or any gameplay action")
+	await load_fresh()
+	var focusable: Array[String] = []
+	for c: Node in scene().find_children("*", "Control", true, false):
+		if (c as Control).focus_mode != Control.FOCUS_NONE:
+			focusable.append(String(c.name))
+	check(focusable.is_empty(), "no focusable Control in the P007 scene, so Tab (also ui_focus_next) moves no GUI focus")
+	var files: Array[String] = []
+	for dir_path: String in ["res://game/player", "res://game/prototypes", "res://game/prototypes/p002", "res://game/prototypes/p003", "res://game/prototypes/p004", "res://game/prototypes/p006", "res://tests"]:
+		for f: String in DirAccess.get_files_at(dir_path):
+			if f.ends_with(".gd") and not f.begins_with("p007"):
+				files.append(dir_path + "/" + f)
+	var readers: Array[String] = []
+	for f: String in files:
+		if FileAccess.get_file_as_string(f).contains("target_focus") or FileAccess.get_file_as_string(f).contains("p007_control_mode"):
+			readers.append(f)
+	check(files.size() >= 20 and readers.is_empty(), "no historical script reads target_focus or the P007 mode (%d files scanned)" % files.size())
+
+
+func test_focus_mode_and_logging() -> void:
+	print("-- A/B mode switch, focus marker and HUD, comparison logging")
+	root.remove_meta(&"p007_control_mode")
+	await load_fresh()
+	var mode_label: Label = scene().get_node("HUD/ModeLabel")
+	var marker: Label3D = scene().get_node("FocusMarker")
+	check(scene().control_mode == "A" and not king().focus_available and not root.has_meta(&"p007_control_mode"), "the experiment starts in Mode A")
+	check(mode_label.text.begins_with("Mode A") and not marker.visible, "HUD shows Mode A; no focus marker")
+	# F2 mid-fight: switches to Mode B and restarts the attempt.
+	enemy().take_sword_hit()
+	king().take_enemy_hit(1)
+	check(await switch_mode_with_key(), "F2 reloads the encounter")
+	check(scene().control_mode == "B" and king().focus_available and not king().focused, "F2 switched to Mode B; the new attempt starts unfocused")
+	check_fresh("after F2")
+	mode_label = scene().get_node("HUD/ModeLabel")
+	marker = scene().get_node("FocusMarker")
+	check(mode_label.text.begins_with("Mode B") and mode_label.text.contains("focus off") and not marker.visible, "HUD shows Mode B with focus off")
+	# Scripted Mode B attempt with known focused / unfocused activity.
+	var root_node: Node = scene()
+	var k: Variant = king()
+	var e: Variant = enemy()
+	await place(Vector3(0, 0, 2), Vector3(0, 0, 1))
+	await face(6)
+	await tap("attack")
+	await wait(26)
+	await tap("target_focus")
+	await process_frame
+	check(k.focused and mode_label.text.contains("FOCUS ON") and marker.visible, "focused: HUD says FOCUS ON and the marker is shown")
+	check(marker.global_position.distance_to(e.global_position + Vector3(0, 2.35, 0)) < 0.01, "marker sits above the focused enemy")
+	await tap("attack")
+	await wait(26)
+	check(k.try_dodge(Vector2(1, 0)), "focused dodge")
+	await wait(20)
+	k.take_enemy_hit(1)
+	await tap("target_focus")
+	check(not k.focused and not marker.visible and mode_label.text.contains("focus off"), "release hides the marker at once")
+	await wait(30)
+	check(k.try_dodge(Vector2(-1, 0)), "unfocused dodge")
+	await wait(20)
+	k.take_enemy_hit(1)
+	await place(Vector3(0, 0, 2), Vector3(0, 0, 1))
+	await tap("target_focus")
+	await tap("attack")
+	await wait(26)
+	await process_frame
+	check(root_node.result == "victory" and not k.focused and not marker.visible, "victory while focused: focus released, marker hidden")
+	var line: String = root_node.result_line
+	print("INFO  ", line)
+	check(line.contains("| controls B |"), "result line records Mode B")
+	check(line.contains("focus acquired 2, released: press 1, range 0, defeat 1, invalid 0, king defeated 0"), "result line counts acquisitions and releases by reason")
+	check(line.contains("swings 2/1") and line.contains("sword hits 2/1") and line.contains("dodges 1/1") and line.contains("damage taken 1/1"), "result line splits focused/unfocused swings, hits, dodges, damage")
+	check(k.swings == 3 and root_node.hits_dealt == k.sword_hits and k.sword_hits == 3 and root_node.hits_taken == k.hits_taken and k.hits_taken == 2 and k.dodges == 2, "split counters reconcile with the encounter totals")
+	check(k.focused_time > 0.0 and k.focused_time < root_node.elapsed, "focused time is part of the attempt time (%.2f of %.2f s)" % [k.focused_time, root_node.elapsed])
+	# Retry keeps the mode.
+	check(await retry_with_key(), "R reloads in Mode B")
+	check(scene().control_mode == "B" and king().focus_available and not king().focused, "Retry keeps Mode B and starts unfocused")
+	check_fresh("Mode B retry")
+	# Back to Mode A: zero focused activity even if Tab is pressed.
+	check(await switch_mode_with_key(), "F2 again")
+	check(scene().control_mode == "A" and not king().focus_available, "F2 switched back to Mode A")
+	root_node = scene()
+	k = king()
+	await place(Vector3(0, 0, 2), Vector3(0, 0, 1))
+	await face(6)
+	for i in 3:
+		await tap("target_focus")
+		await tap("attack")
+		await wait(26)
+	line = root_node.result_line
+	check(root_node.result == "victory" and line.contains("| controls A |") and line.contains("focused 0.00 of"), "Mode A result line: controls A, zero focused time")
+	check(line.contains("focus acquired 0,") and line.contains("swings 0/3") and line.contains("sword hits 0/3") and k.focus_acquisitions == 0, "Mode A has zero focused activity")
+	root.remove_meta(&"p007_control_mode")
+	await load_fresh()
+	check(scene().control_mode == "A", "mode metadata cleared after the test (no state left for later tests)")
