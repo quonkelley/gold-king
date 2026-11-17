@@ -130,6 +130,10 @@ func _run() -> void:
 	await test_facing()
 	test_sector_geometry()
 	await test_sword()
+	await test_dodge()
+	await test_iframes()
+	await test_cancel()
+	await test_input_isolation()
 	print("\n%d passed, %d failed" % [passes, fails])
 	quit(0 if fails == 0 else 1)
 
@@ -378,3 +382,204 @@ func test_sword() -> void:
 	var active_alpha: float = (arc.material_override as StandardMaterial3D).albedo_color.a
 	await wait_until(func() -> bool: return k.attack_phase == 3, 20)
 	check(active_alpha > 0.5 and not arc.visible, "arc bright while active, hidden in recovery")
+
+
+func test_dodge() -> void:
+	print("-- dodge movement, direction, hold, cooldown, collision")
+	await load_fresh()
+	var k: Variant = king()
+	await place(Vector3(0, 0, 3), Vector3(-5, 0, -5))
+	await face(0)
+	var start: Vector3 = k.global_position
+	await tap("dodge")
+	check(k.dodging and k.dodge_dir.is_equal_approx(Vector3(1, 0, 0)), "neutral input dodges along the retained facing")
+	await wait_until(func() -> bool: return not k.dodging, 30)
+	var moved: float = flat(k.global_position - start).length()
+	check(absf(moved - k.dodge_distance) < 0.08, "one dodge covers ~1.75 m once, not double (%.2f m)" % moved)
+	await wait(5)
+	check(flat(k.global_position - start).length() - moved < 0.01, "no slide after the dodge ends")
+	# Analog input direction is used as-is (normalized), not snapped.
+	await load_fresh()
+	k = king()
+	await place(Vector3(0, 0, 3), Vector3(-5, 0, -5))
+	Input.action_press("move_right", 0.9)
+	Input.action_press("move_down", 0.4)
+	await tap("dodge")
+	hold_input(Vector2.ZERO)
+	check(k.dodge_dir.is_equal_approx(Vector3(0.9, 0, 0.4).normalized()), "dodge follows the current input direction")
+	check(k.facing_index == 1, "facing snaps the same input (24 deg) to down-right (index %d)" % k.facing_index)
+	# Holding dodge never repeats it.
+	await load_fresh()
+	k = king()
+	Input.action_press("dodge")
+	await wait(120)
+	Input.action_release("dodge")
+	check(k.dodges == 1, "holding dodge for 2 s gives exactly one dodge")
+	# Cooldown runs from dodge start: 0.70 s.
+	await load_fresh()
+	k = king()
+	await place(Vector3(0, 0, 3), Vector3(-5, 0, -5))
+	check(k.try_dodge(Vector2.ZERO), "first dodge accepted")
+	await wait(30)
+	check(not k.try_dodge(Vector2.ZERO), "dodge at 0.50 s after start rejected (cooldown)")
+	await wait(11)
+	check(not k.try_dodge(Vector2.ZERO), "dodge at 0.683 s after start rejected")
+	await wait(1)
+	check(k.try_dodge(Vector2.ZERO), "dodge at 0.70 s after start accepted")
+	# Walls stop a dodge.
+	await load_fresh()
+	k = king()
+	await place(Vector3(5.0, 0, 0), Vector3(-5, 0, -5))
+	await face(0)
+	await tap("dodge")
+	await wait(20)
+	check(k.global_position.x < 5.6, "dodge into the east wall stops at the wall (x = %.2f)" % k.global_position.x)
+	# A living enemy's body stops a dodge (solid collision).
+	await load_fresh()
+	k = king()
+	await place(Vector3(0, 0, 2), Vector3(0, 0, 0.5))
+	await face(6)
+	await tap("dodge")
+	await wait(20)
+	check(k.global_position.z > 0.5 + 0.85, "dodge into the enemy stops at its body (z = %.2f)" % k.global_position.z)
+	# No attack during a dodge; attack right after it ends.
+	await load_fresh()
+	k = king()
+	await place(Vector3(0, 0, 3), Vector3(-5, 0, -5))
+	k.try_dodge(Vector2.ZERO)
+	await wait(2)
+	check(not k.try_attack() and k.swings == 0, "attack is ignored during a dodge")
+	await wait_until(func() -> bool: return not k.dodging, 20)
+	check(k.try_attack(), "attack is available as soon as the dodge ends")
+
+
+## King-side result of an enemy hit arriving `ticks` physics ticks after a dodge starts.
+func iframe_result(ticks: int) -> int:
+	await load_fresh()
+	var k: Variant = king()
+	await place(Vector3(0, 0, 3), Vector3(-5, 0, -5))
+	k.try_dodge(Vector2.ZERO)
+	await wait(ticks)
+	return k.take_enemy_hit(1)
+
+
+func test_iframes() -> void:
+	print("-- invulnerability boundaries (0.04-0.16 s)")
+	var hit: int = 0
+	var dodged: int = 1
+	check(await iframe_result(1) == hit, "0.017 s into dodge: hit")
+	check(await iframe_result(2) == hit, "0.033 s into dodge: hit (before window)")
+	check(await iframe_result(3) == dodged, "0.050 s into dodge: dodged")
+	check(await iframe_result(6) == dodged, "0.100 s into dodge: dodged")
+	check(await iframe_result(9) == dodged, "0.150 s into dodge: dodged")
+	check(await iframe_result(10) == hit, "0.167 s into dodge: hit (after window)")
+	check(await iframe_result(11) == hit, "0.183 s into dodge (still dodging): hit")
+	var k: Variant = king()
+	check(k.health == 2, "a hit removes 1 health")
+	await wait(20)
+	check(not k.is_invulnerable(), "no stale invulnerability after the dodge")
+	# Player defeat.
+	await load_fresh()
+	k = king()
+	k.take_enemy_hit(1)
+	k.take_enemy_hit(1)
+	check(not k.is_defeated, "2 hits: still standing")
+	k.take_enemy_hit(1)
+	check(k.is_defeated and k.health == 0, "3 hits: King defeated")
+	check(k.take_enemy_hit(1) == 2 and k.health == 0, "hits after defeat are ignored")
+	check(not k.try_attack() and not k.try_dodge(Vector2.ZERO), "defeated King cannot attack or dodge")
+
+
+## Whether a dodge is accepted `ticks` ticks after a swing starts, and the King afterwards.
+func cancel_at(ticks: int) -> bool:
+	await load_fresh()
+	var k: Variant = king()
+	await place(Vector3(0, 0, 3), Vector3(-5, 0, -5))
+	k.try_attack()
+	await wait(ticks)
+	return k.try_dodge(Vector2(1, 0))
+
+
+func test_cancel() -> void:
+	print("-- late-recovery dodge cancellation")
+	check(not await cancel_at(2), "rejected in windup (0.033 s)")
+	check(not await cancel_at(6), "rejected in active (0.100 s)")
+	check(not await cancel_at(11), "rejected in active (0.183 s)")
+	check(not await cancel_at(13), "rejected in early recovery (0.217 s, 0.183 s left)")
+	check(not await cancel_at(17), "rejected in early recovery (0.283 s, 0.117 s left)")
+	check(await cancel_at(18), "accepted in late recovery (0.300 s, 0.100 s left)")
+	var k: Variant = king()
+	var arc: MeshInstance3D = k.get_node("SwordArc")
+	check(k.attack_phase == 0 and not arc.visible and k.cancels == 1 and k.dodging, "cancel ends the swing cleanly and starts the dodge")
+	check(await cancel_at(22), "accepted in late recovery (0.367 s)")
+	check(await cancel_at(30), "accepted when idle after the swing")
+	# A cancelled swing cannot hit: enemy placed in its arc after cancel takes nothing.
+	await load_fresh()
+	k = king()
+	var e: Variant = enemy()
+	await place(Vector3(0, 0, 3), Vector3(-5, 0, -5))
+	await face(6)
+	k.try_attack()
+	await wait(18)
+	check(k.try_dodge(Vector2(1, 0)), "late-recovery cancel accepted")
+	e.global_position = k.global_position + Vector3(0, 0, -1.0)
+	await wait(30)
+	check(e.health == 3, "cancelled swing never hits again (no prolonged hitbox)")
+	# Real input path: Left Shift during late recovery cancels.
+	await load_fresh()
+	k = king()
+	await place(Vector3(0, 0, 3), Vector3(-5, 0, -5))
+	await tap("attack")
+	await wait(16)
+	var shift: InputEventKey = InputEventKey.new()
+	shift.physical_keycode = KEY_SHIFT
+	shift.keycode = KEY_SHIFT
+	shift.location = KEY_LOCATION_LEFT
+	shift.pressed = true
+	Input.parse_input_event(shift)
+	await wait(2)
+	var release: InputEventKey = shift.duplicate()
+	release.pressed = false
+	Input.parse_input_event(release)
+	check(k.dodging and k.cancels == 1, "Left Shift in late recovery cancels into a dodge")
+
+
+func events_of(action: String) -> Array[String]:
+	var out: Array[String] = []
+	for ev: InputEvent in InputMap.action_get_events(action):
+		if ev is InputEventKey:
+			out.append("key:%d" % (ev as InputEventKey).physical_keycode)
+		elif ev is InputEventJoypadButton:
+			out.append("joy:%d" % (ev as InputEventJoypadButton).button_index)
+		elif ev is InputEventJoypadMotion:
+			out.append("axis:%d:%d" % [(ev as InputEventJoypadMotion).axis, signi(int((ev as InputEventJoypadMotion).axis_value))])
+	return out
+
+
+func test_input_isolation() -> void:
+	print("-- input isolation")
+	check(events_of("dodge") == ["key:%d" % KEY_SHIFT, "joy:%d" % JOY_BUTTON_B], "dodge = Left Shift + gamepad east (B)")
+	var left_shift: InputEventKey = InputMap.action_get_events("dodge")[0]
+	check(left_shift.location == KEY_LOCATION_LEFT, "dodge key is Left Shift specifically")
+	check(events_of("attack") == ["key:%d" % KEY_J, "key:%d" % KEY_SPACE, "joy:%d" % JOY_BUTTON_X], "attack bindings unchanged (J, Space, west)")
+	check(events_of("strike") == events_of("attack"), "strike bindings unchanged (same as attack)")
+	check(events_of("interact") == ["key:%d" % KEY_E, "joy:%d" % JOY_BUTTON_A], "interact bindings unchanged")
+	check(events_of("restart_test") == ["key:%d" % KEY_R, "joy:%d" % JOY_BUTTON_BACK], "restart_test bindings unchanged")
+	check(events_of("move_left") == ["key:%d" % KEY_A, "key:%d" % KEY_LEFT, "axis:0:-1"], "move_left bindings unchanged")
+	var overlaps: bool = false
+	for ev: InputEvent in InputMap.action_get_events("dodge"):
+		for ui: String in ["ui_accept", "ui_cancel", "ui_select"]:
+			if InputMap.action_has_event(ui, ev):
+				overlaps = true
+	check(not overlaps, "dodge shares no event with ui_accept / ui_cancel / ui_select")
+	# No P001-P006 code or test reads the new action.
+	var files: Array[String] = []
+	for dir_path: String in ["res://game/player", "res://game/prototypes", "res://game/prototypes/p002", "res://game/prototypes/p003", "res://game/prototypes/p004", "res://game/prototypes/p006", "res://tests"]:
+		for f: String in DirAccess.get_files_at(dir_path):
+			if f.ends_with(".gd") and not f.begins_with("p007"):
+				files.append(dir_path + "/" + f)
+	var readers: Array[String] = []
+	for f: String in files:
+		if FileAccess.get_file_as_string(f).contains("\"dodge\""):
+			readers.append(f)
+	check(files.size() >= 20 and readers.is_empty(), "no historical script reads the dodge action (%d files scanned)" % files.size())
