@@ -235,6 +235,8 @@ Current preference:
 
 No weapon roster, synergy framework, combat architecture, or implementation sequence is approved.
 
+**Prototype evidence (P007, concluded 2026-11-17, Iterate):** facing derived from the opponent (lightweight target focus) gave Quon much greater perceived control and engagement than facing derived from movement. This is a promising Experimental Idea for "combat controls and aiming", not Approved Direction; the targeting model, its controls, eight-direction precision, and all P007 timings and values remain Prototype Assumptions. Dodge feel and enemy readability could not be judged apart from placeholder presentation.
+
 ---
 
 ## 10. Expedition Milestones and Exploration
@@ -295,6 +297,10 @@ Early prototypes are **incremental**. Each answers one primary design question a
 **Update 2026-11-16:** Quon approved **P007 — Combat Foundation** (`docs/features/p007_combat_foundation.md`) as the next prototype, and authorized its implementation. P007 is a standalone combat test; its timings and values are Prototype Assumptions, not combat rules. No human playtest result exists yet.
 
 **Update 2026-11-16 (Iteration 1):** P007 Human Playtest 1 (Quon, developer) is recorded in the Prototype Log. Quon approved **P007 Iteration 1 — Lightweight Target Focus**, an A/B experiment comparing the original movement-based facing with a toggleable single-enemy target focus (spec §10). Target focus is an Experimental Idea under test, not an approved combat mechanic. P007 has no outcome yet.
+
+**Update 2026-11-17:** **P007 — Combat Foundation** concluded with outcome **Iterate**. Movement-based facing caused substantial control friction in Human Playtest 1; in the Iteration 1 A/B comparison Quon strongly preferred lightweight target focus and reported much greater control and engagement (one developer tester, qualitative). Opponent-focused combat is a promising result, not an approved combat mechanic; see the Prototype Log for findings and limitations.
+
+**Update 2026-11-17 — Foundational prototype cycle concluded.** P001–P007 form GoldKing's initial sequence of focused experiments. The next stage is **planning** a First Integrated Playable Experience (Approved Direction; Decision Log, 2026-11-17). Its content, architecture, and feature list are not yet approved. Scoped prototypes remain available for significant new uncertainties; not every feature needs its own prototype. The incremental sequence above is kept as history.
 
 ### P001 Scope
 

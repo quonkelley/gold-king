@@ -4,6 +4,7 @@
 **Status:** Feature specification **approved for technical planning** — implementation not authorized  
 **Status update (2026-11-16):** Implementation **authorized** by Quon on the `feat/p007-combat-foundation` branch (local commits only; no push or merge). See the Approval Record.  
 **Status update (2026-11-16, Iteration 1):** After P007 Human Playtest 1, Quon approved **Iteration 1 — Lightweight Target Focus**, a controlled A/B experiment on the `feat/p007-target-focus` branch. See §10 and the Approval Record. P007 is not concluded.  
+**Status update (2026-11-17, closeout):** The initial implementation and Iteration 1 were completed and tested. P007's current prototype cycle **concluded with outcome Iterate**. See §11 and the Prototype Log.  
 **Prototype:** P007 — Combat Foundation (approved feature specification)  
 **Prepared:** 2026-11-16  
 **Engine context:** Existing Godot 4.x / typed GDScript project and controlled elevated 2.5D presentation; verify the current engine version in the repository before planning  
@@ -321,6 +322,17 @@ Add a P007 entry to `docs/GOLDKING_PROTOTYPE_LOG.md` using its established **20-
 
 **Known P007 findings not addressed by Iteration 1:** the centre-point hit/miss readability finding, dodge readability, and enemy telegraph readability remain recorded findings.
 
+## 11. Closeout (2026-11-17)
+
+Both the initial P007 implementation (`706c9d5`) and Iteration 1 (`feat/p007-target-focus`) were completed, regression-tested (696 checks across P003–P007, 0 failures), and played by Quon. **Outcome: Iterate — current prototype cycle concluded.**
+
+- Human Playtest 1 found substantial control friction with movement-based facing.
+- In the Iteration 1 A/B comparison, Quon strongly preferred lightweight target focus (Mode B) and reported much greater control and engagement. One developer tester; qualitative; no Mode B ratings.
+- Quon attributed the low dodge-feel and enemy-readability ratings largely to placeholder presentation; this is a developer interpretation, not a tested cause.
+- Opponent-focused combat is carried forward as a promising direction. Nothing in this specification — including the §10 targeting exception, the controls, timings, ranges, eight-direction facing, enemy behavior, or architecture — is approved as production design. The §5 exclusion narrowing applied to Iteration 1 only.
+
+The approvals, exclusions, and amendments above are kept as history. Full findings: `docs/GOLDKING_PROTOTYPE_LOG.md`, P007.
+
 ---
 
 ## Approval Record
@@ -344,3 +356,7 @@ Add a P007 entry to `docs/GOLDKING_PROTOTYPE_LOG.md` using its established **20-
 
 **Iteration 1 implementation:** Authorized (2026-11-16).  
 **Push / merge / P007 outcome:** Not authorized; P007 remains open.
+
+**2026-11-17 — Quon:** Concluded P007 — Combat Foundation for the current prototype cycle with outcome **Iterate**, and concluded the foundational prototype cycle (P001–P007). The next stage is planning a First Integrated Playable Experience (Decision Log, 2026-11-17). Pushing and merging are not part of this closeout.
+
+**P007 outcome:** Iterate (2026-11-17).

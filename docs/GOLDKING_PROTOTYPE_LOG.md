@@ -144,6 +144,9 @@ Do not rewrite an interpretation as if it were an observed fact.
 | P004 | Gold Spill & Theft | Can the threat of losing collected gold create exciting, readable tension without making the player regret collecting it? | Concluded (current cycle) | Iterate (promising external-threat mechanic; future expansion deferred) | 2026-11-14 |
 | P005 | Mini Expedition / Extraction | Can a short expedition combining exploration, gold collection, external danger, and voluntary extraction create a satisfying loop the player wants to repeat? | Concluded (current cycle) | Iterate (promising expedition loop; extraction rewards need development) | 2026-11-15 |
 | P006 | Meaningful Extraction Rewards | Does giving gold brought home from an expedition a persistent, meaningful use make extraction more satisfying and make the player want to embark on another expedition? | Concluded (current cycle) | Iterate (promising integrated expedition-to-settlement reward loop, Medium; individual elements, replay, and return-or-continue effects Low) | 2026-11-16 |
+| P007 | Combat Foundation | Can one responsive directional sword attack, a brief invulnerable dodge, and one readable melee enemy produce an enjoyable combat exchange within GoldKing's existing 2.5D presentation? | Concluded (current cycle) | Iterate (target focus improved Quon's perceived control and engagement, Medium; permanent targeting design, combat enjoyment, balance, dodge feel, and enemy readability Low) | 2026-11-17 |
+
+**2026-11-17:** The foundational prototype cycle (P001–P007) is concluded. See *Foundational Prototype Cycle* under Current Prototype Sequence.
 
 This index should remain compact. Detailed findings belong in each prototype entry below.
 
@@ -2076,18 +2079,24 @@ No prototype number, specification, or implementation is assigned here. Any comb
 
 ---
 
-# Prototype 007 (in progress)
+# Prototype 007
 
 ## P007 — Combat Foundation
 
-**Status:** In progress. **No outcome assigned; P007 is not concluded.** Human Playtest 1 is recorded below as the baseline for Iteration 1.  
+**Status:** Concluded for the current prototype cycle (2026-11-17). Outcome: Iterate (§18). Not Validated; not production-ready.  
 **Date Started:** 2026-11-16 (specification approved; implementation authorized)  
+**Date Concluded:** 2026-11-17  
 **Build / Commit (Human Playtest 1):** `706c9d5` (branch `feat/p007-combat-foundation`; Godot 4.7.2)  
-**Iteration 1 branch:** `feat/p007-target-focus`, branched from `706c9d5`  
-**Testers so far:** Quon (developer), one tester.  
+**Build / Commit (Iteration 1):** branch `feat/p007-target-focus` (branched from `706c9d5`; head `2ef4674` at closeout; Godot 4.7.2). The exact commit used for the A/B play was not recorded; gameplay code is unchanged since `720ef5b`.  
+**Testers:** Quon (developer), one tester, for both Human Playtest 1 and the Iteration 1 A/B comparison. No external testers evaluated P007 or its Iteration 1.  
+**Related Decision(s):**
+- Immediate Prototype Priority: Extraction Rewards (P006), whose subsequent-priority note became P007 (Decision Log, 2026-11-15, with 2026-11-16 updates)
+- Transition to a First Integrated Playable Experience (Approved Direction, 2026-11-17) — follows this closeout
+- Gameplay Foundation §9 combat preferences remain Experimental Ideas / Open Questions
+
 **Related Feature Spec:** `docs/features/p007_combat_foundation.md` (Iteration 1: §10)
 
-The remaining sections of the standard 20-section format (measured data, interpretation, outcome, confidence, decision impact, next test) are completed only when P007 closes.
+*Status before closeout (kept as history): "In progress. No outcome assigned; P007 is not concluded." The sections below were completed at closeout on 2026-11-17; the Human Playtest 1 record and Iteration 1 implementation notes are unchanged.*
 
 ### 1. Primary Design Question
 
@@ -2147,7 +2156,124 @@ One tester; small-sample developer ratings. The spec's tentative supportive targ
 - The overhead focus marker left the top of the screen when the enemy was about 5 m or more up-screen; a cyan ground ring under the enemy was added so focus stays visible. At the spawn distance the enemy and ring sit under the top HUD text (pre-existing camera framing).
 - Not verified: physical keyboard Tab/F2 in a live window (synthetic OS keystrokes were blocked; the window's input path was exercised with injected key events), the editor's embedded Game view, and gamepad RB (no controller).
 
-**A/B human comparison:** not yet performed. No Iteration 1 playtest result exists.
+**A/B human comparison:** not yet performed at implementation time (2026-11-17). Quon's subsequent comparison is recorded below.
+
+### Iteration 1 — Human A/B Comparison (Quon, developer; Iteration 1 build)
+
+Qualitative developer report (2026-11-17). **No numerical Mode B ratings, `P007 encounter` Output lines, attempt counts, or order of play were supplied**; none are inferred here. One tester.
+
+Quon **strongly preferred Mode B** (target focus). He reported:
+
+- Feeling substantially more engaged in combat.
+- Feeling much more in control.
+- Feeling like he was actually fighting an opponent.
+- That Mode A did not create the same sense of confrontation.
+- That the King's orientation toward the enemy made the character look more engaged in the fight.
+
+### Developer Clarification (2026-11-17): Presentation and the Low Ratings
+
+Quon clarified that the low **dodge feel** (2/5) and **enemy attack readability** (2/5) ratings from Human Playtest 1 were significantly influenced by the prototype's limited presentation:
+
+- Placeholder visuals.
+- Limited animations.
+- Basic attack and dodge feedback.
+- Limited visual and audio responsiveness.
+- Incomplete overall game feel.
+
+Quon believes the underlying mechanics are promising and should not be prematurely redesigned solely because they feel unfinished. **This is the developer's interpretation, not a verified causal finding.** It does not establish that better presentation will resolve every issue. The Human Playtest 1 ratings above are unchanged.
+
+### Regression Evidence (mechanical only)
+
+Reported by Claude Code for the Iteration 1 implementation (2026-11-17):
+
+| Suite | Passed | Failed |
+|---|---:|---:|
+| P003 | 114 | 0 |
+| P004 | 71 | 0 |
+| P005 | 84 | 0 |
+| P006 | 161 | 0 |
+| P007 Iteration 1 | 266 | 0 |
+| **Total** | **696** | **0** |
+
+**Closeout rerun (2026-11-17, `2ef4674`, Godot 4.7.2, headless):** identical results, 696 passed / 0 failed. P004 again printed resource-cleanup warnings at exit after passing (pre-existing; not investigated). These checks verify mechanics only; they say nothing about enjoyment, feel, or readability.
+
+**Known technical limitations at closeout:**
+- Physical keyboard Tab/F2 in a live window, the editor's embedded Game view, and gamepad RB were not verified by Claude Code. Quon's A/B play is the only physical-input use on record; his report did not mention input problems, which is not the same as verification.
+- Focused facing snaps to eight directions; near a 22.5° boundary the cue and swing visibly point beside the enemy.
+- A neutral dodge while focused travels toward the enemy and stops at its body (intentional Amendment B constraint; its feel was not separately reported).
+- Hits test the enemy's ground point, so a sprite can visibly overlap the sword arc and still be missed (unresolved readability concern recorded during implementation).
+- Placeholder art, a left/right-only King sprite, ground-plane indicators, popup text, and one reused hit sound.
+- At the spawn distance the enemy sits under the top HUD text.
+
+### 14. What Worked
+
+- **Mechanical:** a functional, repeatable combat test — directional sword swing with windup/active/recovery, eight-direction facing, dodge with invulnerability and late-recovery cancel, one telegraphing melee enemy, win/loss/retry, and A/B control modes — passed its regression checks without changing P001–P006.
+- **Player report (Quon):** combat was enjoyable in principle (Playtest 1). With target focus, Quon felt substantially more engaged and in control and felt he was fighting an opponent; the King's orientation toward the enemy made him look engaged in the fight.
+
+### 15. What Did Not Work
+
+- **Control and interaction (Playtest 1):** movement-based facing made the intended attack direction hard to achieve; retreating turned the King away; the player sometimes ran past the enemy.
+- **Overall feel (Playtest 1):** clunky and awkward; desire to fight again 2/5.
+- **Presentation and feedback:** the dodge was hard to interpret visually and enemy attacks were hard to read (both 2/5); attributed by Quon largely to presentation (see clarification above).
+- **Readability:** the ground-point versus visible-sprite hit mismatch remains unresolved.
+- No measured data (Output lines, run counts, times) was recorded for either human session.
+
+### 16. Interpretation
+
+One developer tester, qualitative A/B report; treat as directional.
+
+The P007 issues are separated into three kinds:
+
+1. **Mechanical-design problems:** none clearly established by the human evidence. Sword timings, dodge window, enemy behavior, and balance were not shown to be wrong, but they were also not validated; their effect could not be separated from control and presentation problems. The spam diagnostic's quick win at starting tuning (implementation report) remains an unexamined balance question.
+2. **Control and interaction problems:** strongly indicated. Movement-based facing caused the main Playtest 1 complaints, and changing only the facing source (target focus, same eight-direction precision, same sword and dodge) produced a strong preference and much higher perceived control and engagement. This is the clearest result of P007.
+3. **Presentation and feedback limitations:** likely contributors to the low dodge-feel and enemy-readability ratings, per Quon's clarification. This is a developer interpretation, not a tested cause; P007 did not vary presentation.
+
+- **Opponent-focused facing (supported, medium confidence):** target-derived facing improved Quon's perceived control and engagement relative to movement-derived facing.
+- **Combat enjoyment overall:** not validated. Playtest 1 enjoyment was 3/5 and no Mode B rating was given.
+- **Dodge feel and enemy readability:** cannot be judged independently of presentation from this evidence.
+- **Generalization:** only one enemy, one arena, and a toggle focus were tested; multiple-enemy targeting, target switching, and broader encounters are untested.
+
+### 17. Unexpected Findings
+
+- The visual effect of facing mattered: Quon noted that the King looking at the enemy made him seem engaged in the fight, beyond the control benefit.
+- Changing only the facing source, with directional precision held at eight directions, was enough to change the reported experience substantially.
+
+### 18. Outcome
+
+**Outcome:** Iterate — current prototype cycle concluded.  
+**Confidence:**
+- **Medium** that target focus improves Quon's perceived combat control and engagement compared with the original movement-based baseline.
+- **Low** that the present targeting implementation is suitable as a permanent, generalized production solution.
+- **Low** regarding final combat balance, dodge feel, and enemy-readability design.
+
+Conclusions:
+- P007 produced a functional combat experiment with sword attacks, directional movement, dodge invulnerability, one fightable enemy, and a repeatable encounter.
+- Human Playtest 1 identified substantial control friction with movement-based facing.
+- Iteration 1 showed a strong positive qualitative preference for lightweight target focus.
+- This supports carrying **opponent-focused combat** forward as a promising direction for future development.
+
+Limitations:
+- The current targeting implementation is not established as the permanent production design.
+- Combat enjoyment has not been conclusively validated.
+- Dodge and enemy-attack satisfaction remain difficult to judge independently of presentation.
+- Multiple-enemy targeting and broader combat encounters remain untested.
+- Human evidence is limited to one developer tester, with no numerical Mode B ratings or measured play data.
+
+No additional isolated P007 iteration is scheduled for the current cycle. Unresolved mechanics and presentation questions may be revisited during integrated development or through focused prototypes when needed.
+
+### 19. Decision Impact
+
+- **Promising, not approved as production design:** opponent-focused combat (facing derived from the opponent rather than from movement). It is carried forward as a promising experimental result.
+- **Not promoted — remain Prototype Assumptions:** eight-direction facing as the final combat model; the Tab / RB focus toggle and the 7.0 m / 9.0 m acquisition and release ranges; sword timing, arc, reach, and damage; dodge timing and invulnerability window; the Training Enemy's behavior and balancing; current combat indicators and placeholder visuals; the current P007 scene and script architecture.
+- **Open Questions:** final targeting model (toggle, hold, automatic, or soft focus); multiple-enemy targeting and switching; continuous vs. snapped facing; neutral-dodge direction while focused; hit-area readability (ground point vs. visible sprite); how much presentation and feedback change dodge feel and enemy readability; combat balance and difficulty; whether the encounter is enjoyable beyond the control improvement.
+- **Production direction (separate decision, 2026-11-17):** the team will plan a First Integrated Playable Experience (Decision Log). That decision does not approve any P007 mechanic.
+- No change to Established Canon.
+
+### 20. Next Test
+
+No further isolated P007 iteration is planned for this cycle.
+
+P007's open questions may be revisited within the First Integrated Playable, once it is scoped and approved, or in a focused prototype if a significant combat uncertainty needs isolation. Any such test needs its own scope and approval; none is assigned here.
 
 ---
 
@@ -2272,6 +2398,20 @@ Give gold secured by extraction a persistent, meaningful use: an in-session trea
 Test whether one directional sword attack, a brief invulnerable dodge, and one readable melee enemy produce an enjoyable combat exchange.
 
 *In progress. Human Playtest 1 (2026-11-16) recorded as the baseline; Iteration 1 (Lightweight Target Focus) approved as an A/B experiment. No outcome assigned. See the P007 entry.*
+
+*Concluded for the current cycle on 2026-11-17 (Iterate). Target focus improved Quon's perceived control and engagement (Medium confidence); the permanent targeting design, combat enjoyment, balance, dodge feel, and enemy readability remain open (Low). See the P007 entry.*
+
+### Foundational Prototype Cycle
+
+**2026-11-17 — Foundational prototype cycle concluded by Quon.**
+
+P001–P007 represent GoldKing's initial sequence of focused gameplay experiments. This development cycle is concluded, but this Prototype Log remains available for future experiments.
+
+Future prototypes may be introduced whenever significant new mechanics, technical uncertainties, or contradictory gameplay evidence justify isolated testing. The team is not committed to creating a separate prototype for every new feature.
+
+The next development stage is **planning** a First Integrated Playable Experience (Decision Log, 2026-11-17). It has no prototype identifier and no approved scope or specification yet.
+
+The sequences and planning notes above are kept as history.
 
 This sequence is not permanent.
 

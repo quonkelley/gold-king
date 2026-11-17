@@ -470,6 +470,49 @@ Acts on the P005 Strong Recommendation (`GOLDKING_PROTOTYPE_LOG.md`, P005 §19).
 - Persistence implementation
 - Milestone behavior
 
+**Update 2026-11-17:** P007 concluded with outcome Iterate, and the foundational prototype cycle (P001–P007) concluded. See the 2026-11-17 decision below and the Prototype Log.
+
+---
+
+## 2026-11-17 — Transition to a First Integrated Playable Experience
+
+**Category:** Production Priority / Development Workflow
+
+**Decision:**  
+Transition from the initial standalone-prototype cycle (P001–P007, concluded 2026-11-17) toward **planning** a First Integrated Playable Experience.
+
+**Status:** Approved Direction (approved by Quon, 2026-11-17).
+
+**Reasoning:**  
+Existing prototypes provide enough promising groundwork to begin testing exploration, combat, treasure, extraction, settlement progression, and game feel together.
+
+**Workflow direction:**
+
+- Prefer larger, coherent playable milestones when combining established mechanics.
+- Continue using scoped prototypes for significant new uncertainties.
+- Introduce focused presentation and feedback work when necessary to evaluate gameplay meaningfully.
+- Do not require production-level polish for every gameplay test.
+- Preserve historical evidence and avoid treating experimental implementation details as permanent architecture.
+- Allow implementation latitude within approved milestone boundaries while retaining explicit review for major changes.
+
+**Scope boundary:**  
+This decision authorizes **planning** the next milestone only. It does not authorize implementation and does not approve the First Integrated Playable's content, architecture, art pipeline, or feature list. No milestone specification or prototype identifier is assigned.
+
+**Existing Decisions Affected:**  
+Concludes the incremental prototype sequencing that began with P001 (`GOLDKING_PROTOTYPE_LOG.md`, *Foundational Prototype Cycle*). Does not change any P001–P007 outcome. The Prototype Log remains available for future focused prototypes.
+
+**Not decided by this entry (remain Prototype Assumptions or Open Questions):**
+
+- Opponent-focused combat is a promising experimental result from P007, not an Approved Direction.
+- Eight-direction facing as the final combat model; the target-focus controls and acquisition/release ranges; sword timing, arc, reach, and damage; dodge timing and invulnerability; the Training Enemy's behavior and balance; current combat indicators and placeholder visuals; the current prototype scene and script architecture.
+
+**Questions Still Open:**
+
+- The First Integrated Playable's scope, content, and success criteria
+- Which prototype implementations are reused, rebuilt, or discarded
+- How much presentation and feedback work the milestone needs to evaluate combat and game feel
+- Combat targeting model for multiple enemies
+
 ---
 
 # Deferred Decisions
@@ -644,6 +687,7 @@ Individual encounters may still use controlled arenas when appropriate.
 - Settlement characters, followers, and specialist services (Experimental Ideas; see Gameplay Foundation §6)
 - Whether reputation, influence, or legendary status is communicated mechanically, and how
 - Combat identity: weapons, relic combinations, defensive mechanics (current preferences in Gameplay Foundation §9)
+- Combat targeting and facing: P007 found opponent-focused facing promising (Iterate, 2026-11-17); the production targeting model, multiple-enemy targeting, and directional precision are open
 - Expedition milestone layers and regional variety (Experimental Ideas; see Gameplay Foundation §10)
 - Whether the settlement becomes a new kingdom
 - Potential old-kingdom vs. new-kingdom narrative choice
