@@ -1,0 +1,99 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game/prototypes/p007_combat_foundation.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://game/player/player.tscn" id="2_player"]
+[ext_resource type="Script" path="res://game/prototypes/p007/combat_king.gd" id="3_king"]
+[ext_resource type="Script" path="res://game/prototypes/p001_follow_camera.gd" id="4_camera"]
+
+[sub_resource type="Environment" id="Environment_graybox"]
+background_mode = 1
+background_color = Color(0.55, 0.6, 0.65, 1)
+ambient_light_source = 2
+ambient_light_color = Color(1, 1, 1, 1)
+ambient_light_energy = 0.5
+
+[sub_resource type="StandardMaterial3D" id="Mat_floor"]
+albedo_color = Color(0.45, 0.47, 0.42, 1)
+
+[sub_resource type="StandardMaterial3D" id="Mat_wall"]
+albedo_color = Color(0.68, 0.64, 0.58, 1)
+
+[node name="P007CombatFoundation" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_graybox")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, -0.409576, 0.286788, 0, 0.573576, 0.819152, -0.5, -0.709406, 0.496732, 0, 10, 0)
+shadow_enabled = true
+
+[node name="Arena" type="Node3D" parent="."]
+
+[node name="Floor" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+use_collision = true
+size = Vector3(14, 1, 14)
+material = SubResource("Mat_floor")
+
+[node name="WallNorth" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, -6.5)
+use_collision = true
+size = Vector3(14, 1.2, 1)
+material = SubResource("Mat_wall")
+
+[node name="WallSouth" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 6.5)
+use_collision = true
+size = Vector3(14, 0.6, 1)
+material = SubResource("Mat_wall")
+
+[node name="WallEast" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.5, 0.6, 0)
+use_collision = true
+size = Vector3(1, 1.2, 12)
+material = SubResource("Mat_wall")
+
+[node name="WallWest" type="CSGBox3D" parent="Arena"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.5, 0.6, 0)
+use_collision = true
+size = Vector3(1, 1.2, 12)
+material = SubResource("Mat_wall")
+
+[node name="King" parent="." instance=ExtResource("2_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3)
+script = ExtResource("3_king")
+
+[node name="Camera" type="Camera3D" parent="." node_paths=PackedStringArray("target")]
+fov = 45.0
+script = ExtResource("4_camera")
+target = NodePath("../King")
+distance = 11.0
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="ControlsLabel" type="Label" parent="HUD"]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = -48.0
+offset_right = 900.0
+offset_bottom = -16.0
+grow_vertical = 0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.1, 0.07, 0.03, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 16
+text = "Move: WASD / arrows / left stick    Attack: J / Space / X(west)    Dodge: Left Shift / B(east)    Retry: R / LB    Debug: F3"
+
+[node name="DebugLabel" type="Label" parent="HUD"]
+visible = false
+offset_left = 24.0
+offset_top = 96.0
+offset_right = 624.0
+offset_bottom = 400.0
+theme_override_colors/font_color = Color(0.85, 1, 0.85, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 15
