@@ -401,17 +401,15 @@ Avoid duplicating the same information across several files.
 
 ## Current Development Priority
 
-GoldKing is entering playable prototyping.
+The foundational prototype cycle (P001–P007) concluded on 2026-11-17. See `docs/GOLDKING_PROTOTYPE_LOG.md`.
 
-The current prototype sequence begins with:
+The current priority is **planning** a First Integrated Playable Experience (Approved Direction; `docs/GOLDKING_DECISION_LOG.md`, 2026-11-17).
 
-1. Player Movement & Controlled Camera
-2. Gold Collection
-3. Gold Power vs. Burden
-4. Gold Spill & Theft
-5. Mini Expedition / Extraction
+- No integrated-playable specification or implementation has been approved. Do not begin implementing it unless explicitly authorized.
+- Focused prototypes remain available when a significant uncertainty needs isolated testing; not every feature needs its own prototype.
+- The Prototype Log, Decision Log, Gameplay Foundation, and Established Canon (`docs/GOLDKING_CONTEXT.md`) remain authoritative as described above.
 
-Do not jump ahead and implement later prototype systems unless explicitly requested.
+Do not jump ahead and implement systems that have not been requested.
 
 The immediate goal is to learn, not to complete the full game.
 
