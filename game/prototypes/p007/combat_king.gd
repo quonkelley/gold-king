@@ -106,6 +106,9 @@ func _ready() -> void:
 	# Exact ground point that every hit and strike test uses.
 	CombatSector.add_indicator(self, "FootMarker", 0.1, 360.0, Color(1.0, 0.95, 0.6, 0.95), 0.025)
 	_facing_cue = CombatSector.add_indicator(self, "FacingCue", 0.75, 30.0, Color(1.0, 0.85, 0.25, 0.55), 0.02)
+	# Facing up, the cue lies behind the King's own billboard; draw it on top so all 8 read.
+	(_facing_cue.material_override as StandardMaterial3D).no_depth_test = true
+	_facing_cue.material_override.render_priority = 1
 	_apply_facing_cue()
 	_sword_arc = CombatSector.add_indicator(self, "SwordArc", sword_reach, sword_arc_degrees, Color.WHITE, 0.04)
 	_sword_material = _sword_arc.material_override as StandardMaterial3D
@@ -204,10 +207,11 @@ func _dodge_step(delta: float) -> void:
 		# Hand back to walking from rest so the dodge covers its set distance, not more.
 		velocity = Vector3.ZERO
 		_visual.modulate = Color.WHITE
+	# Opaque tints only: the King's sprite uses alpha-cut, so translucency would hide him entirely.
 	elif is_invulnerable():
-		_visual.modulate = Color(0.75, 0.9, 1.0, 0.45)
+		_visual.modulate = Color(0.45, 0.8, 1.0)
 	else:
-		_visual.modulate = Color(0.75, 0.9, 1.0, 0.8)
+		_visual.modulate = Color(0.75, 0.9, 1.0)
 
 
 func _end_attack() -> void:
@@ -221,7 +225,7 @@ func _defeat() -> void:
 	dodging = false
 	velocity = Vector3.ZERO
 	_end_attack()
-	_visual.modulate = Color(0.4, 0.4, 0.42, 0.85)
+	_visual.modulate = Color(0.4, 0.4, 0.42)
 	defeated.emit()
 
 

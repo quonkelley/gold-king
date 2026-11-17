@@ -137,6 +137,7 @@ func _run() -> void:
 	await test_enemy_states()
 	await test_strike_resolution()
 	await test_enemy_limits()
+	await test_encounter_and_retry()
 	print("\n%d passed, %d failed" % [passes, fails])
 	quit(0 if fails == 0 else 1)
 
@@ -794,3 +795,112 @@ func test_enemy_limits() -> void:
 	var started: int = e.attacks_started
 	await wait(240)
 	check(e.state == E_IDLE and e.attacks_started == started, "enemy stops attacking once the King is defeated")
+
+
+func press_key(code: Key) -> void:
+	var ev: InputEventKey = InputEventKey.new()
+	ev.physical_keycode = code
+	ev.keycode = code
+	ev.pressed = true
+	Input.parse_input_event(ev)
+	await process_frame
+	var up: InputEventKey = ev.duplicate()
+	up.pressed = false
+	Input.parse_input_event(up)
+	await process_frame
+
+
+## Presses R (restart_test) and waits for the reloaded scene.
+func retry_with_key() -> bool:
+	var old_id: int = current_scene.get_instance_id()
+	await press_key(KEY_R)
+	for i in 30:
+		await process_frame
+		if current_scene != null and current_scene.get_instance_id() != old_id and current_scene.is_node_ready():
+			await physics_frame
+			return true
+	return false
+
+
+func check_fresh(label: String) -> void:
+	var root: Node = scene()
+	var k: Variant = king()
+	var e: Variant = enemy()
+	var enemies: int = root.find_children("TrainingEnemy*", "CharacterBody3D", true, false).size()
+	var ok: bool = enemies == 1 and k.health == 3 and not k.is_defeated and e.health == 3 and e.state == E_IDLE
+	ok = ok and flat(k.global_position).distance_to(Vector2(0, 3)) < 0.05 and flat(e.global_position).distance_to(Vector2(0, -3)) < 0.05
+	ok = ok and k.attack_phase == 0 and not k.dodging and not k.is_invulnerable() and k.dodge_cooldown_left == 0.0
+	ok = ok and k.facing_index == 6 and k.swings == 0 and k.dodges == 0 and e.attacks_started == 0 and not e.held
+	ok = ok and root.result == "" and root.hits_dealt == 0 and root.hits_taken == 0
+	check(ok, "%s: retry restores health, positions, facing, cooldowns, phases, counters; one enemy" % label)
+
+
+func test_encounter_and_retry() -> void:
+	print("-- encounter result, HUD, diagnostics, retry")
+	await load_fresh()
+	var root: Node = scene()
+	var k: Variant = king()
+	var e: Variant = enemy()
+	var hud: Label = root.get_node("HUD/HealthLabel")
+	check(hud.text == "King ♥♥♥     Enemy ●●●", "HUD shows full health")
+	# Win: three hits from the King.
+	await place(Vector3(0, 0, 2), Vector3(0, 0, 1))
+	await face(6)
+	for i in 3:
+		await tap("attack")
+		await wait(26)
+	check(root.result == "victory" and e.state == E_DEFEATED, "three sword hits win the encounter")
+	check(root.hits_dealt == 3 and root.result_line.contains("| victory |") and root.result_line.contains("hits dealt 3"), "result line records the win and all 3 hits (killing hit included)")
+	check(hud.text == "King ♥♥♥     Enemy ○○○", "HUD shows the enemy at 0")
+	check(root.find_children("*", "Label3D", false, false).size() >= 1, "hit feedback popup spawned")
+	# Dodge in late recovery and leftover cooldown before retrying, to prove the reset.
+	k.try_attack()
+	await wait(18)
+	k.try_dodge(Vector2(1, 0))
+	await wait(2)
+	check(k.dodging and k.dodge_cooldown_left > 0.0, "mid-dodge with cooldown running before retry")
+	check(await retry_with_key(), "R reloads the encounter after a win")
+	check_fresh("after win")
+	# Loss.
+	k = king()
+	e = enemy()
+	root = scene()
+	await prime_windup(Vector3(0, 0, 1.2))
+	root = scene()
+	k = king()
+	e = enemy()
+	k.health = 1
+	root._update_health()
+	await pin_king(Vector3(0, 0, 1.2), 40)
+	check(root.result == "defeat" and root.result_line.contains("| defeat |"), "losing all health ends the encounter as a defeat")
+	check((root.get_node("HUD/PromptLabel") as Label).text.contains("Retry"), "win/loss prompt shows the retry key")
+	var finished_line: String = root.result_line
+	await wait(30)
+	check(root.result_line == finished_line, "the result is recorded once per attempt")
+	check(await retry_with_key(), "R reloads the encounter after a loss")
+	check_fresh("after loss")
+	# Retry mid-fight (enemy winding up, King mid-swing) is also clean.
+	root = scene()
+	enemy().start_delay = 0.0
+	king().global_position = Vector3(0, 0, -1.4)
+	await wait_until(func() -> bool: return enemy().state == E_WINDUP, 60)
+	king().try_attack()
+	await wait(3)
+	check(await retry_with_key(), "R reloads mid-fight")
+	check_fresh("mid-fight")
+	# Developer keys.
+	root = scene()
+	var dbg: Label = root.get_node("HUD/DebugLabel")
+	check(not dbg.visible, "diagnostics hidden by default")
+	await press_key(KEY_F3)
+	await process_frame
+	check(dbg.visible and dbg.text.contains("King: sword") and dbg.text.contains("Enemy:"), "F3 shows the diagnostics panel")
+	await press_key(KEY_F3)
+	check(not dbg.visible, "F3 hides it again")
+	await press_key(KEY_F4)
+	check(enemy().held, "F4 holds the enemy")
+	var held_pos: Vector3 = enemy().global_position
+	await wait(120)
+	check(enemy().state == E_IDLE and enemy().global_position.is_equal_approx(held_pos), "held enemy does not act")
+	await press_key(KEY_F4)
+	check(not enemy().held, "F4 releases it")

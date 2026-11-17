@@ -199,7 +199,7 @@ func _show_state() -> void:
 
 ## Sprite tint at rest: dimmed during recovery to show the opening.
 func _rest_color() -> Color:
-	return Color(0.62, 0.68, 0.8, 0.9) if state == State.RECOVERY else Color.WHITE
+	return Color(0.62, 0.68, 0.8) if state == State.RECOVERY else Color.WHITE
 
 
 ## Applies one sword hit. Returns false when the enemy is already defeated.
@@ -221,7 +221,7 @@ func _defeat() -> void:
 	_enter(State.DEFEATED)
 	# The body no longer blocks the King once defeated.
 	_collision.set_deferred("disabled", true)
-	_visual.modulate = Color(0.35, 0.35, 0.38, 0.85)
+	_visual.modulate = Color(0.35, 0.35, 0.38)
 	_health_label.text = "DEFEATED"
 	defeated.emit()
 
