@@ -1,8 +1,9 @@
 extends SceneTree
 ## P007 regression checks: scene isolation, eight-direction facing, sector geometry, sword timing
 ## and hit limits, dodge, invulnerability, cancellation, enemy states and first-contact strike
-## resolution, defeat, retry, and input isolation. Mechanical only; never feel, readability,
-## fairness, balance, or enjoyment.
+## resolution, defeat, retry, and input isolation; plus Iteration 1 target focus (Mode B):
+## acquisition, release, snapped target facing, sword and dodge interaction, A/B mode selection,
+## and comparison logging. Mechanical only; never feel, readability, fairness, balance, or enjoyment.
 ##
 ## Run from the repository root (Godot 4.7.2):
 ##   <godot> --headless --path . --script res://tests/p007_regression.gd
@@ -106,7 +107,7 @@ func tap(action: String) -> void:
 
 
 func release_all() -> void:
-	for action: String in MOVES + ["attack", "dodge", "restart_test"]:
+	for action: String in MOVES + ["attack", "dodge", "restart_test", "target_focus"]:
 		if InputMap.has_action(action):
 			Input.action_release(action)
 
@@ -138,6 +139,11 @@ func _run() -> void:
 	await test_strike_resolution()
 	await test_enemy_limits()
 	await test_encounter_and_retry()
+	await test_focus_acquisition()
+	await test_focus_lifecycle()
+	await test_focus_facing()
+	await test_focus_sword()
+	await test_focus_dodge()
 	print("\n%d passed, %d failed" % [passes, fails])
 	quit(0 if fails == 0 else 1)
 
@@ -904,3 +910,374 @@ func test_encounter_and_retry() -> void:
 	check(enemy().state == E_IDLE and enemy().global_position.is_equal_approx(held_pos), "held enemy does not act")
 	await press_key(KEY_F4)
 	check(not enemy().held, "F4 releases it")
+
+
+# --- Iteration 1: target focus (Mode B) ---
+
+## Fresh scene in Mode B, King and held enemy placed, focus pressed. Returns whether it focused.
+func focus_setup(king_pos: Vector3, enemy_pos: Vector3) -> bool:
+	await load_fresh()
+	king().focus_available = true
+	await place(king_pos, enemy_pos)
+	await tap("target_focus")
+	return king().focused
+
+
+## Expected focused facing: the existing eight-direction snap of the bearing to the enemy.
+func snapped_bearing_index() -> int:
+	return king().snap_index(flat(enemy().global_position - king().global_position))
+
+
+func releases(reason: String) -> int:
+	return int(king().focus_releases[reason])
+
+
+func release_total() -> int:
+	var total: int = 0
+	for n: int in king().focus_releases.values():
+		total += n
+	return total
+
+
+func tab_event(pressed: bool, echo: bool) -> InputEventKey:
+	var ev: InputEventKey = InputEventKey.new()
+	ev.physical_keycode = KEY_TAB
+	ev.keycode = KEY_TAB
+	ev.pressed = pressed
+	ev.echo = echo
+	return ev
+
+
+func test_focus_acquisition() -> void:
+	print("-- focus acquisition (Mode B), Mode A ignores focus")
+	await load_fresh()
+	var k: Variant = king()
+	check(not k.focus_available and not k.focused, "a fresh encounter starts in Mode A, unfocused")
+	await place(Vector3(0, 0, 3), Vector3(0, 0, -1))
+	await face(0)
+	await tap("target_focus")
+	check(not k.focused and k.focus_acquisitions == 0 and k.facing_index == 0, "Mode A: focus press does nothing (facing stays movement-based)")
+	check(await focus_setup(Vector3(0, 0, 3), Vector3(0, 0, -3)), "Mode B: acquires the living enemy at 6.0 m")
+	k = king()
+	check(k.focus_target == enemy() and k.focus_acquisitions == 1, "focus target is the Training Enemy")
+	await tap("target_focus")
+	check(not k.focused and k.focus_target == null and releases("press") == 1, "second press releases (reason: press)")
+	check(await focus_setup(Vector3(0, 0, 3), Vector3(0, 0, -4)), "acquires at exactly 7.0 m (inclusive)")
+	check(not await focus_setup(Vector3(0, 0, 3), Vector3(0, 0, -4.1)), "rejects at 7.1 m")
+	k = king()
+	check(k.focus_acquisitions == 0 and release_total() == 0 and k.facing_index == 6, "failed acquisition changes nothing")
+	# Defeated enemy.
+	await load_fresh()
+	k = king()
+	k.focus_available = true
+	await place(Vector3(0, 0, 3), Vector3(0, 0, 1))
+	for i in 3:
+		enemy().take_sword_hit()
+	await tap("target_focus")
+	check(not enemy().is_alive() and not k.focused, "a defeated enemy cannot be focused")
+	# Removed enemy.
+	await load_fresh()
+	k = king()
+	k.focus_available = true
+	await place(Vector3(0, 0, 3), Vector3(0, 0, 1))
+	enemy().free()
+	await tap("target_focus")
+	check(not k.focused and k.focus_acquisitions == 0, "a removed enemy cannot be focused (no error)")
+	# Holding the button toggles once.
+	await load_fresh()
+	k = king()
+	k.focus_available = true
+	await place(Vector3(0, 0, 3), Vector3(0, 0, -1))
+	Input.action_press("target_focus")
+	await wait(60)
+	Input.action_release("target_focus")
+	await wait(2)
+	check(k.focused and k.focus_acquisitions == 1 and release_total() == 0, "holding focus for 1 s toggles exactly once")
+	# Real Tab key path, and key-repeat echo does not toggle.
+	await load_fresh()
+	k = king()
+	k.focus_available = true
+	await place(Vector3(0, 0, 3), Vector3(0, 0, -1))
+	Input.parse_input_event(tab_event(true, false))
+	await wait(2)
+	check(k.focused, "the Tab key focuses (ui_focus_next overlap does not block it)")
+	for i in 3:
+		Input.parse_input_event(tab_event(true, true))
+		await wait(2)
+	Input.parse_input_event(tab_event(false, false))
+	await wait(2)
+	check(k.focused and k.focus_acquisitions == 1 and release_total() == 0, "Tab key-repeat echoes do not toggle focus")
+
+
+func test_focus_lifecycle() -> void:
+	print("-- focus release: defeat, removal, range hysteresis, King defeat")
+	# Defeating hit releases focus on the same tick.
+	check(await focus_setup(Vector3(0, 0, 3), Vector3(0, 0, 2)), "focused at 1.0 m")
+	var k: Variant = king()
+	var e: Variant = enemy()
+	e.take_sword_hit()
+	e.take_sword_hit()
+	k.try_attack()
+	await wait_until(func() -> bool: return not e.is_alive(), 20)
+	check(not e.is_alive() and not k.focused and releases("defeat") == 1, "focus releases on the tick the enemy is defeated (reason: defeat)")
+	await tap("target_focus")
+	check(not k.focused, "cannot re-focus the defeated enemy")
+	# Removed enemy releases (no error).
+	check(await focus_setup(Vector3(0, 0, 3), Vector3(0, 0, 0)), "focused at 3.0 m")
+	k = king()
+	enemy().queue_free()
+	await wait(3)
+	check(not k.focused and k.focus_target == null and releases("invalid") == 1, "focus releases when the enemy is removed (reason: invalid)")
+	# Range: 9.0 m release, with no flicker inside the 7-9 m band.
+	check(await focus_setup(Vector3(0, 0, 3), Vector3(0, 0, -3)), "focused at 6.0 m")
+	k = king()
+	e = enemy()
+	e.global_position = Vector3(0, 0, -5.9)
+	await wait(3)
+	check(k.focused, "still focused at 8.9 m (beyond the 7.0 m acquire range)")
+	for i in 120:
+		e.global_position = Vector3(0, 0, -5.5 if i % 2 == 0 else -6.0)
+		await physics_frame
+	check(k.focused and release_total() == 0, "120 ticks alternating 8.5 / 9.0 m: no release")
+	e.global_position = Vector3(0, 0, -6.1)
+	await wait(2)
+	check(not k.focused and releases("range") == 1, "releases beyond 9.0 m (9.1 m, reason: range)")
+	e.global_position = Vector3(0, 0, -5.0)
+	await wait(1)
+	await tap("target_focus")
+	check(not k.focused, "re-acquire rejected at 8.0 m")
+	e.global_position = Vector3(0, 0, -4.0)
+	await wait(1)
+	await tap("target_focus")
+	check(k.focused and k.focus_acquisitions == 2, "re-acquired at 7.0 m")
+	# King defeat releases.
+	check(await focus_setup(Vector3(0, 0, 3), Vector3(0, 0, -1)), "focused at 4.0 m")
+	k = king()
+	for i in 3:
+		k.take_enemy_hit(1)
+	check(k.is_defeated and not k.focused and releases("king_defeated") == 1, "King defeat releases focus")
+	check(not k.toggle_focus() and not k.focused, "a defeated King cannot focus")
+	await load_fresh()
+	check(not king().focused, "a new encounter starts unfocused")
+
+
+func test_focus_facing() -> void:
+	print("-- focused facing: eight-direction snap toward the enemy; movement unchanged")
+	# Mode B but unfocused: movement-based facing exactly as Mode A.
+	await load_fresh()
+	var k: Variant = king()
+	k.focus_available = true
+	await place(Vector3(0, 0, 3), Vector3(0, 0, -1))
+	await face(0)
+	check(k.facing_index == 0 and not k.focused, "Mode B unfocused: facing follows movement")
+	# Walking distance is unchanged by focus: same input, same displacement as Mode A.
+	await load_fresh()
+	await place(Vector3(0, 0, 0), Vector3(0, 0, -3))
+	var start_a: Vector3 = king().global_position
+	hold_input(Vector2(0, 1))
+	await wait(30)
+	hold_input(Vector2.ZERO)
+	var walked_a: Vector3 = king().global_position - start_a
+	check(king().facing_index == 2, "Mode A: walking away turns the King away (down)")
+	check(await focus_setup(Vector3(0, 0, 0), Vector3(0, 0, -3)), "Mode B focused at 3.0 m")
+	k = king()
+	var start_b: Vector3 = k.global_position
+	hold_input(Vector2(0, 1))
+	await wait(30)
+	hold_input(Vector2.ZERO)
+	var walked_b: Vector3 = k.global_position - start_b
+	check(walked_b.distance_to(walked_a) < 0.001, "focused retreat moves exactly as far as Mode A (%.3f vs %.3f m)" % [walked_b.length(), walked_a.length()])
+	check(k.facing_index == 6 and k.facing_dir.is_equal_approx(k.direction_for_index(6)), "focused retreat keeps facing the enemy (up)")
+	# Strafing: facing follows the snapped bearing every tick and changes as the bearing crosses 22.5 deg.
+	check(await focus_setup(Vector3(0, 0, 3), Vector3(0, 0, -1)), "focused at 4.0 m")
+	k = king()
+	hold_input(Vector2(1, 0))
+	var always_snapped: bool = true
+	var seen: Dictionary = {}
+	for i in 45:
+		await physics_frame
+		await physics_frame
+		# Facing is set at the start of the King's tick, before he moves: compare one tick later.
+		seen[k.facing_index] = true
+		if not k.facing_dir.is_equal_approx(k.direction_for_index(k.facing_index)):
+			always_snapped = false
+	hold_input(Vector2.ZERO)
+	await wait(2)
+	check(always_snapped and k.facing_index == snapped_bearing_index(), "strafing: facing is always one of the eight snapped directions toward the enemy")
+	check(seen.has(6) and seen.has(5) and not seen.has(0), "strafing right turns the facing up -> up-left, never toward the movement")
+	# Tracking a moving enemy, including near a 22.5-degree boundary.
+	var spots: Array[Vector3] = [Vector3(2, 0, 0), Vector3(0, 0, 2), Vector3(-2, 0, -2), Vector3(-2, 0, 0)]
+	var expected: Array[int] = [0, 2, 5, 4]
+	var tracked: bool = true
+	for i in spots.size():
+		enemy().global_position = k.global_position + spots[i]
+		await wait(2)
+		if k.facing_index != expected[i]:
+			tracked = false
+	check(tracked, "facing tracks the enemy to right / down / up-left / left")
+	enemy().global_position = k.global_position + Vector3(sin(deg_to_rad(20.0)), 0, -cos(deg_to_rad(20.0))) * 3.0
+	await wait(2)
+	check(k.facing_index == 6 and k.facing_dir.is_equal_approx(Vector3(0, 0, -1)), "enemy 20 deg right of up: facing snaps to exactly up (no continuous aim)")
+	enemy().global_position = k.global_position + Vector3(sin(deg_to_rad(25.0)), 0, -cos(deg_to_rad(25.0))) * 3.0
+	await wait(2)
+	check(k.facing_index == 7, "enemy 25 deg right of up: facing snaps to up-right")
+	# Sprite flip follows the target, not the movement.
+	enemy().global_position = k.global_position + Vector3(-2, 0, 0)
+	await wait(2)
+	hold_input(Vector2(1, 0))
+	await wait(10)
+	hold_input(Vector2.ZERO)
+	await wait(2)
+	var visual: Sprite3D = k.get_node("Visual")
+	check(visual.flip_h, "moving right with the enemy to the left: sprite faces left (target)")
+	enemy().global_position = k.global_position + Vector3(0, 0, -2)
+	await wait(2)
+	check(visual.flip_h and k.facing_index == 6, "enemy straight up: last flip kept")
+	# Release: facing kept until movement input changes it, then movement-based again.
+	await tap("target_focus")
+	check(not k.focused and k.facing_index == 6, "after release with no input, the last facing is kept")
+	await face(0)
+	check(k.facing_index == 0 and not visual.flip_h, "after release, movement input turns the King again (right)")
+
+
+func test_focus_sword() -> void:
+	print("-- focused sword: snapshot at start, no tracking, same reach and arc, no auto-approach")
+	check(await focus_setup(Vector3(0, 0, 3), Vector3(0, 0, 2)), "focused at 1.0 m")
+	var k: Variant = king()
+	var e: Variant = enemy()
+	check(is_equal_approx(k.sword_reach, 1.4) and is_equal_approx(k.sword_arc_degrees, 110.0), "sword reach and arc unchanged in Mode B (1.4 m, 110 deg)")
+	var arc: MeshInstance3D = k.get_node("SwordArc")
+	k.try_attack()
+	check(k.attack_dir.is_equal_approx(k.direction_for_index(6)) and is_equal_approx(arc.rotation.y, CombatSector.yaw_for(k.attack_dir)), "swing snapshots the focused facing (up); arc drawn along it")
+	await wait(1)
+	e.global_position = k.global_position + Vector3(1.0, 0, 0)
+	await wait(20)
+	check(k.attack_dir.is_equal_approx(k.direction_for_index(6)) and e.health == 3, "enemy moved 90 deg aside mid-swing: swing does not follow it (no hit)")
+	check(k.facing_index == 0, "facing itself keeps tracking (right) for the next swing")
+	# Reach unchanged: dead centre at 1.5 m misses, 1.3 m hits.
+	check(await focus_setup(Vector3(0, 0, 3), Vector3(0, 0, 1.5)), "focused, enemy dead centre at 1.5 m")
+	k = king()
+	k.try_attack()
+	await wait(25)
+	check(enemy().health == 3, "beyond the 1.4 m reach: no hit even when focused")
+	check(await focus_setup(Vector3(0, 0, 3), Vector3(0, 0, 1.7)), "focused, enemy dead centre at 1.3 m")
+	k = king()
+	k.try_attack()
+	await wait(25)
+	check(enemy().health == 2 and k.sword_hits == 1, "inside reach: exactly one hit")
+	# Snapped, not continuous: the swing goes along the snapped direction.
+	check(await focus_setup(Vector3(0, 0, 3), Vector3(0, 0, 3) + Vector3(sin(deg_to_rad(20.0)), 0, -cos(deg_to_rad(20.0))) * 1.2), "focused, enemy 20 deg off up at 1.2 m")
+	k = king()
+	k.try_attack()
+	check(k.attack_dir.is_equal_approx(Vector3(0, 0, -1)), "swing direction is the snapped facing (up), not the exact bearing")
+	await wait(25)
+	check(enemy().health == 2, "20 deg off the snapped direction is inside the 55 deg half-arc: hit")
+	# No automatic movement toward the target.
+	check(await focus_setup(Vector3(0, 0, 3), Vector3(0, 0, 0)), "focused at 3.0 m, no input")
+	k = king()
+	var still: Vector3 = k.global_position
+	k.try_attack()
+	await wait(60)
+	check(k.global_position.distance_to(still) < 0.001, "focus never moves the King toward the target")
+	# Retreat-and-attack: focused hits while backing away; Mode A turns away and misses.
+	check(await focus_setup(Vector3(0, 0, 3), Vector3(0, 0, 2.1)), "focused at 0.9 m")
+	k = king()
+	hold_input(Vector2(0, 1))
+	await tap("attack")
+	await wait(20)
+	hold_input(Vector2.ZERO)
+	check(enemy().health == 2 and k.retreat_swings == 1 and k.retreat_hits == 1, "focused: attack while retreating hits the enemy")
+	await load_fresh()
+	k = king()
+	await place(Vector3(0, 0, 3), Vector3(0, 0, 2.1))
+	await face(6)
+	hold_input(Vector2(0, 1))
+	await tap("attack")
+	await wait(20)
+	hold_input(Vector2.ZERO)
+	check(enemy().health == 3 and k.attack_dir.is_equal_approx(k.direction_for_index(2)) and k.retreat_swings == 1 and k.retreat_hits == 0, "Mode A: the same retreat turns the swing away (down) and misses")
+
+
+## Focused variants of the King-side invulnerability and cancel timing checks.
+func focused_iframe_result(ticks: int) -> int:
+	await focus_setup(Vector3(0, 0, 3), Vector3(-3, 0, -1))
+	var k: Variant = king()
+	k.try_dodge(Vector2.ZERO)
+	await wait(ticks)
+	return k.take_enemy_hit(1)
+
+
+func focused_cancel_at(ticks: int) -> bool:
+	await focus_setup(Vector3(0, 0, 3), Vector3(-3, 0, -1))
+	var k: Variant = king()
+	k.try_attack()
+	await wait(ticks)
+	return k.try_dodge(Vector2(1, 0))
+
+
+func test_focus_dodge() -> void:
+	print("-- focused dodge: input direction, neutral along facing, persistence, timing unchanged")
+	check(await focus_setup(Vector3(0, 0, 3), Vector3(0, 0, -1)), "focused at 4.0 m")
+	var k: Variant = king()
+	var start: Vector3 = k.global_position
+	hold_input(Vector2(1, 0))
+	await tap("dodge")
+	hold_input(Vector2.ZERO)
+	check(k.dodging and k.dodge_dir.is_equal_approx(Vector3(1, 0, 0)), "focused: dodge follows the movement input (right), not the target")
+	check(k.focused, "focus stays on during the dodge")
+	await wait_until(func() -> bool: return not k.dodging, 30)
+	var moved: Vector3 = k.global_position - start
+	check(absf(moved.x - k.dodge_distance) < 0.08 and absf(moved.z) < 0.01, "focused dodge covers ~1.75 m to the right (%.2f m)" % moved.x)
+	# Facing is set at the start of each tick, before that tick's move: one tick later it reflects
+	# where the dodge ended (here the bearing sits just past the 22.5 deg boundary).
+	await wait(1)
+	check(k.focused and k.facing_index == snapped_bearing_index(), "after the dodge: still focused, facing the enemy's snapped bearing")
+	# Neutral focused dodge follows the current facing, i.e. toward the enemy (Amendment B).
+	check(await focus_setup(Vector3(0, 0, 3), Vector3(0, 0, -1)), "focused at 4.0 m, neutral input")
+	k = king()
+	start = k.global_position
+	await tap("dodge")
+	check(k.dodge_dir.is_equal_approx(k.facing_dir) and k.dodge_dir.is_equal_approx(Vector3(0, 0, -1)), "neutral focused dodge goes along the current facing (toward the enemy)")
+	await wait_until(func() -> bool: return not k.dodging, 30)
+	check(absf((start - k.global_position).z - k.dodge_distance) < 0.08, "open space: the full 1.75 m toward the enemy")
+	check(await focus_setup(Vector3(0, 0, 2), Vector3(0, 0, 0.5)), "focused at 1.5 m, neutral input")
+	k = king()
+	await tap("dodge")
+	await wait(20)
+	var gap: float = flat(enemy().global_position - k.global_position).length()
+	check(k.global_position.z > 0.5 + 0.85 and gap > 0.85, "neutral focused dodge into the enemy stops at its body, no overlap (gap %.2f m)" % gap)
+	# The first attack after a dodge uses the bearing from where the dodge ended.
+	check(await focus_setup(Vector3(0, 0, 3), Vector3(0, 0, 1)), "focused at 2.0 m")
+	k = king()
+	hold_input(Vector2(1, 0))
+	await tap("dodge")
+	hold_input(Vector2.ZERO)
+	await wait_until(func() -> bool: return not k.dodging, 30)
+	await tap("attack")
+	check(k.focused and k.facing_index == 5 and k.attack_dir.is_equal_approx(k.direction_for_index(5)), "attack right after a sideways dodge swings at the enemy (up-left)")
+	# Timing tables repeated while focused: identical to the unfocused results.
+	var hit: int = 0
+	var dodged: int = 1
+	var iframes_ok: bool = true
+	for t: int in [1, 2, 10, 11]:
+		if await focused_iframe_result(t) != hit:
+			iframes_ok = false
+	for t: int in [3, 6, 9]:
+		if await focused_iframe_result(t) != dodged:
+			iframes_ok = false
+	check(iframes_ok and king().focused, "focused: invulnerability window unchanged (ticks 3-9 dodged; 1, 2, 10, 11 hit)")
+	var cancel_ok: bool = true
+	for t: int in [2, 6, 11, 13, 17]:
+		if await focused_cancel_at(t):
+			cancel_ok = false
+	for t: int in [18, 22, 30]:
+		if not await focused_cancel_at(t):
+			cancel_ok = false
+	check(cancel_ok, "focused: late-recovery cancel window unchanged (ticks 18+ accepted, 2-17 rejected)")
+	check(await focus_setup(Vector3(0, 0, 3), Vector3(-3, 0, -1)), "focused")
+	k = king()
+	check(k.try_dodge(Vector2(1, 0)), "focused: first dodge accepted")
+	await wait(41)
+	check(not k.try_dodge(Vector2(1, 0)), "focused: cooldown still blocks at 0.683 s")
+	await wait(1)
+	check(k.try_dodge(Vector2(1, 0)), "focused: dodge accepted at 0.70 s")
