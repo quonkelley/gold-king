@@ -1331,7 +1331,7 @@ func test_focus_mode_and_logging() -> void:
 	var mode_label: Label = scene().get_node("HUD/ModeLabel")
 	var marker: Label3D = scene().get_node("FocusMarker")
 	check(scene().control_mode == "A" and not king().focus_available and not root.has_meta(&"p007_control_mode"), "the experiment starts in Mode A")
-	check(mode_label.text.begins_with("Mode A") and not marker.visible, "HUD shows Mode A; no focus marker")
+	check(mode_label.text.begins_with("Mode A") and not marker.visible and not scene().get_node("FocusRing").visible, "HUD shows Mode A; no focus marker or ring")
 	# F2 mid-fight: switches to Mode B and restarts the attempt.
 	enemy().take_sword_hit()
 	king().take_enemy_hit(1)
@@ -1351,15 +1351,16 @@ func test_focus_mode_and_logging() -> void:
 	await wait(26)
 	await tap("target_focus")
 	await process_frame
-	check(k.focused and mode_label.text.contains("FOCUS ON") and marker.visible, "focused: HUD says FOCUS ON and the marker is shown")
-	check(marker.global_position.distance_to(e.global_position + Vector3(0, 2.35, 0)) < 0.01, "marker sits above the focused enemy")
+	var ring: MeshInstance3D = root_node.get_node("FocusRing")
+	check(k.focused and mode_label.text.contains("FOCUS ON") and marker.visible and ring.visible, "focused: HUD says FOCUS ON; marker and ground ring shown")
+	check(marker.global_position.distance_to(e.global_position + Vector3(0, 2.35, 0)) < 0.01 and flat(ring.global_position).distance_to(flat(e.global_position)) < 0.01, "marker above and ring under the focused enemy")
 	await tap("attack")
 	await wait(26)
 	check(k.try_dodge(Vector2(1, 0)), "focused dodge")
 	await wait(20)
 	k.take_enemy_hit(1)
 	await tap("target_focus")
-	check(not k.focused and not marker.visible and mode_label.text.contains("focus off"), "release hides the marker at once")
+	check(not k.focused and not marker.visible and not ring.visible and mode_label.text.contains("focus off"), "release hides the marker and ring at once")
 	await wait(30)
 	check(k.try_dodge(Vector2(-1, 0)), "unfocused dodge")
 	await wait(20)
@@ -1369,7 +1370,7 @@ func test_focus_mode_and_logging() -> void:
 	await tap("attack")
 	await wait(26)
 	await process_frame
-	check(root_node.result == "victory" and not k.focused and not marker.visible, "victory while focused: focus released, marker hidden")
+	check(root_node.result == "victory" and not k.focused and not marker.visible and not ring.visible, "victory while focused: focus released, marker and ring hidden")
 	var line: String = root_node.result_line
 	print("INFO  ", line)
 	check(line.contains("| controls B |"), "result line records Mode B")

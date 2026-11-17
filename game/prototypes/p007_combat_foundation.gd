@@ -12,6 +12,7 @@ extends Node3D
 
 const CombatKing := preload("res://game/prototypes/p007/combat_king.gd")
 const TrainingEnemy := preload("res://game/prototypes/p007/training_enemy.gd")
+const CombatSector := preload("res://game/prototypes/p007/combat_sector.gd")
 
 ## Developer-only keys; not input-map actions.
 const DEBUG_KEY: Key = KEY_F3
@@ -25,6 +26,11 @@ const MODE_B: String = "B"
 ## Only P007 reads it; it is absent (Mode A) until F2 is first pressed.
 const MODE_META: StringName = &"p007_control_mode"
 const FOCUS_MARKER_HEIGHT: float = 2.35
+## Ground ring under the focused enemy. The overhead marker leaves the top of the screen when the
+## enemy is about 5 m or more up-screen (windowed check), so the ring keeps focus visible there.
+const FOCUS_RING_RADIUS: float = 0.65
+const FOCUS_RING_HEIGHT: float = 0.012
+const FOCUS_COLOR: Color = Color(0.3, 0.95, 1.0, 0.5)
 
 const ATTACK_PHASE_NAMES: Array[String] = ["idle", "windup", "ACTIVE", "recovery"]
 const ENEMY_STATE_NAMES: Array[String] = ["idle", "approach", "WINDUP", "STRIKE", "recovery", "defeated"]
@@ -43,6 +49,7 @@ var walked: float = 0.0
 var control_mode: String = MODE_A
 
 var _last_king_position: Vector3
+var _focus_ring: MeshInstance3D
 
 @onready var king: CombatKing = $King
 @onready var enemy: TrainingEnemy = $TrainingEnemy
@@ -56,6 +63,8 @@ var _last_king_position: Vector3
 
 func _ready() -> void:
 	control_mode = current_mode(get_tree())
+	_focus_ring = CombatSector.add_indicator(self, "FocusRing", FOCUS_RING_RADIUS, 360.0, FOCUS_COLOR, FOCUS_RING_HEIGHT)
+	_focus_ring.visible = false
 	# Set before the first physics tick; every attempt starts unfocused.
 	king.focus_available = control_mode == MODE_B
 	king.focus_changed.connect(_on_focus_changed)
@@ -153,8 +162,11 @@ func _update_focus_feedback() -> void:
 func _place_focus_marker() -> void:
 	var target_ok: bool = king.focused and is_instance_valid(king.focus_target)
 	_focus_marker.visible = target_ok
+	_focus_ring.visible = target_ok
 	if target_ok:
-		_focus_marker.global_position = king.focus_target.global_position + Vector3(0.0, FOCUS_MARKER_HEIGHT, 0.0)
+		var ground: Vector3 = king.focus_target.global_position
+		_focus_marker.global_position = ground + Vector3(0.0, FOCUS_MARKER_HEIGHT, 0.0)
+		_focus_ring.global_position = ground + Vector3(0.0, FOCUS_RING_HEIGHT, 0.0)
 
 
 func _on_enemy_defeated() -> void:
