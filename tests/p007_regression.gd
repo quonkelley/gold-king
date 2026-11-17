@@ -134,6 +134,9 @@ func _run() -> void:
 	await test_iframes()
 	await test_cancel()
 	await test_input_isolation()
+	await test_enemy_states()
+	await test_strike_resolution()
+	await test_enemy_limits()
 	print("\n%d passed, %d failed" % [passes, fails])
 	quit(0 if fails == 0 else 1)
 
@@ -583,3 +586,211 @@ func test_input_isolation() -> void:
 		if FileAccess.get_file_as_string(f).contains("\"dodge\""):
 			readers.append(f)
 	check(files.size() >= 20 and readers.is_empty(), "no historical script reads the dodge action (%d files scanned)" % files.size())
+
+
+const E_IDLE := 0
+const E_APPROACH := 1
+const E_WINDUP := 2
+const E_STRIKE := 3
+const E_RECOVERY := 4
+const E_DEFEATED := 5
+const O_NONE := 0
+const O_HIT := 1
+const O_DODGED := 2
+
+
+## Fresh scene: enemy at the origin, King at `king_pos`, enemy released with no start delay.
+## Returns once the enemy has begun its windup.
+func prime_windup(king_pos: Vector3) -> void:
+	await load_fresh()
+	await place(king_pos, Vector3.ZERO)
+	var e: Variant = enemy()
+	e.start_delay = 0.0
+	e.held = false
+	await wait_until(func() -> bool: return e.state == E_WINDUP, 30)
+
+
+## Keeps the King at `pos` (teleported before every tick) for `ticks` ticks.
+func pin_king(pos: Vector3, ticks: int) -> void:
+	for i in ticks:
+		king().global_position = pos
+		await physics_frame
+
+
+func test_enemy_states() -> void:
+	print("-- enemy approach, telegraph, commit, strike, recovery")
+	await load_fresh()
+	var k: Variant = king()
+	var e: Variant = enemy()
+	var seen: Array[int] = [e.state]
+	var approach_start: Vector3 = e.global_position
+	var approach_ticks: int = 0
+	for i in 360:
+		await physics_frame
+		if e.state == E_APPROACH:
+			approach_ticks += 1
+		if e.state != seen[-1]:
+			seen.append(e.state)
+	check(seen.slice(0, 6) == [E_IDLE, E_APPROACH, E_WINDUP, E_STRIKE, E_RECOVERY, E_APPROACH], "state sequence: idle, approach, windup, strike, recovery, approach (%s)" % [seen])
+	check(e.attacks_started >= 1 and e.attacks_completed >= 1, "attacks started (%d) and completed (%d) are counted" % [e.attacks_started, e.attacks_completed])
+	# Approach speed is slower than the King's.
+	await load_fresh()
+	e = enemy()
+	k = king()
+	e.start_delay = 0.0
+	await wait(2)
+	var p0: Vector3 = e.global_position
+	await wait(30)
+	var speed: float = flat(e.global_position - p0).length() / 0.5
+	check(e.state == E_APPROACH and absf(speed - 3.0) < 0.15 and speed < k.move_speed, "approach speed %.2f m/s is below the King's 5.0" % speed)
+	# Stops at trigger range and starts the windup.
+	await wait_until(func() -> bool: return e.state == E_WINDUP, 120)
+	var gap: float = flat(k.global_position - e.global_position).length()
+	check(gap <= e.attack_trigger_range + 0.06 and gap > 1.3, "windup starts at ~1.5 m (%.2f m)" % gap)
+	# Before commit the aim follows the King; after commit it is locked.
+	await prime_windup(Vector3(0, 0, 1.2))
+	e = enemy()
+	k = king()
+	check(not e.committed and e.strike_dir.is_equal_approx(Vector3(0, 0, 1)), "windup aims at the King, not yet committed")
+	var tele: MeshInstance3D = e.get_node("Telegraph")
+	check(tele.visible and is_equal_approx(tele.rotation.y, CombatSector.yaw_for(e.strike_dir)), "telegraph visible and pointing along the strike direction")
+	await pin_king(Vector3(1.2, 0, 0), 3)
+	check(e.strike_dir.is_equal_approx(Vector3(1, 0, 0)), "before commit the aim tracks the King")
+	await wait_until(func() -> bool: return e.committed, 30)
+	var locked: Vector3 = e.strike_dir
+	var faint_alpha: float = 0.16
+	check((tele.material_override as StandardMaterial3D).albedo_color.a > faint_alpha, "telegraph turns solid at commit")
+	check(e.state_time >= e.commit_time - TICK and e.state_time < e.commit_time + TICK * 1.5, "commit happens at ~0.25 s into the windup (%.3f s)" % e.state_time)
+	# Circle the King around the enemy after commit: direction never changes.
+	var changed: bool = false
+	for i in 20:
+		var angle: float = float(i) * 0.4
+		k.global_position = Vector3(cos(angle), 0, sin(angle)) * 1.3
+		await physics_frame
+		if not e.strike_dir.is_equal_approx(locked):
+			changed = true
+		if e.state != E_WINDUP and e.state != E_STRIKE:
+			break
+	check(not changed, "committed strike direction stays fixed while the King circles")
+	# Telegraph region equals the tested strike region.
+	var verts: PackedVector3Array = (tele.mesh as ArrayMesh).surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
+	var inside: bool = true
+	for v: Vector3 in verts:
+		if not CombatSector.contains(Vector3.ZERO, e.strike_dir, e.strike_reach, e.strike_arc_degrees, v.rotated(Vector3.UP, tele.rotation.y)):
+			inside = false
+	check(inside, "every telegraph vertex lies inside the tested strike sector")
+	# Recovery: no movement, no telegraph, then approach again.
+	await wait_until(func() -> bool: return e.state == E_RECOVERY, 60)
+	var rp: Vector3 = e.global_position
+	check(not tele.visible, "telegraph hidden in recovery")
+	await wait(30)
+	check(e.state == E_RECOVERY and flat(e.global_position - rp).length() < 0.001, "enemy stands still through recovery")
+	await wait_until(func() -> bool: return e.state != E_RECOVERY, 40)
+	check(e.state == E_APPROACH or e.state == E_WINDUP, "recovery ends after ~0.6 s")
+
+
+func test_strike_resolution() -> void:
+	print("-- first-contact strike resolution (Amendment A1)")
+	var inside: Vector3 = Vector3(0, 0, 1.0)
+	var outside: Vector3 = Vector3(0, 0, 3.0)
+	# (a) First contact during i-frames: dodged; staying in the zone after i-frames end does no harm.
+	await prime_windup(Vector3(0, 0, 1.2))
+	var k: Variant = king()
+	var e: Variant = enemy()
+	await wait_until(func() -> bool: return e.state_time >= e.windup - 4.5 * TICK, 40)
+	check(k.try_dodge(Vector2(0, 1)), "(a) dodge started just before the strike")
+	var invuln_at_contact: bool = false
+	var after_iframes_in_zone: int = 0
+	for i in 14:
+		k.global_position = inside
+		await physics_frame
+		if e.state == E_STRIKE and e.strike_outcome == O_DODGED and not invuln_at_contact:
+			invuln_at_contact = true
+		if e.state == E_STRIKE and not k.is_invulnerable() and invuln_at_contact:
+			after_iframes_in_zone += 1
+	check(invuln_at_contact and e.dodges_confirmed == 1, "(a) first contact during invulnerability = confirmed dodge")
+	check(after_iframes_in_zone >= 1, "(a) King stayed in the active zone after invulnerability ended (%d ticks)" % after_iframes_in_zone)
+	await wait_until(func() -> bool: return e.state == E_RECOVERY, 20)
+	check(k.health == 3 and e.hits_landed == 0 and e.dodges_confirmed == 1, "(a) the dodged strike never becomes damage; one dodge recorded")
+	# (b) No dodge, King inside for the whole strike: exactly one hit.
+	await prime_windup(Vector3(0, 0, 1.2))
+	k = king()
+	e = enemy()
+	await wait_until(func() -> bool: return e.state == E_STRIKE, 40)
+	await pin_king(inside, 12)
+	check(k.health == 2 and e.hits_landed == 1 and e.strike_outcome == O_HIT, "(b) King inside for the whole strike takes exactly 1 hit")
+	# (f) Next strike starts unresolved; King outside: no hit.
+	await wait_until(func() -> bool: return e.state == E_WINDUP, 120)
+	await wait_until(func() -> bool: return e.committed, 30)
+	await pin_king(outside, 1)
+	await wait_until(func() -> bool: return e.state == E_STRIKE, 40)
+	check(e.strike_outcome == O_NONE, "(f) the next strike begins with a fresh, unresolved state")
+	await pin_king(outside, 12)
+	check(k.health == 2 and e.attacks_completed == 2, "(e) a strike that never touches the King does no damage")
+	# (c) First contact before i-frames: hit; later invulnerability cannot convert it.
+	await prime_windup(Vector3(0, 0, 1.2))
+	k = king()
+	e = enemy()
+	await wait_until(func() -> bool: return e.state == E_STRIKE, 40)
+	check(e.strike_outcome == O_HIT and k.health == 2, "(c) first contact outside invulnerability hits")
+	k.try_dodge(Vector2(0, 1))
+	await pin_king(inside, 10)
+	check(e.strike_outcome == O_HIT and e.dodges_confirmed == 0 and k.health == 2, "(c) dodging after the hit adds no dodge and no second hit")
+	# (d) Contact after i-frames have ended: hit.
+	await prime_windup(Vector3(0, 0, 1.2))
+	k = king()
+	e = enemy()
+	await wait_until(func() -> bool: return e.committed, 30)
+	k.global_position = outside
+	await wait_until(func() -> bool: return e.state_time >= e.windup - 13.5 * TICK, 40)
+	k.try_dodge(Vector2(1, 0))
+	await wait_until(func() -> bool: return e.state == E_STRIKE, 40)
+	await pin_king(outside, 1)
+	check(not k.is_invulnerable() and e.strike_outcome == O_NONE, "(d) strike active, King outside and no longer invulnerable")
+	await pin_king(inside, 3)
+	check(e.strike_outcome == O_HIT and k.health == 2, "(d) entering the zone after invulnerability ended is a hit")
+
+
+func test_enemy_limits() -> void:
+	print("-- no contact damage, enemy defeat, player defeat")
+	# Damage only ever happens during STRIKE; pushing into the enemy otherwise does nothing.
+	await load_fresh()
+	var k: Variant = king()
+	var e: Variant = enemy()
+	var bad: Array[int] = []
+	k.damaged.connect(func() -> void:
+		if e.state != E_STRIKE:
+			bad.append(e.state))
+	await place(Vector3(0, 0, 0.5), Vector3.ZERO)
+	hold_input(Vector2(0, -1))
+	await wait(90)
+	check(k.health == 3, "held enemy: King pressing into its body for 1.5 s takes no damage")
+	e.held = false
+	e.start_delay = 0.0
+	await wait(300)
+	hold_input(Vector2.ZERO)
+	check(k.health < 3 and bad.is_empty(), "King took %d hit(s), every one during a strike (other states seen: %s)" % [3 - k.health, bad])
+	# Enemy defeated mid-windup: no strike, no further damage.
+	await prime_windup(Vector3(0, 0, 1.2))
+	k = king()
+	e = enemy()
+	e.health = 1
+	await face(6)
+	k.global_position = Vector3(0, 0, 1.2)
+	await tap("attack")
+	await wait(10)
+	check(e.state == E_DEFEATED and not e.get_node("Telegraph").visible, "enemy killed in windup is defeated and its telegraph is gone")
+	var pos: Vector3 = e.global_position
+	await pin_king(Vector3(0, 0, 1.0), 180)
+	check(k.health == 3 and e.global_position.is_equal_approx(pos) and e.state == E_DEFEATED, "defeated enemy never strikes or moves again")
+	check(e.get_node("CollisionShape3D").disabled, "defeated enemy no longer blocks the King")
+	# Player defeat: enemy stops attacking.
+	await prime_windup(Vector3(0, 0, 1.2))
+	k = king()
+	e = enemy()
+	k.health = 1
+	await pin_king(Vector3(0, 0, 1.2), 40)
+	check(k.is_defeated, "third hit (health 1 -> 0) defeats the King")
+	var started: int = e.attacks_started
+	await wait(240)
+	check(e.state == E_IDLE and e.attacks_started == started, "enemy stops attacking once the King is defeated")

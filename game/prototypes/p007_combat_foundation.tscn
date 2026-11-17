@@ -66,8 +66,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3)
 script = ExtResource("3_king")
 opponent = NodePath("../TrainingEnemy")
 
-[node name="TrainingEnemy" parent="." instance=ExtResource("5_enemy")]
+[node name="TrainingEnemy" parent="." node_paths=PackedStringArray("king") instance=ExtResource("5_enemy")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -3)
+king = NodePath("../King")
 
 [node name="Camera" type="Camera3D" parent="." node_paths=PackedStringArray("target")]
 fov = 45.0
