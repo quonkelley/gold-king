@@ -292,6 +292,8 @@ Early prototypes are **incremental**. Each answers one primary design question a
 
 **P006 — Meaningful Extraction Rewards** concluded on 2026-11-16 with outcome Iterate. The integrated expedition-to-settlement reward loop showed promise. See the Prototype Log for findings and limitations. Combat Foundation is the next recommended investigation; its scope and prototype number are not yet approved.
 
+**Update 2026-11-16:** Quon approved **P007 — Combat Foundation** (`docs/features/p007_combat_foundation.md`) as the next prototype, and authorized its implementation. P007 is a standalone combat test; its timings and values are Prototype Assumptions, not combat rules. No human playtest result exists yet.
+
 ### P001 Scope
 
 P001 tests only:

@@ -458,6 +458,8 @@ Acts on the P005 Strong Recommendation (`GOLDKING_PROTOTYPE_LOG.md`, P005 §19).
 
 **Subsequent priority (Strong Recommendation, not authorized):** a combat-foundation experiment after P006. Its scope and prototype number are not set. Quon's current combat preferences are recorded in `GOLDKING_GAMEPLAY_FOUNDATION.md` §9 as unresolved exploration, not Approved Direction.
 
+**Update 2026-11-16:** This combat-foundation experiment is now **P007 — Combat Foundation**. Quon approved its scope and feature specification (`docs/features/p007_combat_foundation.md`) and authorized implementation on 2026-11-16. Its tuning and mechanics remain Prototype Assumptions; §9 of the Gameplay Foundation is unchanged.
+
 **Questions Still Open:**
 
 - The exact reward or benefit
