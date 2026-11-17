@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="88" viewBox="0 0 64 88">
+  <!-- Temporary P007 placeholder Training Enemy: a plain grey-blue figure with a wooden club.
+       No species, equipment lore, or canon implied. Faces right by default. Not art direction. -->
+  <g stroke="#14161c" stroke-width="3" stroke-linejoin="round">
+    <!-- feet -->
+    <rect x="18" y="76" width="11" height="8" rx="2" fill="#2c303a"/>
+    <rect x="35" y="76" width="11" height="8" rx="2" fill="#2c303a"/>
+    <!-- body -->
+    <path d="M14 78 Q10 44 22 32 Q32 24 42 32 Q54 44 50 78 Z" fill="#6f7d94"/>
+    <!-- head -->
+    <circle cx="32" cy="22" r="13" fill="#8592a8"/>
+    <!-- eyes (right-facing) -->
+    <circle cx="36" cy="21" r="2.4" fill="#f4f1e8" stroke-width="1.5"/>
+    <circle cx="43" cy="21" r="2.4" fill="#f4f1e8" stroke-width="1.5"/>
+    <!-- club arm -->
+    <path d="M44 50 L56 40" fill="none" stroke-width="5" stroke="#3b2a1a"/>
+    <path d="M52 44 L62 30 Q63 26 59 25 L50 38 Z" fill="#9a7146"/>
+  </g>
+</svg>

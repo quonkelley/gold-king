@@ -69,6 +69,42 @@ func king() -> Variant:
 	return current_scene.get_node("King")
 
 
+func enemy() -> Variant:
+	return current_scene.get_node("TrainingEnemy")
+
+
+## Puts the King and enemy at exact spots with the enemy frozen (F4 behaviour), King idle.
+func place(king_pos: Vector3, enemy_pos: Vector3) -> void:
+	var e: Variant = enemy()
+	e.held = true
+	e.global_position = enemy_pos
+	king().global_position = king_pos
+	king().velocity = Vector3.ZERO
+	await wait(1)
+
+
+## Faces the King along an index by a few ticks of input, then releases input and stops him.
+func face(index: int) -> void:
+	var dir: Vector3 = king().direction_for_index(index)
+	var pos: Vector3 = king().global_position
+	hold_input(Vector2(dir.x, dir.z))
+	await wait(2)
+	hold_input(Vector2.ZERO)
+	king().global_position = pos
+	king().velocity = Vector3.ZERO
+	await wait(1)
+
+
+## Note on timing: SceneTree.physics_frame fires before nodes process that tick, and an action
+## pressed now is first seen as "just pressed" on the next tick. So a tap has been handled by the
+## game once tap() returns (two awaits).
+func tap(action: String) -> void:
+	Input.action_press(action)
+	await physics_frame
+	Input.action_release(action)
+	await physics_frame
+
+
 func release_all() -> void:
 	for action: String in MOVES + ["attack", "dodge", "restart_test"]:
 		if InputMap.has_action(action):
@@ -93,6 +129,7 @@ func _run() -> void:
 	await test_isolation()
 	await test_facing()
 	test_sector_geometry()
+	await test_sword()
 	print("\n%d passed, %d failed" % [passes, fails])
 	quit(0 if fails == 0 else 1)
 
@@ -192,3 +229,152 @@ func test_sector_geometry() -> void:
 			all_on_edge = false
 	check(all_on_edge, "every drawn arc vertex, rotated to the facing, lies inside the tested sector")
 	check(is_equal_approx(Vector3(1, 0, 0).rotated(Vector3.UP, yaw).z, -1.0), "yaw_for points mesh forward along the facing")
+
+
+func test_sword() -> void:
+	print("-- sword timing, direction lock, hit limits")
+	await load_fresh()
+	var k: Variant = king()
+	var e: Variant = enemy()
+	check(e.health == 3 and e.max_health == 3, "enemy starts with 3 health")
+	# Straight: enemy 1.0 m ahead (up).
+	await place(Vector3(0, 0, 2), Vector3(0, 0, 1))
+	await face(6)
+	var hp: int = e.health
+	Input.action_press("attack")
+	await wait(2)
+	check(k.attack_phase == 1 and k.swings == 1, "press starts a swing in windup")
+	check(k.attack_dir.is_equal_approx(Vector3(0, 0, -1)), "attack direction snapshot = facing")
+	await wait(1)
+	check(e.health == hp, "no damage during windup")
+	var hit_tick: int = -1
+	for i in 30:
+		await physics_frame
+		if e.health < hp and hit_tick < 0:
+			hit_tick = i
+	check(e.health == hp - 1, "enemy inside the arc for the whole active window takes exactly 1 hit")
+	check(k.attack_phase == 0, "swing returns to idle after ~0.40 s")
+	# Held attack: 60 more ticks of holding produce no new swing.
+	await wait(60)
+	check(k.swings == 1 and e.health == hp - 1, "holding attack does not chain swings")
+	Input.action_release("attack")
+	await wait(1)
+	# Key-repeat (echo) events do not start a swing.
+	var echo: InputEventKey = InputEventKey.new()
+	echo.physical_keycode = KEY_J
+	echo.keycode = KEY_J
+	echo.pressed = true
+	Input.parse_input_event(echo)
+	await wait(30)
+	var after_first: int = k.swings
+	check(k.attack_phase == 0, "swing from the key press has finished before the echo arrives")
+	var echo2: InputEventKey = echo.duplicate()
+	echo2.echo = true
+	Input.parse_input_event(echo2)
+	await wait(2)
+	check(k.swings == after_first, "a key-repeat echo does not start another swing")
+	var up: InputEventKey = echo.duplicate()
+	up.pressed = false
+	Input.parse_input_event(up)
+	await wait(30)
+	# Mid-swing presses are ignored and do not extend timing.
+	await place(Vector3(0, 0, 2), Vector3(0, 0, 1))
+	await face(6)
+	var swings_before: int = k.swings
+	await tap("attack")
+	await wait(3)
+	await tap("attack")
+	await wait(3)
+	await tap("attack")
+	await wait(30)
+	check(k.swings == swings_before + 1, "presses during a swing are ignored (no buffering)")
+	# Behind: enemy behind the King is never hit.
+	await load_fresh()
+	k = king()
+	e = enemy()
+	await place(Vector3(0, 0, 2), Vector3(0, 0, 3))
+	await face(6)
+	await tap("attack")
+	await wait(30)
+	check(e.health == 3, "enemy behind the King is not hit")
+	# Out of reach: 1.6 m ahead.
+	await place(Vector3(0, 0, 2), Vector3(0, 0, 0.4))
+	await face(6)
+	await tap("attack")
+	await wait(30)
+	check(e.health == 3, "enemy 1.6 m ahead (beyond 1.4 reach) is not hit")
+	# Direction lock: turn right immediately after starting the swing; arc stays up.
+	await place(Vector3(0, 0, 2), Vector3(0, 0, 1))
+	await face(6)
+	await tap("attack")
+	hold_input(Vector2(1, 0))
+	await wait(3)
+	check(k.facing_index == 0 and k.attack_dir.is_equal_approx(Vector3(0, 0, -1)), "turning mid-swing changes facing but not the locked attack direction")
+	hold_input(Vector2.ZERO)
+	await wait(30)
+	check(e.health == 2, "the locked arc still hits the enemy it was aimed at")
+	# Locked direction also means a target moved to the new facing side is missed.
+	await load_fresh()
+	k = king()
+	e = enemy()
+	await place(Vector3(0, 0, 2), Vector3(-3, 0, 2))
+	await face(6)
+	await tap("attack")
+	await wait(2)
+	e.global_position = Vector3(1.0, 0, 2)
+	await face(0)
+	await wait(30)
+	check(e.health == 3, "enemy placed in the new facing direction mid-swing is not hit")
+	# Diagonal facing: up-right (index 7).
+	var diag: Vector3 = Vector3(1, 0, -1).normalized()
+	await place(Vector3(0, 0, 2), Vector3(0, 0, 2) + diag * 1.2)
+	await face(7)
+	await tap("attack")
+	await wait(30)
+	check(e.health == 2, "diagonal swing hits an enemy 1.2 m along the diagonal")
+	await place(Vector3(0, 0, 2), Vector3(0, 0, 2) + Vector3(1.2, 0, 0.2))
+	await face(5)
+	await tap("attack")
+	await wait(30)
+	check(e.health == 2, "up-left swing misses an enemy to the right")
+	# Arc edges with the real swing: 54 degrees off the facing hits, 57 misses.
+	await load_fresh()
+	k = king()
+	e = enemy()
+	var o: Vector3 = Vector3(0, 0, 2)
+	await place(o, o + Vector3(sin(deg_to_rad(54.0)), 0, -cos(deg_to_rad(54.0))) * 1.3)
+	await face(6)
+	await tap("attack")
+	await wait(30)
+	check(e.health == 2, "real swing: enemy at 54 deg / 1.3 m is hit")
+	await place(o, o + Vector3(sin(deg_to_rad(57.0)), 0, -cos(deg_to_rad(57.0))) * 1.3)
+	await face(6)
+	await tap("attack")
+	await wait(30)
+	check(e.health == 2, "real swing: enemy at 57 deg / 1.3 m is missed")
+	await place(o, o + Vector3(0, 0, -1.38))
+	await face(6)
+	await tap("attack")
+	await wait(30)
+	check(e.health == 1, "real swing: enemy center at 1.38 m (inside reach) is hit")
+	# Defeat at zero health; defeated enemy takes no more hits.
+	await place(o, o + Vector3(0, 0, -1.0))
+	await face(6)
+	await tap("attack")
+	await wait(30)
+	check(e.health == 0 and not e.is_alive(), "third hit defeats the enemy")
+	await tap("attack")
+	await wait(30)
+	check(e.health == 0, "a defeated enemy takes no further hits")
+	# Visible arc matches the tested arc and timing.
+	await load_fresh()
+	k = king()
+	var arc: MeshInstance3D = k.get_node("SwordArc")
+	check(not arc.visible, "arc hidden while idle")
+	await face(0)
+	await tap("attack")
+	check(arc.visible and is_equal_approx(arc.rotation.y, CombatSector.yaw_for(k.attack_dir)), "arc shown at swing start, rotated to the locked direction")
+	await wait_until(func() -> bool: return k.attack_phase == 2, 10)
+	var active_alpha: float = (arc.material_override as StandardMaterial3D).albedo_color.a
+	await wait_until(func() -> bool: return k.attack_phase == 3, 20)
+	check(active_alpha > 0.5 and not arc.visible, "arc bright while active, hidden in recovery")

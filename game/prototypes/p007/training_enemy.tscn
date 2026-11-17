@@ -1,0 +1,34 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game/prototypes/p007/training_enemy.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://game/prototypes/p007/training_enemy.svg" id="2_art"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
+radius = 0.45
+height = 1.5
+
+[node name="TrainingEnemy" type="CharacterBody3D"]
+motion_mode = 1
+script = ExtResource("1_script")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
+shape = SubResource("CapsuleShape3D_body")
+
+[node name="Visual" type="Sprite3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+pixel_size = 0.0045
+billboard = 2
+alpha_cut = 1
+texture = ExtResource("2_art")
+
+[node name="HealthLabel" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.75, 0)
+pixel_size = 0.006
+billboard = 1
+no_depth_test = true
+modulate = Color(1, 0.4, 0.35, 1)
+outline_modulate = Color(0.1, 0.02, 0.02, 1)
+text = "●●●"
+font_size = 48
+outline_size = 12
