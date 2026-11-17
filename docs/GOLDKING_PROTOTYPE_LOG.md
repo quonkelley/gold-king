@@ -2138,7 +2138,15 @@ One tester; small-sample developer ratings. The spec's tentative supportive targ
 
 **Deliberate constraints to observe, not fix:** a neutral dodge while focused travels toward the enemy and may be stopped by its body; snapped focused facing may alternate between neighbouring directions when the enemy sits near a 22.5° boundary.
 
-**Technical findings:** to be recorded after implementation.  
+**Technical findings (implementation, 2026-11-17; automated and developer windowed checks only, not human evidence):**
+- Mode A keeps the original behavior: all 159 original P007 regression checks pass unchanged, and the scripted play-style diagnostic gives the same results as before Iteration 1.
+- Mode B mechanics verified by 107 added checks: acquire at ≤ 7.0 m, release by press / beyond 9.0 m / enemy defeat / enemy removal / King defeat, no release flicker inside the 7–9 m band, eight-direction snapped target facing, swing direction locked at start, unchanged reach/arc/timings, no movement toward the target, dodge timings and cancel window unchanged while focused.
+- Scripted retreat-and-attack at 0.9 m: hits when focused; the same input in Mode A turns the swing away and misses.
+- Neutral focused dodge travels toward the enemy and stops at its body (0.90 m centre gap), as intended by the Amendment B constraint.
+- Near a 22.5° boundary the snapped cue and swing visibly point beside the enemy (for example, enemy 23° off up: facing up-right, 45°).
+- The overhead focus marker left the top of the screen when the enemy was about 5 m or more up-screen; a cyan ground ring under the enemy was added so focus stays visible. At the spawn distance the enemy and ring sit under the top HUD text (pre-existing camera framing).
+- Not verified: physical keyboard Tab/F2 in a live window (synthetic OS keystrokes were blocked; the window's input path was exercised with injected key events), the editor's embedded Game view, and gamepad RB (no controller).
+
 **A/B human comparison:** not yet performed. No Iteration 1 playtest result exists.
 
 ---
